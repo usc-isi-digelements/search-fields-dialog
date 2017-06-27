@@ -5,10 +5,10 @@ A Polymer Element showing search fields in a modal dialog.
 ### Example
 ```html
 <search-fields-dialog
-	date-config='{"dateStart": "postingDate", "dateEnd": "postingDate"}'
-	search-fields-config="[[searchFieldsConfig]]"
-	search-parameters="{{searchParameters}}"
-	process-request="{{processRequest}}">
+  date-config='{"dateStart": "postingDate", "dateEnd": "postingDate"}'
+  search-fields-config="[[searchFieldsConfig]]"
+  search-parameters="{{searchParameters}}"
+  process-request="{{processRequest}}">
 </search-fields-dialog>
 ```
 
