@@ -39,7 +39,8 @@ limitations under the License.
 
       var cityConfig = {
         key: 'city',
-        title: 'City'
+        title: 'City',
+        useInNetworkSearch: true
       };
       var dateStartConfig = {
         dateIdentifier: 'start',
@@ -101,6 +102,9 @@ limitations under the License.
           name: 'Ad',
           data: [websiteConfig, titleConfig, descriptionConfig]
         }];
+        element.networkExpansionParameters = {
+          city: false
+        };
         flush(done);
       });
 
@@ -114,6 +118,7 @@ limitations under the License.
         assert.isFalse(element.opened);
         assert.isTrue(element.processRequest);
         assert.isFalse(element.userCanceled);
+        assert.equal(element.networkSearchProperty, 'useInNetworkSearch');
       });
 
       test('template has correct elements at the top', function() {
@@ -135,7 +140,9 @@ limitations under the License.
           dateId: 'start',
           key: 'dateStart',
           title: 'From',
-          value: {}
+          value: {},
+          useInNetworkSearch: false,
+          showNetworkCheckbox: undefined
         });
         assert.deepEqual(datePickers[0].key, 'dateStart');
         assert.deepEqual(datePickers[0].prefixLabel, 'From');
@@ -147,7 +154,9 @@ limitations under the License.
           dateId: 'end',
           key: 'dateEnd',
           title: 'To',
-          value: {}
+          value: {},
+          useInNetworkSearch: false,
+          showNetworkCheckbox: undefined
         });
         assert.deepEqual(datePickers[1].key, 'dateEnd');
         assert.deepEqual(datePickers[1].prefixLabel, 'To');
@@ -196,12 +205,16 @@ limitations under the License.
             dateId: 'start',
             key: 'dateStart',
             title: 'From',
-            value: {}
+            value: {},
+            useInNetworkSearch: false,
+            showNetworkCheckbox: undefined
           }, {
             dateId: 'end',
             key: 'dateEnd',
             title: 'To',
-            value: {}
+            value: {},
+            useInNetworkSearch: false,
+            showNetworkCheckbox: undefined
           }]
         }, {
           type: undefined,
@@ -210,12 +223,16 @@ limitations under the License.
             dateId: undefined,
             key: 'phone',
             title: 'Telephone Number',
-            value: ''
+            value: '',
+            useInNetworkSearch: false,
+            showNetworkCheckbox: undefined
           }, {
             dateId: undefined,
             key: 'email',
             title: 'Email Address',
-            value: ''
+            value: '',
+            useInNetworkSearch: false,
+            showNetworkCheckbox: undefined
           }]
         }, {
           type: undefined,
@@ -224,7 +241,9 @@ limitations under the License.
             dateId: undefined,
             key: 'city',
             title: 'City',
-            value: ''
+            value: '',
+            useInNetworkSearch: false,
+            showNetworkCheckbox: true
           }]
         }, {
           type: undefined,
@@ -233,17 +252,23 @@ limitations under the License.
             dateId: undefined,
             key: 'website',
             title: 'Website',
-            value: ''
+            value: '',
+            useInNetworkSearch: false,
+            showNetworkCheckbox: undefined
           }, {
             dateId: undefined,
             key: 'title',
             title: 'Title',
-            value: ''
+            value: '',
+            useInNetworkSearch: false,
+            showNetworkCheckbox: undefined
           }, {
             dateId: undefined,
             key: 'description',
             title: 'Page',
-            value: ''
+            value: '',
+            useInNetworkSearch: false,
+            showNetworkCheckbox: undefined
           }]
         }]);
       });
@@ -280,19 +305,22 @@ limitations under the License.
             key: 'nyc',
             category: 'City',
             enabled: true,
-            text: 'nyc'
+            text: 'nyc',
+            useInNetworkSearch: false
           },
           chicago: {
             key: 'chicago',
             category: 'City',
             enabled: true,
-            text: 'chicago'
+            text: 'chicago',
+            useInNetworkSearch: false,
           },
           la: {
             key: 'la',
             category: 'City',
             enabled: false,
-            text: 'la'
+            text: 'la',
+            useInNetworkSearch: false
           }
         };
         // cityConfig is in index 0 of data array for location
@@ -302,7 +330,9 @@ limitations under the License.
           key: 'city',
           dateId: undefined,
           title: 'City',
-          value: 'nyc, chicago'
+          value: 'nyc, chicago',
+          showNetworkCheckbox: true,
+          useInNetworkSearch: false
         });
         assert.equal(element.$$('#input_city').value, 'nyc, chicago');
       });
@@ -456,11 +486,12 @@ limitations under the License.
         element._updateDateParameterAndNotify('dateStart', '2017-03-01T00:00:00', '03/01/2017', 'From', true);
       });
 
-      test('_updateSearchParameterFromField has expected behavior for most common cases', function() {
+      test('_updateSearchAndNetworkParameterFromField has expected behavior for most common cases', function() {
         element.$$('#input_city').value = 'nyc, chicago';
-
         // cityConfig is first in data array for location
-        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
+        element._searchFields[2].data[0].useInNetworkSearch = true;
+
+        element._updateSearchAndNetworkParameterFromField(element._searchFields[2].data[0]);
 
         assert.deepEqual(element.searchParameters.city, {
           nyc: {
@@ -478,13 +509,14 @@ limitations under the License.
             text: 'chicago'
           }
         });
+        assert.deepEqual(element.networkExpansionParameters, {city: true});
       });
 
       test('_updateSearchParameterFromField will remove formatting from phone numbers', function() {
         element.$$('#input_phone').value = '111-222-3333';
 
         // phoneConfig is first in data array for identifiers
-        element._updateSearchParameterFromField(element._searchFields[1].data[0]);
+        element._updateSearchAndNetworkParameterFromField(element._searchFields[1].data[0]);
 
         assert.deepEqual(element.searchParameters.phone, {
           '1112223333': {

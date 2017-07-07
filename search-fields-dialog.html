@@ -88,7 +88,7 @@ A Polymer Element showing search fields in a modal dialog.
       .date-fields-container > date-picker-display {
         display: inline-block;
         margin: 0 10px;
-        padding: 5px 0 9px;
+        padding: 5px 35px 9px 0px;
         width: 240px;
         --date-select-bg-color: #ffffff;
         --date-select-text-color: #000000;
@@ -100,6 +100,17 @@ A Polymer Element showing search fields in a modal dialog.
 
       styled-dialog ::content .inside.styled-dialog .styled-dialog-name {
         min-width: 100px;
+      }
+
+      paper-checkbox {
+        display: inline-block;
+        --paper-checkbox-unchecked-color: var(--secondary-text-color);
+        --paper-checkbox-unchecked-ink-color: var(--secondary-text-color);
+        padding: 18px 5px 7px 5px;
+      }
+
+      .no-checkbox {
+        padding-right: 35px;
       }
 
       @media all and (min-width: 500px) and (max-width: 650px) {
@@ -124,6 +135,13 @@ A Polymer Element showing search fields in a modal dialog.
           padding: 0px 10px 10px 10px;
         }
       }
+
+      .instruction-text {
+        color: var(--primary-text-color);
+        font-size: 16px;
+        line-height: 18px;
+        min-height: 18px;
+      }
     </style>
 
     <paper-button class="layout horizontal center bottom green" active="[[opened]]" on-tap="toggleSearchFieldsDialog" title="Click to Enter Search Terms">
@@ -140,12 +158,15 @@ A Polymer Element showing search fields in a modal dialog.
       <div class="layout vertical">
         <div class="layout horizontal">
           <div class="styled-dialog-name styled-dialog-right-space instructions">Instructions</div>
-          <div class="styled-dialog-text">
+          <div class="instruction-text">
             Enter words or phrases as <strong>search terms</strong> in one or more of the text fields below.
             Click the <strong>Search</strong> button or press the <strong>ENTER</strong> key when finished.
             Use <strong>commas</strong> to separate individual search terms.
             All punctuation <strong>except commas and periods</strong> will be removed.
             Example:  <strong>New York, Washington</strong>
+            <br/><br/>
+            Use the checkboxes to enable <strong>network expansion</strong> for a particular field. Note that network
+            expansion queries may take a minute or two longer.
           </div>
         </div>
 
@@ -153,16 +174,18 @@ A Polymer Element showing search fields in a modal dialog.
           <div class="layout horizontal">
             <template is="dom-if" if="[[_equalsDate(dialogConfig.type)]]">
               <div class="styled-dialog-name styled-dialog-right-space search-labels date-fields-title">[[dialogConfig.name]]</div>
-              <div class="layout horizontal date-fields-container">
+              <div class="layout horizontal">
                 <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
-                  <date-picker-display
-                    facet-key="value"
-                    facets="{{searchConfig}}"
-                    key="[[searchConfig.key]]"
-                    prefix-label="[[searchConfig.title]]"
-                    date-identifier="[[searchConfig.dateId]]"
-                    title="[[searchConfig.title]]">
-                  </date-picker-display>
+                  <div class="layout horizontal date-fields-container nowrap">
+                    <date-picker-display
+                      facet-key="value"
+                      facets="{{searchConfig}}"
+                      key="[[searchConfig.key]]"
+                      prefix-label="[[searchConfig.title]]"
+                      date-identifier="[[searchConfig.dateId]]"
+                      title="[[searchConfig.title]]">
+                    </date-picker-display>
+                  </div>
                 </template>
               </div>
             </template>
@@ -171,12 +194,20 @@ A Polymer Element showing search fields in a modal dialog.
               <div class="styled-dialog-name styled-dialog-right-space search-labels">[[dialogConfig.name]]</div>
               <div class="layout horizontal wrap">
                 <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
-                  <paper-input
-                    id$="input_[[searchConfig.key]]"
-                    label="[[searchConfig.title]]"
-                    value="{{searchConfig.value}}"
-                    on-keydown="_checkSearchFieldInputKey">
-                  </paper-input>
+                  <div class="layout horizontal nowrap">
+                    <paper-input
+                      id$="input_[[searchConfig.key]]"
+                      label="[[searchConfig.title]]"
+                      value="{{searchConfig.value}}"
+                      on-keydown="_checkSearchFieldInputKey">
+                    </paper-input>
+                    <template is="dom-if" if="[[searchConfig.showNetworkCheckbox]]">
+                      <paper-checkbox noink checked="{{searchConfig.useInNetworkSearch}}"></paper-checkbox>
+                    </template>
+                    <template is="dom-if" if="[[!searchConfig.showNetworkCheckbox]]">
+                      <span class="no-checkbox"></span>
+                    </template>
+                  </div>
                 </template>
               </div>
             </template>
@@ -316,6 +347,27 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
+         * The networkSearchProperty property in the searchFieldsConfig.
+         *
+         * @type {String}
+         * @default 'useInNetworkSearch'
+         */
+        networkSearchProperty: {
+          type: String,
+          value: 'useInNetworkSearch'
+        },
+
+        /**
+         * The network expansion parameters passed in.
+         *
+         * @type {Object}
+         */
+        networkExpansionParameters: {
+          type: Object,
+          notify: true
+        },
+
+        /**
          * A list of objects that correspond to groupings of search fields.
          *
          * @type {Array}
@@ -362,7 +414,7 @@ A Polymer Element showing search fields in a modal dialog.
          * @private
          */
         _searchFields: {
-          computed: '_createSearchFields(searchFieldsConfig, dataProperty, nameProperty, typeProperty, dataDateIdProperty, dataKeyProperty, dataTitleProperty)',
+          computed: '_createSearchFields(searchFieldsConfig, dataProperty, nameProperty, typeProperty, dataDateIdProperty, dataKeyProperty, dataTitleProperty, networkSearchProperty)',
           type: Array
         }
       },
@@ -415,10 +467,11 @@ A Polymer Element showing search fields in a modal dialog.
        * @param {String} dataDateIdProperty
        * @param {String} dataKeyProperty
        * @param {String} dataTitleProperty
+       * @param {String} networkSearchProperty
        * @return {Array}
        * @private
        */
-      _createSearchFields: function(config, dataProperty, nameProperty, typeProperty, dataDateIdProperty, dataKeyProperty, dataTitleProperty) {
+      _createSearchFields: function(config, dataProperty, nameProperty, typeProperty, dataDateIdProperty, dataKeyProperty, dataTitleProperty, networkSearchProperty) {
         var dateKeys = _.keys(this.dateConfig);
         return config.map(function(dialogConfig) {
           return {
@@ -428,7 +481,11 @@ A Polymer Element showing search fields in a modal dialog.
                 dateId: searchConfig[dataDateIdProperty],
                 key: searchConfig[dataKeyProperty],
                 title: searchConfig[dataTitleProperty],
-                value: isDate ? {} : ''
+                value: isDate ? {} : '',
+                // showNetworkCheckbox indicates whether or not to show checkbox, while useInNetworkSearch indicates value of actual checkbox
+                // only enable checkboxes for non-date fields
+                showNetworkCheckbox: searchConfig[networkSearchProperty],
+                useInNetworkSearch: false
               };
             }),
             name: dialogConfig[nameProperty],
@@ -465,13 +522,14 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Updates the searchParameters from the given config object by adding or removing search terms.
+       * Updates the searchParameters and networkExpansionParameters from the given config object by adding or removing search terms.
        *
        * @param {Object} searchConfig
        * @private
        */
-      _updateSearchParameterFromField: function(searchConfig) {
+      _updateSearchAndNetworkParameterFromField: function(searchConfig) {
         var self = this;
+
         var terms = searchConfig.value.split(',').map(function(term) {
           // TODO Custom formatting.
           if(searchConfig.key === 'phone') {
@@ -495,6 +553,13 @@ A Polymer Element showing search fields in a modal dialog.
             self._updateSearchParameterAndNotify(searchConfig.key, term, searchConfig.title, true);
           }
         });
+
+        // TODO: network expansion -- do we need notify?
+        if(self.networkExpansionParameters[searchConfig.key] !== undefined &&
+          self.networkExpansionParameters[searchConfig.key] !== searchConfig.useInNetworkSearch) {
+          self.networkExpansionParameters[searchConfig.key] = searchConfig.useInNetworkSearch;
+          self.notifyPath(['networkExpansionParameters', searchConfig.key], searchConfig.useInNetworkSearch);
+        }
       },
 
       /**
@@ -523,6 +588,7 @@ A Polymer Element showing search fields in a modal dialog.
        * @private
        */
       _updateDateParameterFromField: function(searchConfig) {
+
         var parameterKey = this.dateConfig[searchConfig.key];
         // TODO Don't assume data structure.
         if(!_.isEmpty(searchConfig.value[searchConfig.key])) {
@@ -550,7 +616,7 @@ A Polymer Element showing search fields in a modal dialog.
                 if(dateKeys.indexOf(searchConfig.key) >= 0) {
                   self._updateDateParameterFromField(searchConfig);
                 } else {
-                  self._updateSearchParameterFromField(searchConfig);
+                  self._updateSearchAndNetworkParameterFromField(searchConfig);
                 }
               });
             }
