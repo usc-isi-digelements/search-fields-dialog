@@ -13,17 +13,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/button-action/button-action.html">
-<link rel="import" href="../../bower_components/date-picker-display/date-picker-display.html">
-<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
-<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
-<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
-<link rel="import" href="../../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../../bower_components/styled-dialog/styled-dialog.html">
-<link rel="import" href="../../bower_components/filter-behavior/filter-behavior.html">
-<link rel="import" href="../../bower_components/phone-behavior/phone-behavior.html">
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../button-action/button-action.html">
+<link rel="import" href="../date-picker-display/date-picker-display.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../filter-behavior/filter-behavior.html">
+<link rel="import" href="../fontawesome-iconset/fa-all.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../phone-behavior/phone-behavior.html">
+<link rel="import" href="../styled-dialog/styled-dialog.html">
 
 <!--
 A Polymer Element showing search fields in a modal dialog.
@@ -58,11 +59,6 @@ A Polymer Element showing search fields in a modal dialog.
         text-align: end;
       }
 
-      .instructions {
-        padding-top: 0;
-        padding-bottom: 30px;
-      }
-
       .search-dialog paper-input {
         display: inline-block;
         --paper-input-container-color: var(--secondary-text-color);
@@ -78,11 +74,7 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       .date-fields-title {
-        padding-top: 35px;
-      }
-
-      .date-fields-container {
-        padding: 20px 0 0;
+        padding-top: 15px;
       }
 
       .date-fields-container > date-picker-display {
@@ -95,22 +87,24 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       .search-dialog .search-buttons {
-        padding-top: 20px;
+        padding-top: 5px;
       }
 
       styled-dialog ::content .inside.styled-dialog .styled-dialog-name {
         min-width: 100px;
       }
 
-      paper-checkbox {
-        display: inline-block;
-        --paper-checkbox-unchecked-color: var(--secondary-text-color);
-        --paper-checkbox-unchecked-ink-color: var(--secondary-text-color);
-        padding: 18px 5px 7px 5px;
+      .toggle-buttons paper-icon-button {
+        border-radius: 5px;
+        margin-right: 10px;
+        margin-top: 10px;
+        padding: 5px;
+        height: 30px;
+        width: 30px;
       }
 
-      .no-checkbox {
-        padding-right: 35px;
+      .active {
+        background-color: yellowgreen;
       }
 
       @media all and (min-width: 500px) and (max-width: 650px) {
@@ -136,11 +130,24 @@ A Polymer Element showing search fields in a modal dialog.
         }
       }
 
-      .instruction-text {
+      .instructions-text {
         color: var(--primary-text-color);
         font-size: 16px;
         line-height: 18px;
         min-height: 18px;
+      }
+
+      .instructions-text > * {
+        margin: 5px 0;
+      }
+
+      .instructions-text iron-icon {
+        --iron-icon: {
+        margin-right: 10px;
+        min-width: 20px;
+        }
+        --iron-icon-height: 20px;
+        --iron-icon-width: 20px;
       }
     </style>
 
@@ -156,20 +163,6 @@ A Polymer Element showing search fields in a modal dialog.
       on-opened-changed="toggleProcessRequest">
 
       <div class="layout vertical">
-        <div class="layout horizontal">
-          <div class="styled-dialog-name styled-dialog-right-space instructions">Instructions</div>
-          <div class="instruction-text">
-            Enter words or phrases as <strong>search terms</strong> in one or more of the text fields below.
-            Click the <strong>Search</strong> button or press the <strong>ENTER</strong> key when finished.
-            Use <strong>commas</strong> to separate individual search terms.
-            All punctuation <strong>except commas and periods</strong> will be removed.
-            Example:  <strong>New York, Washington</strong>
-            <br/><br/>
-            Use the checkboxes to enable <strong>network expansion</strong> for a particular field. Note that network
-            expansion queries may take a minute or two longer.
-          </div>
-        </div>
-
         <template is="dom-repeat" items="[[_searchFields]]" as="dialogConfig">
           <div class="layout horizontal">
             <template is="dom-if" if="[[_equalsDate(dialogConfig.type)]]">
@@ -201,12 +194,14 @@ A Polymer Element showing search fields in a modal dialog.
                       value="{{searchConfig.value}}"
                       on-keydown="_checkSearchFieldInputKey">
                     </paper-input>
-                    <template is="dom-if" if="[[searchConfig.showNetworkCheckbox]]">
-                      <paper-checkbox noink checked="{{searchConfig.useInNetworkSearch}}"></paper-checkbox>
-                    </template>
-                    <template is="dom-if" if="[[!searchConfig.showNetworkCheckbox]]">
-                      <span class="no-checkbox"></span>
-                    </template>
+                    <span class="toggle-buttons" on-tap="_toggleNetworkExpansion">
+                      <template is="dom-if" if="[[searchConfig.useInNetworkSearch]]">
+                        <paper-icon-button class="active" icon="fa:arrows-alt" title="Network Expansion Enabled"></paper-icon-button>
+                      </template>
+                      <template is="dom-if" if="[[!searchConfig.useInNetworkSearch]]">
+                        <paper-icon-button icon="fa:arrows-alt" title="Network Expansion Disabled"></paper-icon-button>
+                      </template>
+                    </span>
                   </div>
                 </template>
               </div>
@@ -219,6 +214,26 @@ A Polymer Element showing search fields in a modal dialog.
         <button-action class="styled-dialog-button" text="Search" on-tap="handleSearch"></button-action>
         <button-action class="styled-dialog-button" text="Reset" on-tap="resetAllSearchFields"></button-action>
         <button-action class="styled-dialog-button" text="Cancel" on-tap="cancelSearch"></button-action>
+      </div>
+
+      <div class="layout vertical instructions-text">
+        <div>
+          <strong class="styled-dialog-right-space">Instructions:</strong>
+          Enter words or phrases as <strong>search terms</strong> in one or more of the text fields below.
+          Click the <strong>Search</strong> button or press the <strong>ENTER</strong> key when finished.
+          Use <strong>commas</strong> to separate individual search terms.
+          All punctuation <strong>except commas and periods</strong> will be removed.
+          Example:  <strong>New York, Washington</strong>
+        </div>
+        <div class="layout horizontal center">
+          <iron-icon icon="fa:arrows-alt"></iron-icon>
+          <div>
+            Enable <strong>network expansion</strong> on one or more fields to run a <strong>two-step search</strong>:  first, DIG will
+            search on your <strong>search terms</strong>; then, DIG will search on the <strong>terms in the network expansion fields
+            from the results of the first search</strong>; finally, DIG will show you the combined results of the two searches.
+            Please note that this search may take one or two minutes to run.
+          </div>
+        </div>
       </div>
     </styled-dialog>
   </template>
@@ -347,17 +362,6 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
-         * The networkSearchProperty property in the searchFieldsConfig.
-         *
-         * @type {String}
-         * @default 'useInNetworkSearch'
-         */
-        networkSearchProperty: {
-          type: String,
-          value: 'useInNetworkSearch'
-        },
-
-        /**
          * The network expansion parameters passed in.
          *
          * @type {Object}
@@ -414,7 +418,7 @@ A Polymer Element showing search fields in a modal dialog.
          * @private
          */
         _searchFields: {
-          computed: '_createSearchFields(searchFieldsConfig, dataProperty, nameProperty, typeProperty, dataDateIdProperty, dataKeyProperty, dataTitleProperty, networkSearchProperty)',
+          computed: '_createSearchFields(searchFieldsConfig, dataProperty, nameProperty, typeProperty, dataDateIdProperty, dataKeyProperty, dataTitleProperty)',
           type: Array
         }
       },
@@ -467,11 +471,10 @@ A Polymer Element showing search fields in a modal dialog.
        * @param {String} dataDateIdProperty
        * @param {String} dataKeyProperty
        * @param {String} dataTitleProperty
-       * @param {String} networkSearchProperty
        * @return {Array}
        * @private
        */
-      _createSearchFields: function(config, dataProperty, nameProperty, typeProperty, dataDateIdProperty, dataKeyProperty, dataTitleProperty, networkSearchProperty) {
+      _createSearchFields: function(config, dataProperty, nameProperty, typeProperty, dataDateIdProperty, dataKeyProperty, dataTitleProperty) {
         var dateKeys = _.keys(this.dateConfig);
         return config.map(function(dialogConfig) {
           return {
@@ -482,9 +485,7 @@ A Polymer Element showing search fields in a modal dialog.
                 key: searchConfig[dataKeyProperty],
                 title: searchConfig[dataTitleProperty],
                 value: isDate ? {} : '',
-                // showNetworkCheckbox indicates whether or not to show checkbox, while useInNetworkSearch indicates value of actual checkbox
                 // only enable checkboxes for non-date fields
-                showNetworkCheckbox: searchConfig[networkSearchProperty],
                 useInNetworkSearch: false
               };
             }),
@@ -503,6 +504,16 @@ A Polymer Element showing search fields in a modal dialog.
        */
       _equalsDate: function(string) {
         return string === 'date';
+      },
+
+      /**
+       * Toggles the useInNetworkSearch property of the searchConfig in the model of the given event.
+       *
+       * @param {Event} event
+       * @private
+       */
+      _toggleNetworkExpansion: function(event) {
+        event.model.set('searchConfig.useInNetworkSearch', !event.model.searchConfig.useInNetworkSearch);
       },
 
       /**

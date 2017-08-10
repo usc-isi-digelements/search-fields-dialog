@@ -118,7 +118,6 @@ limitations under the License.
         assert.isFalse(element.opened);
         assert.isTrue(element.processRequest);
         assert.isFalse(element.userCanceled);
-        assert.equal(element.networkSearchProperty, 'useInNetworkSearch');
       });
 
       test('template has correct elements at the top', function() {
@@ -141,8 +140,7 @@ limitations under the License.
           key: 'dateStart',
           title: 'From',
           value: {},
-          useInNetworkSearch: false,
-          showNetworkCheckbox: undefined
+          useInNetworkSearch: false
         });
         assert.deepEqual(datePickers[0].key, 'dateStart');
         assert.deepEqual(datePickers[0].prefixLabel, 'From');
@@ -155,8 +153,7 @@ limitations under the License.
           key: 'dateEnd',
           title: 'To',
           value: {},
-          useInNetworkSearch: false,
-          showNetworkCheckbox: undefined
+          useInNetworkSearch: false
         });
         assert.deepEqual(datePickers[1].key, 'dateEnd');
         assert.deepEqual(datePickers[1].prefixLabel, 'To');
@@ -206,15 +203,13 @@ limitations under the License.
             key: 'dateStart',
             title: 'From',
             value: {},
-            useInNetworkSearch: false,
-            showNetworkCheckbox: undefined
+            useInNetworkSearch: false
           }, {
             dateId: 'end',
             key: 'dateEnd',
             title: 'To',
             value: {},
-            useInNetworkSearch: false,
-            showNetworkCheckbox: undefined
+            useInNetworkSearch: false
           }]
         }, {
           type: undefined,
@@ -224,15 +219,13 @@ limitations under the License.
             key: 'phone',
             title: 'Telephone Number',
             value: '',
-            useInNetworkSearch: false,
-            showNetworkCheckbox: undefined
+            useInNetworkSearch: false
           }, {
             dateId: undefined,
             key: 'email',
             title: 'Email Address',
             value: '',
-            useInNetworkSearch: false,
-            showNetworkCheckbox: undefined
+            useInNetworkSearch: false
           }]
         }, {
           type: undefined,
@@ -242,8 +235,7 @@ limitations under the License.
             key: 'city',
             title: 'City',
             value: '',
-            useInNetworkSearch: false,
-            showNetworkCheckbox: true
+            useInNetworkSearch: false
           }]
         }, {
           type: undefined,
@@ -253,22 +245,19 @@ limitations under the License.
             key: 'website',
             title: 'Website',
             value: '',
-            useInNetworkSearch: false,
-            showNetworkCheckbox: undefined
+            useInNetworkSearch: false
           }, {
             dateId: undefined,
             key: 'title',
             title: 'Title',
             value: '',
-            useInNetworkSearch: false,
-            showNetworkCheckbox: undefined
+            useInNetworkSearch: false
           }, {
             dateId: undefined,
             key: 'description',
             title: 'Page',
             value: '',
-            useInNetworkSearch: false,
-            showNetworkCheckbox: undefined
+            useInNetworkSearch: false
           }]
         }]);
       });
@@ -331,7 +320,6 @@ limitations under the License.
           dateId: undefined,
           title: 'City',
           value: 'nyc, chicago',
-          showNetworkCheckbox: true,
           useInNetworkSearch: false
         });
         assert.equal(element.$$('#input_city').value, 'nyc, chicago');

@@ -1,15 +1,16 @@
 {
   "name": "search-fields-dialog",
   "description": "A Polymer Element showing search fields in a modal dialog.",
-  "version": "1.0.1",
-  "authors": ["Next Century Corporation"],
-  "license": "Apache-2.0",
+  "version": "1.0.2",
+  "authors": [
+    "Next Century Corporation"
+  ],
+  "license": "http://polymer.github.io/LICENSE.txt",
   "keywords": [
     "web-component",
     "polymer"
   ],
   "main": "search-fields-dialog.html",
-  "license": "http://polymer.github.io/LICENSE.txt",
   "homepage": "https://github.com/DigElements/search-fields-dialog/",
   "ignore": [
     "/.*",
@@ -21,13 +22,18 @@
     "date-picker-display": "DigElements/date-picker-display#1.1.0",
     "iron-elements": "PolymerElements/iron-elements#^1.0.10",
     "iron-flex-layout": "PolymerElements/iron-flex-layout#1.3.1",
-    "paper-elements": "PolymerElements/paper-elements#^1.0.7",
-    "styled-dialog": "DigElements/styled-dialog#1.0.4",
     "filter-behavior": "DigElements/filter-behavior#1.0.0",
-    "phone-behavior": "DigElements/phone-behavior#1.0.0"
+    "fontawesome-iconset": "https://github.com/vangware/fontawesome-iconset.git#7f5826f89bac4e6d4fa61f64a9fe13978aaa7b38",
+    "paper-elements": "PolymerElements/paper-elements#^1.0.7",
+    "phone-behavior": "DigElements/phone-behavior#1.0.0",
+    "styled-dialog": "DigElements/styled-dialog#1.0.4"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.1.7",
     "web-component-tester": "^5.0.0"
+  },
+  "resolutions": {
+    "iron-icons": "^1.2.0",
+    "lodash": "~4.17.2"
   }
 }
