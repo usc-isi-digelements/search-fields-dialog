@@ -264,18 +264,20 @@ limitations under the License.
 
       test('default searchParameterTransform is set correctly', function() {
         assert.isFunction(element.searchParameterTransform);
-        assert.deepEqual(element.searchParameterTransform('category', 'enabled', 'key', 'text'), {
+        assert.deepEqual(element.searchParameterTransform('category', 'enabled', 'key', 'text', 'search'), {
           category: 'category',
           date: undefined,
           enabled: 'enabled',
           key: 'key',
+          search: 'search',
           text: 'text'
         });
-        assert.deepEqual(element.searchParameterTransform('category', 'enabled', 'key', 'text', 'date'), {
+        assert.deepEqual(element.searchParameterTransform('category', 'enabled', 'key', 'text', 'search', 'date'), {
           category: 'category',
           date: 'date',
           enabled: 'enabled',
           key: 'key',
+          search: 'search',
           text: 'text'
         });
       });
@@ -332,6 +334,7 @@ limitations under the License.
             date: '2017-03-01T00:00:00',
             enabled: false,
             key: 'dateStart',
+            search: 'required',
             text: '03/01/2017'
           }
         };
@@ -344,6 +347,7 @@ limitations under the License.
             date: '2017-03-01T00:00:00',
             enabled: false,
             key: 'dateStart',
+            search: 'required',
             text: '03/01/2017'
           }
         });
@@ -355,6 +359,7 @@ limitations under the License.
             key: 'nyc',
             category: 'City',
             enabled: true,
+            search: 'optional',
             text: 'nyc'
           },
         };
@@ -364,6 +369,7 @@ limitations under the License.
             date: '2017-03-01T00:00:00',
             enabled: false,
             key: 'dateStart',
+            search: 'required',
             text: '03/01/2017'
           }
         };
@@ -379,6 +385,7 @@ limitations under the License.
             date: '2017-03-01T00:00:00',
             enabled: false,
             key: 'dateStart',
+            search: 'required',
             text: '03/01/2017'
           }
         });
@@ -391,6 +398,7 @@ limitations under the License.
             key: 'la',
             category: 'City',
             enabled: false,
+            search: 'optional',
             text: 'la'
           }
         };
@@ -421,6 +429,7 @@ limitations under the License.
             key: 'nyc',
             category: 'City',
             enabled: true,
+            search: 'optional',
             text: 'nyc'
           }
         });
@@ -440,6 +449,7 @@ limitations under the License.
               date: undefined,
               category: 'City',
               enabled: true,
+              search: 'optional',
               text: 'chicago'
             }
           });
@@ -450,7 +460,7 @@ limitations under the License.
 
         assert.deepEqual(element.searchParameters.city, {});
 
-        element._updateSearchParameterAndNotify('city', 'chicago', 'City', true);
+        element._updateSearchParameterAndNotify('city', 'chicago', 'City', true, 'optional');
       });
 
       test('_updateDateParameterAndNotify works correctly', function(done) {
@@ -461,6 +471,7 @@ limitations under the License.
               date: '2017-03-01T00:00:00',
               enabled: true,
               key: 'dateStart',
+              search: 'required',
               text: '03/01/2017'
             }
           });
@@ -487,6 +498,7 @@ limitations under the License.
             date: undefined,
             category: 'City',
             enabled: true,
+            search: 'optional',
             text: 'nyc'
           },
           chicago: {
@@ -494,13 +506,14 @@ limitations under the License.
             date: undefined,
             category: 'City',
             enabled: true,
+            search: 'optional',
             text: 'chicago'
           }
         });
         assert.deepEqual(element.networkExpansionParameters, {city: true});
       });
 
-      test('_updateSearchParameterFromField will remove formatting from phone numbers', function() {
+      test('_updateSearchAndNetworkParameterFromField will remove formatting from phone numbers', function() {
         element.$$('#input_phone').value = '111-222-3333';
 
         // phoneConfig is first in data array for identifiers
@@ -512,9 +525,66 @@ limitations under the License.
             date: undefined,
             category: 'Telephone Number',
             enabled: true,
+            search: 'optional',
             text: '1112223333'
           }
         });
+      });
+
+      test('_updateSearchAndNetworkParameterFromField does work as expected if a term as a plus sign', function() {
+        element.$$('#input_city').value = '+nyc, chicago';
+        // cityConfig is first in data array for location
+        element._searchFields[2].data[0].useInNetworkSearch = true;
+
+        element._updateSearchAndNetworkParameterFromField(element._searchFields[2].data[0]);
+
+        assert.deepEqual(element.searchParameters.city, {
+          nyc: {
+            key: 'nyc',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'required',
+            text: 'nyc'
+          },
+          chicago: {
+            key: 'chicago',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'optional',
+            text: 'chicago'
+          }
+        });
+        assert.deepEqual(element.networkExpansionParameters, {city: true});
+      });
+
+      test('_updateSearchAndNetworkParameterFromField does work as expected if a term as a minus sign', function() {
+        element.$$('#input_city').value = '-nyc, chicago';
+        // cityConfig is first in data array for location
+        element._searchFields[2].data[0].useInNetworkSearch = true;
+
+        element._updateSearchAndNetworkParameterFromField(element._searchFields[2].data[0]);
+
+        assert.deepEqual(element.searchParameters.city, {
+          nyc: {
+            key: 'nyc',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'ignore',
+            text: 'nyc'
+          },
+          chicago: {
+            key: 'chicago',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'optional',
+            text: 'chicago'
+          }
+        });
+        assert.deepEqual(element.networkExpansionParameters, {city: true});
       });
 
       test('_updateDateParameterFromField will properly set date parameter', function() {
@@ -536,6 +606,7 @@ limitations under the License.
             date: '2017-03-01T00:00:00',
             enabled: false,
             key: 'dateEnd',
+            search: 'required',
             text: '03/01/2017'
           }
         });
@@ -567,6 +638,7 @@ limitations under the License.
             date: '2017-03-01T00:00:00',
             enabled: false,
             key: 'dateEnd',
+            search: 'required',
             text: '03/01/2017'
           }
         };
@@ -579,6 +651,7 @@ limitations under the License.
             date: undefined,
             category: 'City',
             enabled: true,
+            search: 'optional',
             text: 'nyc'
           },
           chicago: {
@@ -586,6 +659,7 @@ limitations under the License.
             date: undefined,
             category: 'City',
             enabled: true,
+            search: 'optional',
             text: 'chicago'
           }
         });
@@ -596,6 +670,7 @@ limitations under the License.
             date: '2017-03-01T00:00:00',
             enabled: false,
             key: 'dateEnd',
+            search: 'required',
             text: '03/01/2017'
           }
         });
@@ -610,6 +685,7 @@ limitations under the License.
             date: '2017-03-01T00:00:00',
             enabled: false,
             key: 'dateEnd',
+            search: 'required',
             text: '03/01/2017'
           }
         };
@@ -637,6 +713,7 @@ limitations under the License.
               date: undefined,
               category: 'City',
               enabled: true,
+              search: 'optional',
               text: 'nyc'
             },
             chicago: {
@@ -644,6 +721,7 @@ limitations under the License.
               date: undefined,
               category: 'City',
               enabled: true,
+              search: 'optional',
               text: 'chicago'
             }
           },
@@ -655,6 +733,7 @@ limitations under the License.
               date: undefined,
               category: 'Telephone Number',
               enabled: true,
+              search: 'optional',
               text: '1112223333'
             }
           },

@@ -66,7 +66,7 @@ A Polymer Element showing search fields in a modal dialog.
         --paper-input-container-focus-color: var(--dark-primary-color);
         --paper-input-container: {
           padding: 0 10px 4px;
-          width: 200px;
+          width: 215px;
         }
         --paper-input-container-input: {
           font-weight: 500;
@@ -80,8 +80,8 @@ A Polymer Element showing search fields in a modal dialog.
       .date-fields-container > date-picker-display {
         display: inline-block;
         margin: 0 10px;
-        padding: 5px 35px 9px 0px;
-        width: 200px;
+        padding: 5px 30px 9px 0px;
+        width: 215px;
         --date-select-bg-color: #ffffff;
         --date-select-text-color: #000000;
       }
@@ -91,25 +91,30 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       styled-dialog ::content .inside.styled-dialog .styled-dialog-name {
-        min-width: 100px;
+        min-width: 80px;
       }
 
       .toggle-buttons paper-icon-button {
         border-radius: 5px;
+        margin-bottom: 10px;
         margin-right: 10px;
-        margin-top: 10px;
-        padding: 5px;
-        height: 30px;
-        width: 30px;
+        margin-top: 20px;
+        padding: 0;
+        height: 20px;
+        width: 20px;
       }
 
-      .active {
-        background-color: yellowgreen;
+      .net-exp {
+        color: black;
+      }
+
+      .net-exp.active {
+        color: yellowgreen;
       }
 
       @media all and (min-width: 500px) and (max-width: 650px) {
         .search-options-title {
-          width: 100px;
+          width: 80px;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -143,8 +148,9 @@ A Polymer Element showing search fields in a modal dialog.
 
       .instructions-text iron-icon {
         --iron-icon: {
-        margin-right: 10px;
-        min-width: 20px;
+          margin-left: 10px;
+          margin-right: 20px;
+          min-width: 20px;
         }
         --iron-icon-height: 20px;
         --iron-icon-width: 20px;
@@ -194,14 +200,14 @@ A Polymer Element showing search fields in a modal dialog.
                       value="{{searchConfig.value}}"
                       on-keydown="_checkSearchFieldInputKey">
                     </paper-input>
-                    <span class="toggle-buttons" on-tap="_toggleNetworkExpansion">
-                      <template is="dom-if" if="[[searchConfig.useInNetworkSearch]]">
-                        <paper-icon-button class="active" icon="fa:arrows-alt" title="Network Expansion Enabled"></paper-icon-button>
-                      </template>
-                      <template is="dom-if" if="[[!searchConfig.useInNetworkSearch]]">
-                        <paper-icon-button icon="fa:arrows-alt" title="Network Expansion Disabled"></paper-icon-button>
-                      </template>
-                    </span>
+                    <div class="layout vertical toggle-buttons">
+                      <paper-icon-button
+                        class$="net-exp [[_getActiveStyleClass(searchConfig.useInNetworkSearch)]]"
+                        icon="fa:arrows-alt"
+                        title="Click to Toggle Network Expansion of [[searchConfig.title]] (Currently [[_getActiveText(searchConfig.useInNetworkSearch)]])"
+                        on-tap="_toggleNetworkExpansion">
+                      </paper-icon-button>
+                    </div>
                   </div>
                 </template>
               </div>
@@ -211,10 +217,12 @@ A Polymer Element showing search fields in a modal dialog.
       </div>
 
       <div class="horizontal layout center-justified search-buttons">
-        <button-action class="styled-dialog-button" text="Search" on-tap="handleSearch"></button-action>
-        <button-action class="styled-dialog-button" text="Reset" on-tap="resetAllSearchFields"></button-action>
-        <button-action class="styled-dialog-button" text="Cancel" on-tap="cancelSearch"></button-action>
+        <button-action class="styled-dialog-button" icon="fa:search" text="Search" on-tap="handleSearch"></button-action>
+        <button-action class="styled-dialog-button" icon="fa:undo" text="Reset" on-tap="resetAllSearchFields"></button-action>
+        <button-action class="styled-dialog-button" icon="fa:times" text="Cancel" on-tap="cancelSearch"></button-action>
       </div>
+
+      <div class="styled-dialog-divider"></div>
 
       <div class="layout vertical instructions-text">
         <div>
@@ -222,16 +230,18 @@ A Polymer Element showing search fields in a modal dialog.
           Enter words or phrases as <strong>search terms</strong> in one or more of the text fields below.
           Click the <strong>Search</strong> button or press the <strong>ENTER</strong> key when finished.
           Use <strong>commas</strong> to separate individual search terms.
-          All punctuation <strong>except commas and periods</strong> will be removed.
-          Example:  <strong>New York, Washington</strong>
+          Use a <strong>plus sign</strong> (<strong>+</strong>) to mark a required word or phrase and a
+          <strong>minus sign</strong> (<strong>-</strong>) to mark a word or phrase to ignore.
+          Example:  <strong>+New York, Manhattan, -Newark</strong>
         </div>
         <div class="layout horizontal center">
-          <iron-icon icon="fa:arrows-alt"></iron-icon>
+          <iron-icon class="net-exp" icon="fa:arrows-alt"></iron-icon>
           <div>
-            Enable <strong>network expansion</strong> on one or more fields to run a <strong>two-step search</strong>:  first, DIG will
-            search on your <strong>search terms</strong>; then, DIG will search on the <strong>terms in the network expansion fields
-            from the results of the first search</strong>; finally, DIG will show you the combined results of the two searches.
-            Please note that this search may take one or two minutes to run.
+            Activate <strong>network expansion</strong> on a field to run a <strong>multi-stage search</strong>:
+            first, DIG will search with the listed search terms like normal;
+            next, DIG will search with the terms of the network expansion fields in the results of the first search;
+            then, DIG will show you the combined results of the two searches.
+            Please note that it may take a minute or longer to run.
           </div>
         </div>
       </div>
@@ -384,17 +394,18 @@ A Polymer Element showing search fields in a modal dialog.
          * A function that transforms search parameter data into a search parameter object.
          *
          * @type {Object}
-         * @default function(category, enabled, key, text, date) { return { category: category, date: date, enabled: enabled, key: key, text: text }; }
+         * @default function(category, enabled, key, text, search, date) { return { category: category, date: date, enabled: enabled, key: key, search: search, text: text }; }
          */
         searchParameterTransform: {
           type: Object,
           value: function() {
-            return function(category, enabled, key, text, date) {
+            return function(category, enabled, key, text, search, date) {
               return {
                 category: category,
                 date: date,
                 enabled: enabled,
                 key: key,
+                search: search,
                 text: text
               };
             };
@@ -485,7 +496,6 @@ A Polymer Element showing search fields in a modal dialog.
                 key: searchConfig[dataKeyProperty],
                 title: searchConfig[dataTitleProperty],
                 value: isDate ? {} : '',
-                // only enable checkboxes for non-date fields
                 useInNetworkSearch: false
               };
             }),
@@ -507,6 +517,26 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
+       * Returns the active style class for the button with the given toggle status.
+       *
+       * @param {Boolean} active
+       * @return {String}
+       */
+      _getActiveStyleClass: function(active) {
+        return active ? 'active' : '';
+      },
+
+      /**
+       * Returns the active text for the button with the given toggle status.
+       *
+       * @param {Boolean} active
+       * @return {String}
+       */
+      _getActiveText: function(active) {
+        return active ? 'On' : 'Off';
+      },
+
+      /**
        * Toggles the useInNetworkSearch property of the searchConfig in the model of the given event.
        *
        * @param {Event} event
@@ -525,11 +555,11 @@ A Polymer Element showing search fields in a modal dialog.
        * @param {Boolean} enabled
        * @private
        */
-      _updateSearchParameterAndNotify: function(type, term, title, enabled) {
-        this.searchParameters[type][term] = this.searchParameterTransform(title, enabled, term, term);
+      _updateSearchParameterAndNotify: function(type, term, name, enabled, search) {
+        this.searchParameters[type][term] = this.searchParameterTransform(name, enabled, term, term, search);
 
-        // TODO Do we really need to create a different object?  Do we need to use an object at all?
-        this.notifyPath(['searchParameters', type, '*'], this.searchParameterTransform(title, enabled, term, term));
+        // TODO Do we really need to create a new object for the second argument?  Do we need to use an object at all?
+        this.notifyPath(['searchParameters', type, '*'], this.searchParameterTransform(name, enabled, term, term, search));
       },
 
       /**
@@ -542,26 +572,39 @@ A Polymer Element showing search fields in a modal dialog.
         var self = this;
 
         var terms = searchConfig.value.split(',').map(function(term) {
-          // TODO Custom formatting.
-          if(searchConfig.key === 'phone') {
-            return DigBehaviors.PhoneBehavior.getUnformattedPhones(term);
-          }
-          // Replace reserved characters with spaces.
-          return term.replace(/\+|\-|\=|\&|\||\>|<|\!|\(|\)|\{|\}|\[|\]|\^|\"|\~|\*|\?|\:|\\|\//g, ' ').trim();
-        });
+          return term.trim();
+        }).reduce(function(terms, term) {
+          var search = 'optional';
+          var key = term;
 
-        // TODO Don't assume data structure.
+          if(key.indexOf('+') === 0 || key.indexOf('-') === 0) {
+            search = (key.indexOf('+') === 0 ? 'required' : 'ignore');
+            key = key.substring(1);
+          }
+
+          // TODO Move custom formatting.
+          if(searchConfig.key === 'phone') {
+            key = DigBehaviors.PhoneBehavior.getUnformattedPhones(key);
+          }
+
+          if(key) {
+            terms[key] = search;
+          }
+
+          return terms;
+        }, {});
+
         _.keys(self.searchParameters[searchConfig.key]).forEach(function(term) {
           // Disable deleted terms.
-          if(self.searchParameters[searchConfig.key][term].enabled && terms.indexOf(term) < 0) {
+          if(self.searchParameters[searchConfig.key][term].enabled && _.keys(terms).indexOf(term) < 0) {
             self._updateSearchParameterAndNotify(searchConfig.key, term, searchConfig.title, false);
           }
         });
 
-        terms.forEach(function(term) {
+        _.keys(terms).forEach(function(term) {
           // Add new terms.
           if(term) {
-            self._updateSearchParameterAndNotify(searchConfig.key, term, searchConfig.title, true);
+            self._updateSearchParameterAndNotify(searchConfig.key, term, searchConfig.title, true, terms[term]);
           }
         });
 
@@ -586,10 +629,10 @@ A Polymer Element showing search fields in a modal dialog.
       _updateDateParameterAndNotify: function(key, date, text, category, enabled) {
         var parameterKey = this.dateConfig[key];
 
-        this.searchParameters[parameterKey][key] = this.searchParameterTransform(category, enabled, key, text, date);
+        this.searchParameters[parameterKey][key] = this.searchParameterTransform(category, enabled, key, text, 'required', date);
 
-        // TODO Do we really need to create a different object?  Do we need to use an object at all?
-        this.notifyPath(['searchParameters', parameterKey, key], this.searchParameterTransform(category, enabled, key, text, date));
+        // TODO Do we really need to create a new object for the second argument?  Do we need to use an object at all?
+        this.notifyPath(['searchParameters', parameterKey, key], this.searchParameterTransform(category, enabled, key, text, 'required', date));
       },
 
       /**
@@ -646,7 +689,8 @@ A Polymer Element showing search fields in a modal dialog.
         searchConfig.value = _.keys(this.searchParameters[searchConfig.key]).filter(function(term) {
           return self.searchParameters[searchConfig.key][term].enabled;
         }).map(function(term) {
-          return self.searchParameters[searchConfig.key][term].text;
+          var prefix = self.searchParameters[searchConfig.key][term].search === 'required' ? '+' : (self.searchParameters[searchConfig.key][term].search === 'ignore' ? '-' : '');
+          return prefix + self.searchParameters[searchConfig.key][term].text;
         }).join(', ');
 
         this.$$('#input_' + searchConfig.key).value = searchConfig.value;
@@ -675,6 +719,7 @@ A Polymer Element showing search fields in a modal dialog.
         this._updateSearchParametersFromFields();
 
         if(DigBehaviors.FilterBehavior.areAllFacetsDisabled(this.searchParameters, ['sort'])) {
+          this.resetAllSearchFields();
           return;
         }
 
