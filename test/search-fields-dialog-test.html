@@ -185,6 +185,12 @@ limitations under the License.
         assert.equal(paperInputs[5].value, '');
       });
 
+      test('template has paper icon buttons', function() {
+        var buttons = Polymer.dom(element.root).querySelectorAll('paper-icon-button');
+        assert.isNotNull(buttons);
+        assert.equal(buttons.length, 6);
+      });
+
       test('template has expected buttons at the bottom', function() {
         var buttons = Polymer.dom(element.root).querySelectorAll('button-action');
         assert.isNotNull(buttons);
@@ -262,9 +268,9 @@ limitations under the License.
         }]);
       });
 
-      test('default searchParameterTransform is set correctly', function() {
-        assert.isFunction(element.searchParameterTransform);
-        assert.deepEqual(element.searchParameterTransform('category', 'enabled', 'key', 'text', 'search'), {
+      test('default buildSearchParameter is set correctly', function() {
+        assert.isFunction(element.buildSearchParameter);
+        assert.deepEqual(element.buildSearchParameter('category', 'enabled', 'key', 'text', 'search'), {
           category: 'category',
           date: undefined,
           enabled: 'enabled',
@@ -272,11 +278,27 @@ limitations under the License.
           search: 'search',
           text: 'text'
         });
-        assert.deepEqual(element.searchParameterTransform('category', 'enabled', 'key', 'text', 'search', 'date'), {
+        assert.deepEqual(element.buildSearchParameter('category', 'enabled', 'key', 'text', 'search', 'date'), {
           category: 'category',
           date: 'date',
           enabled: 'enabled',
           key: 'key',
+          search: 'search',
+          text: 'text'
+        });
+      });
+
+      test('default getSearchParameterData is set correctly', function() {
+        assert.isFunction(element.getSearchParameterData);
+        assert.deepEqual(element.getSearchParameterData({
+          category: 'category',
+          date: undefined,
+          enabled: 'enabled',
+          key: 'key',
+          search: 'search',
+          text: 'text'
+        }), {
+          enabled: 'enabled',
           search: 'search',
           text: 'text'
         });

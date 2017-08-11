@@ -259,6 +259,8 @@ A Polymer Element showing search fields in a modal dialog.
 
       properties: {
         /**
+         * (Optional)
+         *
          * The keys of dates in the searchFieldsConfig mapped to the keys of dates in the searchParameters.
          *
          * @type {Object}
@@ -272,6 +274,8 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
+         * (Optional|Output)
+         *
          * Whether the dialog is opened.
          *
          * @type {Boolean}
@@ -284,6 +288,8 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
+         * (Optional|Output)
+         *
          * Whether to let queries run.
          *
          * @type {Boolean}
@@ -294,6 +300,8 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
+         * (Optional|Output)
+         *
          * Whether the user canceled the changes.
          *
          * @type {Boolean}
@@ -306,6 +314,8 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
+         * (Optional)
+         *
          * The data property in the searchFieldsConfig.
          *
          * @type {String}
@@ -317,6 +327,8 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
+         * (Optional)
+         *
          * The date ID property in the data in the searchFieldsConfig.
          *
          * @type {String}
@@ -328,6 +340,8 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
+         * (Optional)
+         *
          * The key property in the data in the searchFieldsConfig.
          *
          * @type {String}
@@ -339,6 +353,8 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
+         * (Optional)
+         *
          * The title property in the data in the searchFieldsConfig.
          *
          * @type {String}
@@ -350,6 +366,8 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
+         * (Optional)
+         *
          * The name property in the searchFieldsConfig.
          *
          * @type {String}
@@ -361,6 +379,8 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
+         * (Optional)
+         *
          * The type property in the searchFieldsConfig.
          *
          * @type {String}
@@ -372,6 +392,8 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
+         * (Optional|Output)
+         *
          * The network expansion parameters passed in.
          *
          * @type {Object}
@@ -382,6 +404,8 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
+         * (Required|Output)
+         *
          * A list of objects that correspond to groupings of search fields.
          *
          * @type {Array}
@@ -391,12 +415,14 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
+         * (Optional)
+         *
          * A function that transforms search parameter data into a search parameter object.
          *
          * @type {Object}
          * @default function(category, enabled, key, text, search, date) { return { category: category, date: date, enabled: enabled, key: key, search: search, text: text }; }
          */
-        searchParameterTransform: {
+        buildSearchParameter: {
           type: Object,
           value: function() {
             return function(category, enabled, key, text, search, date) {
@@ -413,6 +439,29 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
+         * (Optional)
+         *
+         * A function that transforms a search parameter object into an object with "enabled", "search", and "text" properties.
+         *
+         * @type {Object}
+         * @default function(searchParameter) { return { enabled: searchParameter.enabled, search: searchParameter.search, text: searchParameter.text }; }
+         */
+        getSearchParameterData: {
+          type: Object,
+          value: function() {
+            return function(searchParameter) {
+              return {
+                enabled: searchParameter.enabled,
+                search: searchParameter.search,
+                text: searchParameter.text
+              };
+            };
+          }
+        },
+
+        /**
+         * (Required|Output)
+         *
          * The search parameters created from the terms entered into the dialog.
          *
          * @type {Object}
@@ -556,10 +605,10 @@ A Polymer Element showing search fields in a modal dialog.
        * @private
        */
       _updateSearchParameterAndNotify: function(type, term, name, enabled, search) {
-        this.searchParameters[type][term] = this.searchParameterTransform(name, enabled, term, term, search);
+        this.searchParameters[type][term] = this.buildSearchParameter(name, enabled, term, term, search);
 
         // TODO Do we really need to create a new object for the second argument?  Do we need to use an object at all?
-        this.notifyPath(['searchParameters', type, '*'], this.searchParameterTransform(name, enabled, term, term, search));
+        this.notifyPath(['searchParameters', type, '*'], this.buildSearchParameter(name, enabled, term, term, search));
       },
 
       /**
@@ -629,10 +678,10 @@ A Polymer Element showing search fields in a modal dialog.
       _updateDateParameterAndNotify: function(key, date, text, category, enabled) {
         var parameterKey = this.dateConfig[key];
 
-        this.searchParameters[parameterKey][key] = this.searchParameterTransform(category, enabled, key, text, 'required', date);
+        this.searchParameters[parameterKey][key] = this.buildSearchParameter(category, enabled, key, text, 'required', date);
 
         // TODO Do we really need to create a new object for the second argument?  Do we need to use an object at all?
-        this.notifyPath(['searchParameters', parameterKey, key], this.searchParameterTransform(category, enabled, key, text, 'required', date));
+        this.notifyPath(['searchParameters', parameterKey, key], this.buildSearchParameter(category, enabled, key, text, 'required', date));
       },
 
       /**
@@ -687,10 +736,11 @@ A Polymer Element showing search fields in a modal dialog.
       _updateSearchFieldFromParameter: function(searchConfig) {
         var self = this;
         searchConfig.value = _.keys(this.searchParameters[searchConfig.key]).filter(function(term) {
-          return self.searchParameters[searchConfig.key][term].enabled;
+          return self.getSearchParameterData(self.searchParameters[searchConfig.key][term]).enabled;
         }).map(function(term) {
-          var prefix = self.searchParameters[searchConfig.key][term].search === 'required' ? '+' : (self.searchParameters[searchConfig.key][term].search === 'ignore' ? '-' : '');
-          return prefix + self.searchParameters[searchConfig.key][term].text;
+          var data = self.getSearchParameterData(self.searchParameters[searchConfig.key][term]);
+          var prefix = data.search === 'required' ? '+' : (data.search === 'ignore' ? '-' : '');
+          return prefix + data.text;
         }).join(', ');
 
         this.$$('#input_' + searchConfig.key).value = searchConfig.value;
