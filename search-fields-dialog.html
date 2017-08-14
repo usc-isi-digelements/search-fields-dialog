@@ -53,9 +53,24 @@ A Polymer Element showing search fields in a modal dialog.
         color: yellowgreen;
       }
 
+      .options-row {
+        margin-bottom: 10px;
+      }
+
+      .options-label {
+        text-align: end;
+      }
+
+      .options-row paper-icon-button {
+        margin-right: 5px;
+        padding: 10px;
+        height: 40px;
+        width: 40px;
+      }
+
       .search-labels {
-        line-height: 25px;
-        padding-top: 20px;
+        /* Vertically align the search-labels with their paper-input-containers. */
+        padding-top: 22px;
         text-align: end;
       }
 
@@ -65,7 +80,7 @@ A Polymer Element showing search fields in a modal dialog.
         --paper-input-container-input-color: var(--dark-primary-color);
         --paper-input-container-focus-color: var(--dark-primary-color);
         --paper-input-container: {
-          padding: 0 10px 4px;
+          padding: 0 0 4px 5px;
           width: 215px;
         }
         --paper-input-container-input: {
@@ -73,21 +88,21 @@ A Polymer Element showing search fields in a modal dialog.
         }
       }
 
-      .date-fields-title {
+      .date-labels {
         padding-top: 15px;
+        text-align: end;
       }
 
       .date-fields-container > date-picker-display {
         display: inline-block;
-        margin: 0 10px;
-        padding: 5px 30px 9px 0px;
+        padding: 5px 40px 9px 5px;
         width: 215px;
         --date-select-bg-color: #ffffff;
         --date-select-text-color: #000000;
       }
 
       .search-dialog .search-buttons {
-        padding-top: 5px;
+        padding: 10px;
       }
 
       styled-dialog ::content .inside.styled-dialog .styled-dialog-name {
@@ -96,12 +111,10 @@ A Polymer Element showing search fields in a modal dialog.
 
       .toggle-buttons paper-icon-button {
         border-radius: 5px;
-        margin-bottom: 10px;
-        margin-right: 10px;
-        margin-top: 20px;
-        padding: 0;
-        height: 20px;
-        width: 20px;
+        margin-top: 10px;
+        padding: 10px;
+        height: 40px;
+        width: 40px;
       }
 
       .net-exp {
@@ -169,24 +182,34 @@ A Polymer Element showing search fields in a modal dialog.
       on-opened-changed="toggleProcessRequest">
 
       <div class="layout vertical">
+        <div class="layout horizontal center options-row">
+          <div class="styled-dialog-name styled-dialog-right-space options-label">Options</div>
+          <div class="layout horizontal center">
+            <paper-icon-button
+              icon="[[_getCheckboxIcon(required)]]"
+              title="Click to Toggle (Currently [[_getActiveText(required)]])"
+              on-tap="_toggleRequired">
+            </paper-icon-button>
+            <div class="instructions-text">Require All Non-Excluded Search Terms</div>
+          </div>
+        </div>
+
         <template is="dom-repeat" items="[[_searchFields]]" as="dialogConfig">
           <div class="layout horizontal">
             <template is="dom-if" if="[[_equalsDate(dialogConfig.type)]]">
-              <div class="styled-dialog-name styled-dialog-right-space search-labels date-fields-title">[[dialogConfig.name]]</div>
-              <div class="layout horizontal">
-                <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
-                  <div class="layout horizontal date-fields-container nowrap">
-                    <date-picker-display
-                      facet-key="value"
-                      facets="{{searchConfig}}"
-                      key="[[searchConfig.key]]"
-                      prefix-label="[[searchConfig.title]]"
-                      date-identifier="[[searchConfig.dateId]]"
-                      title="[[searchConfig.title]]">
-                    </date-picker-display>
-                  </div>
-                </template>
-              </div>
+              <div class="styled-dialog-name styled-dialog-right-space date-labels">[[dialogConfig.name]]</div>
+              <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
+                <div class="layout horizontal date-fields-container nowrap">
+                  <date-picker-display
+                    facet-key="value"
+                    facets="{{searchConfig}}"
+                    key="[[searchConfig.key]]"
+                    prefix-label="[[searchConfig.title]]"
+                    date-identifier="[[searchConfig.dateId]]"
+                    title="[[searchConfig.title]]">
+                  </date-picker-display>
+                </div>
+              </template>
             </template>
 
             <template is="dom-if" if="[[!_equalsDate(dialogConfig.type)]]">
@@ -227,11 +250,12 @@ A Polymer Element showing search fields in a modal dialog.
       <div class="layout vertical instructions-text">
         <div>
           <strong class="styled-dialog-right-space">Instructions:</strong>
-          Enter words or phrases as <strong>search terms</strong> in one or more of the text fields below.
-          Click the <strong>Search</strong> button or press the <strong>ENTER</strong> key when finished.
-          Use <strong>commas</strong> to separate individual search terms.
-          Use a <strong>plus sign</strong> (<strong>+</strong>) to mark a required word or phrase and a
-          <strong>minus sign</strong> (<strong>-</strong>) to mark a word or phrase to ignore.
+          Enter words or phrases as <strong>search terms</strong> in one or more of the text fields above.
+          Use <strong>commas</strong> (<strong>,</strong>) to separate search terms.
+          A phrase of multiple words (without commas) is treated as a <strong>single search term</strong> (no need for quotation marks).
+          Use a <strong>plus sign</strong> (<strong>+</strong>) to mark a <strong>required</strong> word or phrase and a
+          <strong>minus sign</strong> (<strong>-</strong>) to mark an <strong>excluded</strong> word or phrase.
+          Click the <strong>SEARCH</strong> button or press the <strong>ENTER</strong> key to run the search.
           Example:  <strong>+New York, Manhattan, -Newark</strong>
         </div>
         <div class="layout horizontal center">
@@ -460,6 +484,19 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
+         * (Optional)
+         *
+         * Whether all optional search terms are required.
+         *
+         * @type {Boolean}
+         * @default true
+         */
+        required: {
+          type: Boolean,
+          value: true
+        },
+
+        /**
          * (Required|Output)
          *
          * The search parameters created from the terms entered into the dialog.
@@ -570,6 +607,7 @@ A Polymer Element showing search fields in a modal dialog.
        *
        * @param {Boolean} active
        * @return {String}
+       * @private
        */
       _getActiveStyleClass: function(active) {
         return active ? 'active' : '';
@@ -580,9 +618,21 @@ A Polymer Element showing search fields in a modal dialog.
        *
        * @param {Boolean} active
        * @return {String}
+       * @private
        */
       _getActiveText: function(active) {
         return active ? 'On' : 'Off';
+      },
+
+      /**
+       * Returns the checkbox icon with the given toggle status.
+       *
+       * @param {Boolean} active
+       * @return {String}
+       * @private
+       */
+      _getCheckboxIcon: function(active) {
+        return active ? 'fa:check-square' : 'fa:square-o';
       },
 
       /**
@@ -593,6 +643,15 @@ A Polymer Element showing search fields in a modal dialog.
        */
       _toggleNetworkExpansion: function(event) {
         event.model.set('searchConfig.useInNetworkSearch', !event.model.searchConfig.useInNetworkSearch);
+      },
+
+      /**
+       * Toggles required.
+       *
+       * @private
+       */
+      _toggleRequired: function() {
+        this.set('required', !this.required);
       },
 
       /**
@@ -623,17 +682,19 @@ A Polymer Element showing search fields in a modal dialog.
         var terms = searchConfig.value.split(',').map(function(term) {
           return term.trim();
         }).reduce(function(terms, term) {
-          var search = 'optional';
+          var search = self.required ? 'required' : 'optional';
           var key = term;
 
+          // An excluded term overrides this.required.
           if(key.indexOf('+') === 0 || key.indexOf('-') === 0) {
-            search = (key.indexOf('+') === 0 ? 'required' : 'ignore');
+            search = (key.indexOf('+') === 0 ? 'required' : 'excluded');
             key = key.substring(1);
           }
 
           // TODO Move custom formatting.
           if(searchConfig.key === 'phone') {
-            key = DigBehaviors.PhoneBehavior.getUnformattedPhones(key);
+            // From DigBehaviors.PhoneBehavior
+            key = self.getUnformattedPhones(key);
           }
 
           if(key) {
@@ -739,7 +800,7 @@ A Polymer Element showing search fields in a modal dialog.
           return self.getSearchParameterData(self.searchParameters[searchConfig.key][term]).enabled;
         }).map(function(term) {
           var data = self.getSearchParameterData(self.searchParameters[searchConfig.key][term]);
-          var prefix = data.search === 'required' ? '+' : (data.search === 'ignore' ? '-' : '');
+          var prefix = (data.search === 'required' ? '+' : (data.search === 'excluded' ? '-' : ''));
           return prefix + data.text;
         }).join(', ');
 
@@ -768,7 +829,8 @@ A Polymer Element showing search fields in a modal dialog.
       handleSearch: function() {
         this._updateSearchParametersFromFields();
 
-        if(DigBehaviors.FilterBehavior.areAllFacetsDisabled(this.searchParameters, ['sort'])) {
+        // From DigBehaviors.FilterBehavior
+        if(this.areAllFacetsDisabled(this.searchParameters)) {
           this.resetAllSearchFields();
           return;
         }

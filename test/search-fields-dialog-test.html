@@ -105,6 +105,7 @@ limitations under the License.
         element.networkExpansionParameters = {
           city: false
         };
+        element.required = false;
         flush(done);
       });
 
@@ -186,7 +187,7 @@ limitations under the License.
       });
 
       test('template has paper icon buttons', function() {
-        var buttons = Polymer.dom(element.root).querySelectorAll('paper-icon-button');
+        var buttons = Polymer.dom(element.root).querySelectorAll('.toggle-buttons paper-icon-button');
         assert.isNotNull(buttons);
         assert.equal(buttons.length, 6);
       });
@@ -347,6 +348,66 @@ limitations under the License.
           useInNetworkSearch: false
         });
         assert.equal(element.$$('#input_city').value, 'nyc, chicago');
+      });
+
+      test('_updateSearchFieldFromParameter does work as expected if a term is required', function() {
+        element.searchParameters.city = {
+          nyc: {
+            key: 'nyc',
+            category: 'City',
+            enabled: true,
+            search: 'required',
+            text: 'nyc',
+            useInNetworkSearch: false
+          },
+          chicago: {
+            key: 'chicago',
+            category: 'City',
+            enabled: true,
+            text: 'chicago',
+            useInNetworkSearch: false,
+          }
+        };
+        element._updateSearchFieldFromParameter(element._searchFields[2].data[0]);
+
+        assert.deepEqual(element._searchFields[2].data[0], {
+          key: 'city',
+          dateId: undefined,
+          title: 'City',
+          value: '+nyc, chicago',
+          useInNetworkSearch: false
+        });
+        assert.equal(element.$$('#input_city').value, '+nyc, chicago');
+      });
+
+      test('_updateSearchFieldFromParameter does work as expected if a term is excluded', function() {
+        element.searchParameters.city = {
+          nyc: {
+            key: 'nyc',
+            category: 'City',
+            enabled: true,
+            search: 'excluded',
+            text: 'nyc',
+            useInNetworkSearch: false
+          },
+          chicago: {
+            key: 'chicago',
+            category: 'City',
+            enabled: true,
+            text: 'chicago',
+            useInNetworkSearch: false,
+          }
+        };
+        element._updateSearchFieldFromParameter(element._searchFields[2].data[0]);
+
+        assert.deepEqual(element._searchFields[2].data[0], {
+          key: 'city',
+          dateId: undefined,
+          title: 'City',
+          value: '-nyc, chicago',
+          useInNetworkSearch: false
+        });
+        assert.equal(element.$$('#input_city').value, '-nyc, chicago');
       });
 
       test('_updateDateFieldFromParameter has expected behavior', function() {
@@ -553,7 +614,7 @@ limitations under the License.
         });
       });
 
-      test('_updateSearchAndNetworkParameterFromField does work as expected if a term as a plus sign', function() {
+      test('_updateSearchAndNetworkParameterFromField does work as expected if a term is a plus sign', function() {
         element.$$('#input_city').value = '+nyc, chicago';
         // cityConfig is first in data array for location
         element._searchFields[2].data[0].useInNetworkSearch = true;
@@ -581,7 +642,7 @@ limitations under the License.
         assert.deepEqual(element.networkExpansionParameters, {city: true});
       });
 
-      test('_updateSearchAndNetworkParameterFromField does work as expected if a term as a minus sign', function() {
+      test('_updateSearchAndNetworkParameterFromField does work as expected if a term is a minus sign', function() {
         element.$$('#input_city').value = '-nyc, chicago';
         // cityConfig is first in data array for location
         element._searchFields[2].data[0].useInNetworkSearch = true;
@@ -594,7 +655,7 @@ limitations under the License.
             date: undefined,
             category: 'City',
             enabled: true,
-            search: 'ignore',
+            search: 'excluded',
             text: 'nyc'
           },
           chicago: {
@@ -603,6 +664,66 @@ limitations under the License.
             category: 'City',
             enabled: true,
             search: 'optional',
+            text: 'chicago'
+          }
+        });
+        assert.deepEqual(element.networkExpansionParameters, {city: true});
+      });
+
+      test('_updateSearchAndNetworkParameterFromField does work as expected if required is true', function() {
+        element.required = true;
+
+        element.$$('#input_city').value = 'nyc, chicago';
+        // cityConfig is first in data array for location
+        element._searchFields[2].data[0].useInNetworkSearch = true;
+
+        element._updateSearchAndNetworkParameterFromField(element._searchFields[2].data[0]);
+
+        assert.deepEqual(element.searchParameters.city, {
+          nyc: {
+            key: 'nyc',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'required',
+            text: 'nyc'
+          },
+          chicago: {
+            key: 'chicago',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'required',
+            text: 'chicago'
+          }
+        });
+        assert.deepEqual(element.networkExpansionParameters, {city: true});
+      });
+
+      test('_updateSearchAndNetworkParameterFromField does work as expected if required is true and a term is a minus sign', function() {
+        element.required = true;
+
+        element.$$('#input_city').value = '-nyc, chicago';
+        // cityConfig is first in data array for location
+        element._searchFields[2].data[0].useInNetworkSearch = true;
+
+        element._updateSearchAndNetworkParameterFromField(element._searchFields[2].data[0]);
+
+        assert.deepEqual(element.searchParameters.city, {
+          nyc: {
+            key: 'nyc',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'excluded',
+            text: 'nyc'
+          },
+          chicago: {
+            key: 'chicago',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'required',
             text: 'chicago'
           }
         });
