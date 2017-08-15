@@ -25,8 +25,86 @@ limitations under the License.
 
 <body unresolved>
   <template is="dom-bind" id="demo">
-    <search-fields-dialog></search-fields-dialog>
+    <search-fields-dialog
+      date-config='{"dateStart": "postingDate", "dateEnd": "postingDate"}'
+      search-fields-config="[[searchFieldsConfig]]"
+      search-parameters="{{searchParameters}}">
+    </search-fields-dialog>
   </template>
+
+  <script>
+    (function (document) {
+      var demo = document.querySelector('#demo');
+
+      var cityConfig = {
+        key: 'city',
+        title: 'City',
+        useInNetworkSearch: true
+      };
+      var dateStartConfig = {
+        dateIdentifier: 'start',
+        key: 'dateStart',
+        title: 'From'
+      };
+      var dateEndConfig = {
+        dateIdentifier: 'end',
+        key: 'dateEnd',
+        title: 'To'
+      };
+      var descriptionConfig = {
+        key: 'description',
+        title: 'Page'
+      };
+      var emailConfig = {
+        key: 'email',
+        title: 'Email Address'
+      };
+      var phoneConfig = {
+        key: 'phone',
+        title: 'Telephone Number'
+      };
+      var titleConfig = {
+        key: 'title',
+        title: 'Title'
+      };
+      var websiteConfig = {
+        key: 'website',
+        title: 'Website'
+      };
+      
+      demo.dateConfig = {
+        dateStart: 'postingDate',
+        dateEnd: 'postingDate'
+      };
+      demo.searchParameters = {
+        city: {},
+        description: {},
+        email: {},
+        phone: {},
+        postingDate: {},
+        title: {},
+        website: {}
+      };
+      demo.searchFieldsConfig = [{
+        type: 'date',
+        name: 'Dates',
+        data: [dateStartConfig, dateEndConfig]
+      }, {
+        name: 'Identifiers',
+        data: [phoneConfig, emailConfig]
+      }, {
+        name: 'Location',
+        data: [cityConfig]
+      }, {
+        name: 'Ad',
+        data: [websiteConfig, titleConfig, descriptionConfig]
+      }];
+      demo.networkExpansionParameters = {
+        city: false
+      };
+      demo.required = false;
+    })(document);
+  </script>
 </body>
 
 </html>
