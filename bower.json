@@ -1,7 +1,7 @@
 {
   "name": "search-fields-dialog",
   "description": "A Polymer Element showing search fields in a modal dialog.",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "authors": [
     "Next Century Corporation"
   ],

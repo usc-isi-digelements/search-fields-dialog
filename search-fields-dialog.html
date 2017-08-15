@@ -62,10 +62,10 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       .options-row paper-icon-button {
-        margin-right: 5px;
-        padding: 10px;
-        height: 40px;
-        width: 40px;
+        margin: 1px 5px 3px;
+        padding: 5px;
+        height: 26px;
+        width: 26px;
       }
 
       .search-labels {
@@ -111,18 +111,30 @@ A Polymer Element showing search fields in a modal dialog.
 
       .toggle-buttons paper-icon-button {
         border-radius: 5px;
-        margin-top: 10px;
-        padding: 10px;
-        height: 40px;
-        width: 40px;
+        margin-top: 2px;
+        margin-left: 8px;
+        margin-right: 8px;
+        padding: 2px;
+        height: 22px;
+        width: 22px;
       }
 
-      .net-exp {
-        color: black;
+      .network-expansion-icon {
+        color: grey;
       }
 
-      .net-exp.active {
+      .network-expansion-icon:hover,
+      .network-expansion-icon.active {
         color: yellowgreen;
+      }
+
+      .require-one-icon {
+        color: grey;
+      }
+
+      .require-one-icon:hover,
+      .require-one-icon.active {
+        color: gold;
       }
 
       @media all and (min-width: 500px) and (max-width: 650px) {
@@ -161,7 +173,7 @@ A Polymer Element showing search fields in a modal dialog.
 
       .instructions-text iron-icon {
         --iron-icon: {
-          margin-left: 10px;
+          margin-left: 5px;
           margin-right: 20px;
           min-width: 20px;
         }
@@ -225,7 +237,13 @@ A Polymer Element showing search fields in a modal dialog.
                     </paper-input>
                     <div class="layout vertical toggle-buttons">
                       <paper-icon-button
-                        class$="net-exp [[_getActiveStyleClass(searchConfig.useInNetworkSearch)]]"
+                        class$="require-one-icon [[_getActiveStyleClass(searchConfig.requireOne)]]"
+                        icon="fa:star"
+                        title="Click to Require at Least One Term from [[searchConfig.title]] (Currently [[_getActiveText(searchConfig.requireOne)]])"
+                        on-tap="_toggleRequireOne">
+                      </paper-icon-button>
+                      <paper-icon-button
+                        class$="network-expansion-icon [[_getActiveStyleClass(searchConfig.useInNetworkSearch)]]"
                         icon="fa:arrows-alt"
                         title="Click to Toggle Network Expansion of [[searchConfig.title]] (Currently [[_getActiveText(searchConfig.useInNetworkSearch)]])"
                         on-tap="_toggleNetworkExpansion">
@@ -256,16 +274,25 @@ A Polymer Element showing search fields in a modal dialog.
           Use a <strong>plus sign</strong> (<strong>+</strong>) to mark a <strong>required</strong> word or phrase and a
           <strong>minus sign</strong> (<strong>-</strong>) to mark an <strong>excluded</strong> word or phrase.
           Click the <strong>SEARCH</strong> button or press the <strong>ENTER</strong> key to run the search.
-          Example:  <strong>+New York, Manhattan, -Newark</strong>
+          Example:  <strong>+New York, New Jersey, -New Hampshire</strong>
         </div>
         <div class="layout horizontal center">
-          <iron-icon class="net-exp" icon="fa:arrows-alt"></iron-icon>
+          <iron-icon class="require-one-icon active" icon="fa:star"></iron-icon>
           <div>
-            Activate <strong>network expansion</strong> on a field to run a <strong>multi-stage search</strong>:
-            first, DIG will search with the listed search terms like normal;
-            next, DIG will search with the terms of the network expansion fields in the results of the first search;
-            then, DIG will show you the combined results of the two searches.
-            Please note that it may take a minute or longer to run.
+            Click the <strong>star</strong> button to <strong>require at least one term from a field</strong> to match every search result.
+            (Terms may still be marked as excluded.)
+            This is helpful if you want results that match one term but you don't need results that match all terms simultaneously.
+            For example:  <strong>New York, Bronx, Brooklyn, Manhattan, Queens</strong>
+          </div>
+        </div>
+        <div class="layout horizontal center">
+          <iron-icon class="network-expansion-icon active" icon="fa:arrows-alt"></iron-icon>
+          <div>
+            Click the <strong>expand</strong> button to activate <strong>network expansion</strong> on a field and run a <strong>multi-stage search</strong>:
+            first, DIG finds results that match the search terms like normal;
+            next, DIG finds results that match the terms in the network expansion fields from the results of the first search;
+            then, DIG shows the combined results.
+            Please note that it may take a minute or more to run a search with network expansion activated.
           </div>
         </div>
       </div>
@@ -580,9 +607,10 @@ A Polymer Element showing search fields in a modal dialog.
               return {
                 dateId: searchConfig[dataDateIdProperty],
                 key: searchConfig[dataKeyProperty],
+                requireOne: false,
                 title: searchConfig[dataTitleProperty],
-                value: isDate ? {} : '',
-                useInNetworkSearch: false
+                useInNetworkSearch: false,
+                value: isDate ? {} : ''
               };
             }),
             name: dialogConfig[nameProperty],
@@ -655,6 +683,16 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
+       * Toggles the requireOne property of the searchConfig in the model of the given event.
+       *
+       * @param {Event} event
+       * @private
+       */
+      _toggleRequireOne: function(event) {
+        event.model.set('searchConfig.requireOne', !event.model.searchConfig.requireOne);
+      },
+
+      /**
        * Updates the searchParameters with a new object and notifies observers.
        *
        * @param {String} type
@@ -682,12 +720,17 @@ A Polymer Element showing search fields in a modal dialog.
         var terms = searchConfig.value.split(',').map(function(term) {
           return term.trim();
         }).reduce(function(terms, term) {
-          var search = self.required ? 'required' : 'optional';
+          var search = searchConfig.requireOne ? 'union' : (self.required ? 'required' : 'optional');
           var key = term;
 
-          // An excluded term overrides this.required.
-          if(key.indexOf('+') === 0 || key.indexOf('-') === 0) {
-            search = (key.indexOf('+') === 0 ? 'required' : 'excluded');
+          // An excluded term overrides searchConfig.requireOne and this.required.
+          if(key.indexOf('-') === 0) {
+            search = 'excluded';
+            key = key.substring(1);
+          }
+
+          if(key.indexOf('+') === 0) {
+            search = (search === 'union' ? 'union' : 'required');
             key = key.substring(1);
           }
 
@@ -796,13 +839,18 @@ A Polymer Element showing search fields in a modal dialog.
        */
       _updateSearchFieldFromParameter: function(searchConfig) {
         var self = this;
-        searchConfig.value = _.keys(this.searchParameters[searchConfig.key]).filter(function(term) {
+        var termData = _.keys(this.searchParameters[searchConfig.key]).filter(function(term) {
           return self.getSearchParameterData(self.searchParameters[searchConfig.key][term]).enabled;
         }).map(function(term) {
-          var data = self.getSearchParameterData(self.searchParameters[searchConfig.key][term]);
+          return self.getSearchParameterData(self.searchParameters[searchConfig.key][term]);
+        });
+        searchConfig.value = termData.map(function(data) {
           var prefix = (data.search === 'required' ? '+' : (data.search === 'excluded' ? '-' : ''));
           return prefix + data.text;
         }).join(', ');
+        searchConfig.requireOne = termData.some(function(data) {
+          return data.search === 'union';
+        });
 
         this.$$('#input_' + searchConfig.key).value = searchConfig.value;
       },
