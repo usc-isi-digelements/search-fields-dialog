@@ -54,7 +54,7 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       .options-row {
-        margin-bottom: 10px;
+        min-height: 40px;
       }
 
       .options-label {
@@ -62,16 +62,16 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       .options-row paper-icon-button {
-        margin: 1px 5px 3px;
+        margin: 1px 5px 3px 15px;
         padding: 5px;
         height: 26px;
         width: 26px;
       }
 
       .search-labels {
-        /* Vertically align the search-labels with their paper-input-containers. */
-        padding-top: 22px;
         text-align: end;
+        /* Vertically align the search-labels with their paper-input-containers. */
+        padding-top: 24px;
       }
 
       .search-dialog paper-input {
@@ -80,8 +80,8 @@ A Polymer Element showing search fields in a modal dialog.
         --paper-input-container-input-color: var(--dark-primary-color);
         --paper-input-container-focus-color: var(--dark-primary-color);
         --paper-input-container: {
-          padding: 0 0 4px 5px;
-          width: 215px;
+          padding: 2px 5px 2px 20px;
+          width: 320px;
         }
         --paper-input-container-input: {
           font-weight: 500;
@@ -89,14 +89,14 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       .date-labels {
-        padding-top: 15px;
+        padding-top: 12px;
         text-align: end;
       }
 
       .date-fields-container > date-picker-display {
         display: inline-block;
-        padding: 5px 40px 9px 5px;
-        width: 215px;
+        padding: 2px 5px 2px 20px;
+        width: 380px;
         --date-select-bg-color: #ffffff;
         --date-select-text-color: #000000;
       }
@@ -105,18 +105,21 @@ A Polymer Element showing search fields in a modal dialog.
         padding: 10px;
       }
 
-      styled-dialog ::content .inside.styled-dialog .styled-dialog-name {
+      styled-dialog.search-dialog ::content .inside.styled-dialog .styled-dialog-name {
         min-width: 80px;
+      }
+
+      styled-dialog.backdrop ::content paper-dialog {
+        opacity: 0.6;
       }
 
       .toggle-buttons paper-icon-button {
         border-radius: 5px;
-        margin-top: 2px;
-        margin-left: 8px;
-        margin-right: 8px;
-        padding: 2px;
-        height: 22px;
-        width: 22px;
+        height: 30px;
+        width: 30px;
+        padding: 5px;
+        /* Vertically align the toggle-buttons with their search-labels & paper-input-containers. */
+        margin-top: 19px;
       }
 
       .network-expansion-icon {
@@ -160,18 +163,18 @@ A Polymer Element showing search fields in a modal dialog.
         }
       }
 
-      .instructions-text {
+      styled-dialog.help-dialog ::content .inside {
+        max-width: 800px;
+      }
+
+      .help-text {
         color: var(--primary-text-color);
         font-size: 16px;
         line-height: 18px;
         min-height: 18px;
       }
 
-      .instructions-text > * {
-        margin: 5px 0;
-      }
-
-      .instructions-text iron-icon {
+      .help-text iron-icon {
         --iron-icon: {
           margin-left: 5px;
           margin-right: 20px;
@@ -188,112 +191,123 @@ A Polymer Element showing search fields in a modal dialog.
     </paper-button>
 
     <styled-dialog
-      class="search-dialog"
+      class$="search-dialog [[_isBackdrop(_helpOpened)]]"
       modal
       opened="{{opened}}"
       on-opened-changed="toggleProcessRequest">
 
-      <div class="layout vertical">
-        <div class="layout horizontal center options-row">
-          <div class="styled-dialog-name styled-dialog-right-space options-label">Options</div>
-          <div class="layout horizontal center">
-            <paper-icon-button
-              icon="[[_getCheckboxIcon(required)]]"
-              title="Click to Toggle (Currently [[_getActiveText(required)]])"
-              on-tap="_toggleRequired">
-            </paper-icon-button>
-            <div class="instructions-text">Require All Non-Excluded Search Terms</div>
-          </div>
+      <div class="layout horizontal center options-row">
+        <div class="styled-dialog-name options-label">Options</div>
+        <div class="layout horizontal center">
+          <paper-icon-button
+            icon="[[_getCheckboxIcon(required)]]"
+            title="Click to Toggle (Currently [[_getActiveText(required)]])"
+            on-tap="_toggleRequired">
+          </paper-icon-button>
+          <div class="help-text">Require All Non-Excluded Search Terms</div>
         </div>
+      </div>
 
-        <template is="dom-repeat" items="[[_searchFields]]" as="dialogConfig">
-          <div class="layout horizontal">
-            <template is="dom-if" if="[[_equalsDate(dialogConfig.type)]]">
-              <div class="styled-dialog-name styled-dialog-right-space date-labels">[[dialogConfig.name]]</div>
-              <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
-                <div class="layout horizontal date-fields-container nowrap">
-                  <date-picker-display
-                    facet-key="value"
-                    facets="{{searchConfig}}"
-                    key="[[searchConfig.key]]"
-                    prefix-label="[[searchConfig.title]]"
-                    date-identifier="[[searchConfig.dateId]]"
-                    title="[[searchConfig.title]]">
-                  </date-picker-display>
-                </div>
-              </template>
-            </template>
-
-            <template is="dom-if" if="[[!_equalsDate(dialogConfig.type)]]">
-              <div class="styled-dialog-name styled-dialog-right-space search-labels">[[dialogConfig.name]]</div>
-              <div class="layout horizontal wrap">
-                <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
-                  <div class="layout horizontal nowrap">
-                    <paper-input
-                      id$="input_[[searchConfig.key]]"
-                      label="[[searchConfig.title]]"
-                      value="{{searchConfig.value}}"
-                      on-keydown="_checkSearchFieldInputKey">
-                    </paper-input>
-                    <div class="layout vertical toggle-buttons">
-                      <paper-icon-button
-                        class$="require-one-icon [[_getActiveStyleClass(searchConfig.requireOne)]]"
-                        icon="fa:star"
-                        title="Click to Require at Least One Term from [[searchConfig.title]] (Currently [[_getActiveText(searchConfig.requireOne)]])"
-                        on-tap="_toggleRequireOne">
-                      </paper-icon-button>
-                      <paper-icon-button
-                        class$="network-expansion-icon [[_getActiveStyleClass(searchConfig.useInNetworkSearch)]]"
-                        icon="fa:arrows-alt"
-                        title="Click to Toggle Network Expansion of [[searchConfig.title]] (Currently [[_getActiveText(searchConfig.useInNetworkSearch)]])"
-                        on-tap="_toggleNetworkExpansion">
-                      </paper-icon-button>
-                    </div>
-                  </div>
-                </template>
+      <template is="dom-repeat" items="[[_searchFields]]" as="dialogConfig">
+        <div class="layout horizontal">
+          <template is="dom-if" if="[[_equalsDate(dialogConfig.type)]]">
+            <div class="styled-dialog-name date-labels">[[dialogConfig.name]]</div>
+            <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
+              <div class="layout horizontal date-fields-container nowrap">
+                <date-picker-display
+                  facet-key="value"
+                  facets="{{searchConfig}}"
+                  key="[[searchConfig.key]]"
+                  prefix-label="[[searchConfig.title]]"
+                  date-identifier="[[searchConfig.dateId]]"
+                  title="[[searchConfig.title]]">
+                </date-picker-display>
               </div>
             </template>
-          </div>
-        </template>
-      </div>
+          </template>
+
+          <template is="dom-if" if="[[!_equalsDate(dialogConfig.type)]]">
+            <div class="styled-dialog-name search-labels">[[dialogConfig.name]]</div>
+            <div class="layout horizontal wrap">
+              <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
+                <div class="layout horizontal nowrap">
+                  <paper-input
+                    id$="input_[[searchConfig.key]]"
+                    label="[[searchConfig.title]]"
+                    value="{{searchConfig.value}}"
+                    on-keydown="_checkSearchFieldInputKey">
+                  </paper-input>
+                  <div class="layout horizontal toggle-buttons">
+                    <paper-icon-button
+                      class$="require-one-icon [[_getActiveStyleClass(searchConfig.requireOne)]]"
+                      icon="fa:star"
+                      title="Click to Require at Least One Term from [[searchConfig.title]] (Currently [[_getActiveText(searchConfig.requireOne)]])"
+                      on-tap="_toggleRequireOne">
+                    </paper-icon-button>
+                    <paper-icon-button
+                      class$="network-expansion-icon [[_getActiveStyleClass(searchConfig.useInNetworkSearch)]]"
+                      icon="fa:arrows-alt"
+                      title="Click to Toggle Network Expansion of [[searchConfig.title]] (Currently [[_getActiveText(searchConfig.useInNetworkSearch)]])"
+                      on-tap="_toggleNetworkExpansion">
+                    </paper-icon-button>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </template>
+        </div>
+      </template>
 
       <div class="horizontal layout center-justified search-buttons">
         <button-action class="styled-dialog-button" icon="fa:search" text="Search" on-tap="handleSearch"></button-action>
         <button-action class="styled-dialog-button" icon="fa:undo" text="Reset" on-tap="resetAllSearchFields"></button-action>
         <button-action class="styled-dialog-button" icon="fa:times" text="Cancel" on-tap="cancelSearch"></button-action>
+        <button-action class="styled-dialog-button" icon="fa:question" text="Help" on-tap="openHelp"></button-action>
+      </div>
+    </styled-dialog>
+
+    <styled-dialog class="help-dialog" header="Search Help" opened="{{_helpOpened}}">
+      <div class="help-text">
+        Enter words or phrases as <strong>search terms</strong> in one or more text fields.
+        Use <strong>commas</strong> to separate search terms.
+      </div>
+      <div class="help-text">
+        A phrase of multiple words (without commas) is treated as a <strong>single</strong> search term (no quotation marks needed).
+      </div>
+      <div class="help-text">
+        Use a <strong>plus sign</strong> (<strong>+</strong>) to mark a <strong>required</strong> search term and a
+        <strong>minus sign</strong> (<strong>-</strong>) to mark an <strong>excluded</strong> search term.
+      </div>
+      <div class="help-text">
+        Click the <strong>SEARCH</strong> button or press the <strong>ENTER</strong> key to run the search.
+        Click the <strong>RESET</strong> button to clear all terms.
+      </div>
+      <div class="help-text">
+        Example:  <strong>+New York, New Jersey, -New Hampshire</strong>
       </div>
 
       <div class="styled-dialog-divider"></div>
 
-      <div class="layout vertical instructions-text">
+      <div class="help-text layout horizontal center">
+        <iron-icon class="require-one-icon active" icon="fa:star"></iron-icon>
         <div>
-          <strong class="styled-dialog-right-space">Instructions:</strong>
-          Enter words or phrases as <strong>search terms</strong> in one or more of the text fields above.
-          Use <strong>commas</strong> (<strong>,</strong>) to separate search terms.
-          A phrase of multiple words (without commas) is treated as a <strong>single search term</strong> (no need for quotation marks).
-          Use a <strong>plus sign</strong> (<strong>+</strong>) to mark a <strong>required</strong> word or phrase and a
-          <strong>minus sign</strong> (<strong>-</strong>) to mark an <strong>excluded</strong> word or phrase.
-          Click the <strong>SEARCH</strong> button or press the <strong>ENTER</strong> key to run the search.
-          Example:  <strong>+New York, New Jersey, -New Hampshire</strong>
+          Click the <strong>star</strong> button to <strong>require at least one term from a field</strong> to match every search result.
+          (Terms may still be marked as excluded.)
+          This is helpful if you want results that match one term but you don't need results that match all terms simultaneously.
+          Example:  <strong>New York, Bronx, Brooklyn, Manhattan, Queens</strong>
         </div>
-        <div class="layout horizontal center">
-          <iron-icon class="require-one-icon active" icon="fa:star"></iron-icon>
-          <div>
-            Click the <strong>star</strong> button to <strong>require at least one term from a field</strong> to match every search result.
-            (Terms may still be marked as excluded.)
-            This is helpful if you want results that match one term but you don't need results that match all terms simultaneously.
-            For example:  <strong>New York, Bronx, Brooklyn, Manhattan, Queens</strong>
-          </div>
-        </div>
-        <div class="layout horizontal center">
-          <iron-icon class="network-expansion-icon active" icon="fa:arrows-alt"></iron-icon>
-          <div>
-            Click the <strong>expand</strong> button to activate <strong>network expansion</strong> on a field and run a <strong>multi-stage search</strong>:
-            first, DIG finds results that match the search terms like normal;
-            next, DIG finds results that match the terms in the network expansion fields from the results of the first search;
-            then, DIG shows the combined results.
-            Please note that it may take a minute or more to run a search with network expansion activated.
-          </div>
+      </div>
+
+      <div class="styled-dialog-divider"></div>
+
+      <div class="help-text layout horizontal center">
+        <iron-icon class="network-expansion-icon active" icon="fa:arrows-alt"></iron-icon>
+        <div>
+          Click the <strong>expand</strong> button to activate <strong>network expansion</strong> on a field and run a <strong>multi-stage search</strong>:
+          first, DIG finds results that match the search terms like normal;
+          next, DIG finds results that match the terms in the network expansion fields from the results of the first search;
+          then, DIG shows the combined results.
+          Please note that it may take a minute or more to run a search with network expansion activated.
         </div>
       </div>
     </styled-dialog>
@@ -536,6 +550,18 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
+         * Whether the help dialog is opened.
+         *
+         * @type {Boolean}
+         * @default false
+         * @private
+         */
+        _helpOpened: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
          * The search fields shown in the dialog.
          *
          * @type {Array}
@@ -661,6 +687,17 @@ A Polymer Element showing search fields in a modal dialog.
        */
       _getCheckboxIcon: function(active) {
         return active ? 'fa:check-square' : 'fa:square-o';
+      },
+
+      /**
+       * Returns the backdrop style class.
+       *
+       * @param {Boolean} helpOpened
+       * @return {String}
+       * @private
+       */
+      _isBackdrop: function(helpOpened) {
+        return helpOpened ? 'backdrop' : '';
       },
 
       /**
@@ -914,6 +951,13 @@ A Polymer Element showing search fields in a modal dialog.
       cancelSearch: function() {
         this.userCanceled = true;
         this.toggleSearchFieldsDialog();
+      },
+
+      /**
+       * Opens the help dialog.
+       */
+      openHelp: function() {
+        this.set('_helpOpened', true);
       },
 
       /**

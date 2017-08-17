@@ -126,8 +126,10 @@ limitations under the License.
         assert.isNotNull(startSearchBtn);
         assert.equal(startSearchBtn.active, element.opened);
         assert.isNotNull(element.$$('iron-icon[icon="search"]'));
-        assert.isNotNull(element.$$('styled-dialog'));
-        assert.equal(element.$$('styled-dialog').opened, element.opened);
+        assert.isNotNull(element.$$('styled-dialog.search-dialog'));
+        assert.equal(element.$$('styled-dialog.search-dialog').opened, false);
+        assert.isNotNull(element.$$('styled-dialog.help-dialog'));
+        assert.equal(element.$$('styled-dialog.help-dialog').opened, false);
       });
 
       test('template has date pickers', function() {
@@ -197,10 +199,11 @@ limitations under the License.
       test('template has expected buttons at the bottom', function() {
         var buttons = Polymer.dom(element.root).querySelectorAll('button-action');
         assert.isNotNull(buttons);
-        assert.equal(buttons.length, 3);
+        assert.equal(buttons.length, 4);
         assert.equal(buttons[0].text, 'Search');
         assert.equal(buttons[1].text, 'Reset');
         assert.equal(buttons[2].text, 'Cancel');
+        assert.equal(buttons[3].text, 'Help');
       });
 
       test('_searchFields is created correctly', function() {
