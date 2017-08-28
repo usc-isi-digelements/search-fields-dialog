@@ -105,6 +105,10 @@ A Polymer Element showing search fields in a modal dialog.
         padding: 10px;
       }
 
+      .search-dialog {
+        --styled-dialog-max-width: 900px;
+      }
+
       styled-dialog.search-dialog ::content .inside.styled-dialog .styled-dialog-name {
         min-width: 80px;
       }
@@ -163,8 +167,9 @@ A Polymer Element showing search fields in a modal dialog.
         }
       }
 
-      styled-dialog.help-dialog ::content .inside {
-        max-width: 800px;
+      .help-dialog {
+        --styled-dialog-min-width: 800px;
+        --styled-dialog-max-width: 800px;
       }
 
       .help-text {
