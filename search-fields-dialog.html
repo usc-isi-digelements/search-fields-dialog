@@ -81,7 +81,7 @@ A Polymer Element showing search fields in a modal dialog.
         --paper-input-container-focus-color: var(--dark-primary-color);
         --paper-input-container: {
           padding: 2px 5px 2px 20px;
-          width: 320px;
+          width: 285px;
         }
         --paper-input-container-input: {
           font-weight: 500;
@@ -96,17 +96,23 @@ A Polymer Element showing search fields in a modal dialog.
       .date-fields-container > date-picker-display {
         display: inline-block;
         padding: 2px 5px 2px 20px;
-        width: 380px;
+        width: 345px;
         --date-select-bg-color: #ffffff;
         --date-select-text-color: #000000;
       }
 
-      .search-dialog .search-buttons {
-        padding: 10px;
+      .search-dialog {
+        --styled-dialog-min-width: 825px;
+        --styled-dialog-max-width: 825px;
       }
 
-      .search-dialog {
-        --styled-dialog-max-width: 900px;
+      .search-dialog ::content paper-dialog {
+        max-width: 900px;
+        overflow: auto;
+      }
+
+      .search-dialog .search-buttons {
+        padding: 10px;
       }
 
       styled-dialog.search-dialog ::content .inside.styled-dialog .styled-dialog-name {
