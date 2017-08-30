@@ -133,7 +133,7 @@ limitations under the License.
       });
 
       test('template has date pickers', function() {
-        var datePickers = Polymer.dom(element.root).querySelectorAll('date-picker-display');
+        var datePickers = Polymer.dom(element.root).querySelectorAll('vaadin-date-picker-display');
         assert.isNotNull(datePickers);
         assert.equal(datePickers.length, 2);
         assert.deepEqual(datePickers[0].facetKey, 'value');
