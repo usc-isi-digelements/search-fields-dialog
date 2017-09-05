@@ -44,12 +44,10 @@ limitations under the License.
         networkExpansionOn: true
       };
       var dateStartConfig = {
-        dateIdentifier: 'start',
         key: 'dateStart',
         title: 'From'
       };
       var dateEndConfig = {
-        dateIdentifier: 'end',
         key: 'dateEnd',
         title: 'To'
       };
@@ -115,7 +113,6 @@ limitations under the License.
         assert.equal(element.dataProperty, 'data');
         assert.equal(element.nameProperty, 'name');
         assert.equal(element.typeProperty, 'type');
-        assert.equal(element.dataDateIdProperty, 'dateIdentifier');
         assert.equal(element.dataKeyProperty, 'key');
         assert.equal(element.dataTitleProperty, 'title');
         assert.isFalse(element.opened);
@@ -142,7 +139,6 @@ limitations under the License.
         assert.deepEqual(datePickers[0].facetKey, 'value');
         assert.equal(datePickers[0].facets, element._searchFields[0].data[0]);
         assert.deepEqual(datePickers[0].facets, {
-          dateId: 'start',
           key: 'dateStart',
           title: 'From',
           value: {},
@@ -151,13 +147,10 @@ limitations under the License.
           enableNetworkExpansion: undefined
         });
         assert.deepEqual(datePickers[0].key, 'dateStart');
-        assert.deepEqual(datePickers[0].prefixLabel, 'From');
-        assert.deepEqual(datePickers[0].dateIdentifier, 'start');
-        assert.deepEqual(datePickers[0].title, 'From');
+        assert.deepEqual(datePickers[0].category, 'From');
         assert.deepEqual(datePickers[1].facetKey, 'value');
         assert.equal(datePickers[1].facets, element._searchFields[0].data[1]);
         assert.deepEqual(datePickers[1].facets, {
-          dateId: 'end',
           key: 'dateEnd',
           title: 'To',
           value: {},
@@ -166,9 +159,7 @@ limitations under the License.
           enableNetworkExpansion: undefined
         });
         assert.deepEqual(datePickers[1].key, 'dateEnd');
-        assert.deepEqual(datePickers[1].prefixLabel, 'To');
-        assert.deepEqual(datePickers[1].dateIdentifier, 'end');
-        assert.deepEqual(datePickers[1].title, 'To');
+        assert.deepEqual(datePickers[1].category, 'To');
         */
       });
 
@@ -217,7 +208,6 @@ limitations under the License.
           type: 'date',
           name: 'Dates',
           data: [{
-            dateId: 'start',
             key: 'dateStart',
             title: 'From',
             value: {},
@@ -225,7 +215,6 @@ limitations under the License.
             networkExpansionOn: undefined,
             enableNetworkExpansion: undefined
           }, {
-            dateId: 'end',
             key: 'dateEnd',
             title: 'To',
             value: {},
@@ -237,7 +226,6 @@ limitations under the License.
           type: undefined,
           name: 'Identifiers',
           data: [{
-            dateId: undefined,
             key: 'phone',
             title: 'Telephone Number',
             value: '',
@@ -245,7 +233,6 @@ limitations under the License.
             networkExpansionOn: false,
             enableNetworkExpansion: true
           }, {
-            dateId: undefined,
             key: 'email',
             title: 'Email Address',
             value: '',
@@ -257,7 +244,6 @@ limitations under the License.
           type: undefined,
           name: 'Location',
           data: [{
-            dateId: undefined,
             key: 'city',
             title: 'City',
             value: '',
@@ -269,7 +255,6 @@ limitations under the License.
           type: undefined,
           name: 'Ad',
           data: [{
-            dateId: undefined,
             key: 'website',
             title: 'Website',
             value: '',
@@ -277,7 +262,6 @@ limitations under the License.
             networkExpansionOn: false,
             enableNetworkExpansion: false
           }, {
-            dateId: undefined,
             key: 'title',
             title: 'Title',
             value: '',
@@ -285,7 +269,6 @@ limitations under the License.
             networkExpansionOn: false,
             enableNetworkExpansion: false
           }, {
-            dateId: undefined,
             key: 'description',
             title: 'Description',
             value: '',
@@ -372,7 +355,6 @@ limitations under the License.
 
         assert.deepEqual(element._searchFields[2].data[0], {
           key: 'city',
-          dateId: undefined,
           title: 'City',
           value: 'nyc, chicago',
           requireOne: false,
@@ -408,7 +390,6 @@ limitations under the License.
 
         assert.deepEqual(element._searchFields[2].data[0], {
           key: 'city',
-          dateId: undefined,
           title: 'City',
           value: '+nyc, chicago',
           requireOne: false,
@@ -444,7 +425,6 @@ limitations under the License.
 
         assert.deepEqual(element._searchFields[2].data[0], {
           key: 'city',
-          dateId: undefined,
           title: 'City',
           value: '-nyc, chicago',
           requireOne: false,

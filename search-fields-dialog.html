@@ -229,9 +229,7 @@ A Polymer Element showing search fields in a modal dialog.
                   facet-key="value"
                   facets="{{searchConfig}}"
                   key="[[searchConfig.key]]"
-                  prefix-label="[[searchConfig.title]]"
-                  date-identifier="[[searchConfig.dateId]]"
-                  title="[[searchConfig.title]]">
+                  category="[[searchConfig.title]]">
                 </vaadin-date-picker-display>
               </div>
             </template>
@@ -409,19 +407,6 @@ A Polymer Element showing search fields in a modal dialog.
         dataProperty: {
           type: String,
           value: 'data'
-        },
-
-        /**
-         * (Optional)
-         *
-         * The date ID property in the data in the searchFieldsConfig.
-         *
-         * @type {String}
-         * @default 'dateIdentifier'
-         */
-        dataDateIdProperty: {
-          type: String,
-          value: 'dateIdentifier'
         },
 
         /**
@@ -611,7 +596,7 @@ A Polymer Element showing search fields in a modal dialog.
          * @private
          */
         _searchFields: {
-          computed: '_createSearchFields(searchFieldsConfig, dataProperty, nameProperty, typeProperty, dataDateIdProperty, dataKeyProperty, dataTitleProperty)',
+          computed: '_createSearchFields(searchFieldsConfig, dataProperty, nameProperty, typeProperty, dataKeyProperty, dataTitleProperty)',
           type: Array
         }
       },
@@ -661,20 +646,18 @@ A Polymer Element showing search fields in a modal dialog.
        * @param {String} dataProperty
        * @param {String} nameProperty
        * @param {String} typeProperty
-       * @param {String} dataDateIdProperty
        * @param {String} dataKeyProperty
        * @param {String} dataTitleProperty
        * @return {Array}
        * @private
        */
-      _createSearchFields: function(config, dataProperty, nameProperty, typeProperty, dataDateIdProperty, dataKeyProperty, dataTitleProperty) {
+      _createSearchFields: function(config, dataProperty, nameProperty, typeProperty, dataKeyProperty, dataTitleProperty) {
         var dateKeys = _.keys(this.dateConfig);
         return config.map(function(dialogConfig) {
           return {
             data: dialogConfig[dataProperty].map(function(searchConfig) {
               var isDate = (dateKeys.indexOf(searchConfig[dataKeyProperty]) >= 0);
               return {
-                dateId: searchConfig[dataDateIdProperty],
                 key: searchConfig[dataKeyProperty],
                 title: searchConfig[dataTitleProperty],
                 value: isDate ? {} : '',

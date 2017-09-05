@@ -1,7 +1,7 @@
 {
   "name": "search-fields-dialog",
   "description": "A Polymer Element showing search fields in a modal dialog.",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "authors": [
     "Next Century Corporation"
   ],
@@ -24,7 +24,7 @@
     "fontawesome-iconset": "https://github.com/vangware/fontawesome-iconset.git#7f5826f89bac4e6d4fa61f64a9fe13978aaa7b38",
     "paper-elements": "PolymerElements/paper-elements#^1.0.7",
     "styled-dialog": "DigElements/styled-dialog#1.0.7",
-    "vaadin-date-picker-display": "DigElements/vaadin-date-picker-display#1.0.3"
+    "vaadin-date-picker-display": "DigElements/vaadin-date-picker-display#1.0.4"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.1.7",
