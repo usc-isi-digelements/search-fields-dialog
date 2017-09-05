@@ -25,10 +25,16 @@ limitations under the License.
 
 <body unresolved>
   <template is="dom-bind" id="demo">
+    <p>Date Config:  <strong>[[stringify(dateConfig)]]</strong></p>
+    <p>Search Fields Config:  <strong>[[stringify(searchFieldsConfig)]]</strong></p>
+    <p>Search Parameters:  <strong>[[stringify(searchParameters, searchParameters.*)]]</strong></p>
+    <p>Network Expansion Parameters:  <strong>[[stringify(networkExpansionParameters, networkExpansionParameters.*)]]</strong></p>
+
     <search-fields-dialog
-      date-config='{"dateStart": "postingDate", "dateEnd": "postingDate"}'
+      date-config="[[dateConfig]]"
       search-fields-config="[[searchFieldsConfig]]"
-      search-parameters="{{searchParameters}}">
+      search-parameters="{{searchParameters}}"
+      network-expansion-parameters="{{networkExpansionParameters}}">
     </search-fields-dialog>
   </template>
 
@@ -39,7 +45,12 @@ limitations under the License.
       var cityConfig = {
         key: 'city',
         title: 'City',
-        useInNetworkSearch: true
+        enableNetworkExpansion: true
+      };
+      var countryConfig = {
+        key: 'country',
+        title: 'Country',
+        enableNetworkExpansion: true
       };
       var dateStartConfig = {
         dateIdentifier: 'start',
@@ -53,19 +64,25 @@ limitations under the License.
       };
       var descriptionConfig = {
         key: 'description',
-        title: 'Page'
+        title: 'Description'
       };
       var emailConfig = {
         key: 'email',
-        title: 'Email Address'
+        title: 'Email Address',
+        enableNetworkExpansion: true
       };
       var phoneConfig = {
         key: 'phone',
-        title: 'Telephone Number'
+        title: 'Telephone Number',
+        enableNetworkExpansion: true
       };
       var titleConfig = {
         key: 'title',
         title: 'Title'
+      };
+      var urlConfig = {
+        key: 'url',
+        title: 'URL'
       };
       var websiteConfig = {
         key: 'website',
@@ -76,15 +93,14 @@ limitations under the License.
         dateStart: 'postingDate',
         dateEnd: 'postingDate'
       };
-      demo.searchParameters = {
-        city: {},
-        description: {},
-        email: {},
-        phone: {},
-        postingDate: {},
-        title: {},
-        website: {}
+
+      demo.networkExpansionParameters = {
+        city: false,
+        country: false,
+        email: false,
+        phone: false
       };
+
       demo.searchFieldsConfig = [{
         type: 'date',
         name: 'Dates',
@@ -94,15 +110,27 @@ limitations under the License.
         data: [phoneConfig, emailConfig]
       }, {
         name: 'Location',
-        data: [cityConfig]
+        data: [cityConfig, countryConfig]
       }, {
         name: 'Ad',
-        data: [websiteConfig, titleConfig, descriptionConfig]
+        data: [websiteConfig, titleConfig, descriptionConfig, urlConfig]
       }];
-      demo.networkExpansionParameters = {
-        city: false
+
+      demo.searchParameters = {
+        city: {},
+        country: {},
+        description: {},
+        email: {},
+        phone: {},
+        postingDate: {},
+        title: {},
+        url: {},
+        website: {}
       };
-      demo.required = false;
+
+      demo.stringify = function(object) {
+        return JSON.stringify(object);
+      };
     })(document);
   </script>
 </body>

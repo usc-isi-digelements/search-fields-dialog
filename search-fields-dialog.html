@@ -13,17 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../button-action/button-action.html">
-<link rel="import" href="../vaadin-date-picker-display/vaadin-date-picker-display.html">
+<link rel="import" href="../date-picker-display/date-picker-display.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../iron-icon/iron-icon.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
-<link rel="import" href="../filter-behavior/filter-behavior.html">
 <link rel="import" href="../fontawesome-iconset/fa-all.html">
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-input/paper-input.html">
-<link rel="import" href="../phone-behavior/phone-behavior.html">
 <link rel="import" href="../styled-dialog/styled-dialog.html">
 
 <!--
@@ -93,7 +92,7 @@ A Polymer Element showing search fields in a modal dialog.
         text-align: end;
       }
 
-      .date-fields-container > vaadin-date-picker-display {
+      .date-fields-container > date-picker-display {
         display: inline-block;
         padding: 2px 5px 2px 20px;
         width: 335px;
@@ -111,10 +110,6 @@ A Polymer Element showing search fields in a modal dialog.
         overflow: auto;
       }
 
-      .search-dialog .search-buttons {
-        padding-top: 10px;
-      }
-
       styled-dialog.search-dialog ::content .inside.styled-dialog .styled-dialog-name {
         max-width: 100px;
         min-width: 100px;
@@ -127,7 +122,7 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       .toggle-buttons paper-icon-button {
-        border-radius: 5px;
+        border-radius: 50%;
         height: 30px;
         width: 30px;
         padding: 5px;
@@ -136,20 +131,24 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       .network-expansion-icon {
-        color: grey;
+        color: lightgray;
       }
 
       .network-expansion-icon:hover,
-      .network-expansion-icon.active {
+      .network-expansion-icon.on {
         color: yellowgreen;
       }
 
+      .network-expansion-icon.on.inactive {
+        color: orangered;
+      }
+
       .require-one-icon {
-        color: grey;
+        color: lightgray;
       }
 
       .require-one-icon:hover,
-      .require-one-icon.active {
+      .require-one-icon.on {
         color: gold;
       }
 
@@ -197,6 +196,16 @@ A Polymer Element showing search fields in a modal dialog.
         --iron-icon-height: 20px;
         --iron-icon-width: 20px;
       }
+
+      .button-spacer {
+        height: 30px;
+        width: 30px;
+      }
+
+      .network-expansion-info,
+      .search-buttons {
+        padding-top: 10px;
+      }
     </style>
 
     <paper-button class="layout horizontal center bottom green" active="[[opened]]" on-tap="toggleSearchFieldsDialog" title="Click to Enter Search Terms">
@@ -210,32 +219,20 @@ A Polymer Element showing search fields in a modal dialog.
       opened="{{opened}}"
       on-opened-changed="toggleProcessRequest">
 
-      <div class="layout horizontal center options-row">
-        <div class="styled-dialog-name options-label">Options</div>
-        <div class="layout horizontal center">
-          <paper-icon-button
-            icon="[[_getCheckboxIcon(required)]]"
-            title="Click to Toggle (Currently [[_getActiveText(required)]])"
-            on-tap="_toggleRequired">
-          </paper-icon-button>
-          <div class="help-text">Require All Non-Excluded Search Terms</div>
-        </div>
-      </div>
-
       <template is="dom-repeat" items="[[_searchFields]]" as="dialogConfig">
         <div class="layout horizontal">
           <template is="dom-if" if="[[_equalsDate(dialogConfig.type)]]">
             <div class="styled-dialog-name date-labels">[[dialogConfig.name]]</div>
             <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
               <div class="layout horizontal date-fields-container nowrap">
-                <vaadin-date-picker-display
+                <date-picker-display
                   facet-key="value"
                   facets="{{searchConfig}}"
                   key="[[searchConfig.key]]"
                   prefix-label="[[searchConfig.title]]"
                   date-identifier="[[searchConfig.dateId]]"
                   title="[[searchConfig.title]]">
-                </vaadin-date-picker-display>
+                </date-picker-display>
               </div>
             </template>
           </template>
@@ -249,21 +246,26 @@ A Polymer Element showing search fields in a modal dialog.
                     id$="input_[[searchConfig.key]]"
                     label="[[searchConfig.title]]"
                     value="{{searchConfig.value}}"
-                    on-keydown="_checkSearchFieldInputKey">
+                    on-keyup="_checkSearchFieldInputKey">
                   </paper-input>
                   <div class="layout horizontal toggle-buttons">
                     <paper-icon-button
-                      class$="require-one-icon [[_getActiveStyleClass(searchConfig.requireOne)]]"
+                      class$="require-one-icon [[_getButtonStyleClass(searchConfig.requireOne)]]"
                       icon="fa:star"
-                      title="Click to Require at Least One Term from [[searchConfig.title]] (Currently [[_getActiveText(searchConfig.requireOne)]])"
+                      title="Click to Require at Least One Term from [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.requireOne)]])"
                       on-tap="_toggleRequireOne">
                     </paper-icon-button>
-                    <paper-icon-button
-                      class$="network-expansion-icon [[_getActiveStyleClass(searchConfig.useInNetworkSearch)]]"
-                      icon="fa:arrows-alt"
-                      title="Click to Toggle Network Expansion of [[searchConfig.title]] (Currently [[_getActiveText(searchConfig.useInNetworkSearch)]])"
-                      on-tap="_toggleNetworkExpansion">
-                    </paper-icon-button>
+                    <template is="dom-if" if="[[searchConfig.enableNetworkExpansion]]">
+                      <paper-icon-button
+                        class$="network-expansion-icon [[_getNetworkExpansionStyleClass(searchConfig.networkExpansionOn, _isNetworkExpansionActive)]]"
+                        icon="fa:arrows-alt"
+                        title="Click to Toggle Network Expansion of [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.networkExpansionOn)]])"
+                        on-tap="_toggleNetworkExpansion">
+                      </paper-icon-button>
+                    </template>
+                    <template is="dom-if" if="[[!searchConfig.enableNetworkExpansion]]">
+                      <div class="button-spacer"></div>
+                    </template>
                   </div>
                 </div>
               </template>
@@ -272,7 +274,7 @@ A Polymer Element showing search fields in a modal dialog.
         </div>
       </template>
 
-      <div class="horizontal layout center-justified search-buttons">
+      <div class="layout horizontal center-justified search-buttons">
         <button-action class="styled-dialog-button" icon="fa:search" text="Search" on-tap="handleSearch"></button-action>
         <button-action class="styled-dialog-button" icon="fa:undo" text="Reset" on-tap="resetAllSearchFields"></button-action>
         <button-action class="styled-dialog-button" icon="fa:times" text="Cancel" on-tap="cancelSearch"></button-action>
@@ -303,7 +305,7 @@ A Polymer Element showing search fields in a modal dialog.
       <div class="styled-dialog-divider"></div>
 
       <div class="help-text layout horizontal center">
-        <iron-icon class="require-one-icon active" icon="fa:star"></iron-icon>
+        <iron-icon class="require-one-icon on" icon="fa:star"></iron-icon>
         <div>
           Click the <strong>star</strong> button to <strong>require at least one term from a field</strong> to match every search result.
           (Terms may still be marked as excluded.)
@@ -315,13 +317,18 @@ A Polymer Element showing search fields in a modal dialog.
       <div class="styled-dialog-divider"></div>
 
       <div class="help-text layout horizontal center">
-        <iron-icon class="network-expansion-icon active" icon="fa:arrows-alt"></iron-icon>
-        <div>
-          Click the <strong>expand</strong> button to activate <strong>network expansion</strong> on a field and run a <strong>multi-stage search</strong>:
-          first, DIG finds results that match the search terms like normal;
-          next, DIG finds results that match the terms in the network expansion fields from the results of the first search;
-          then, DIG shows the combined results.
-          Please note that it may take a minute or more to run a search with network expansion activated.
+        <iron-icon class="network-expansion-icon on" icon="fa:arrows-alt"></iron-icon>
+        <div class="layout vertical">
+          <div>
+            Click the <strong>expand</strong> button to activate <strong>network expansion</strong> on a field and run a <strong>multi-stage search</strong>:
+            first, DIG finds results that match the search terms like normal;
+            next, DIG finds results that match the terms in the network expansion fields from the results of the first search;
+            then, DIG shows the combined results.
+          </div>
+          <div style="margin-top: 10px;">
+            Network expansion will only work if one or more network expansion fields have one or more search terms.
+            Please note that it may take a minute or more to run a search with network expansion activated.
+          </div>
         </div>
       </div>
     </styled-dialog>
@@ -329,12 +336,11 @@ A Polymer Element showing search fields in a modal dialog.
 
   <script>
   (function() {
-    /* globals _, DigBehaviors */
+    /* globals _ */
     'use strict';
 
     Polymer({
       is: 'search-fields-dialog',
-      behaviors: [DigBehaviors.FilterBehavior, DigBehaviors.PhoneBehavior],
 
       properties: {
         /**
@@ -496,6 +502,30 @@ A Polymer Element showing search fields in a modal dialog.
         /**
          * (Optional)
          *
+         * A function that returns whether all the search parameters in the given object are disabled (or empty).
+         *
+         * @type {Object}
+         * @default function
+         */
+        areSearchParametersDisabled: {
+          type: Object,
+          value: function() {
+            return function(searchParameters) {
+              return _.keys(searchParameters).every(function(type) {
+                if(_.isEmpty(searchParameters[type])) {
+                  return true;
+                }
+                return _.keys(searchParameters[type]).every(function(term) {
+                  return !searchParameters[type][term].enabled;
+                });
+              });
+            };
+          }
+        },
+
+        /**
+         * (Optional)
+         *
          * A function that transforms search parameter data into a search parameter object.
          *
          * @type {Object}
@@ -539,19 +569,6 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
-         * (Optional)
-         *
-         * Whether all optional search terms are required.
-         *
-         * @type {Boolean}
-         * @default true
-         */
-        required: {
-          type: Boolean,
-          value: true
-        },
-
-        /**
          * (Required|Output)
          *
          * The search parameters created from the terms entered into the dialog.
@@ -571,6 +588,18 @@ A Polymer Element showing search fields in a modal dialog.
          * @private
          */
         _helpOpened: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * Whether network expansion is active based on the fields and values.
+         *
+         * @type {Boolean}
+         * @default false
+         * @private
+         */
+        _isNetworkExpansionActive: {
           type: Boolean,
           value: false
         },
@@ -647,10 +676,11 @@ A Polymer Element showing search fields in a modal dialog.
               return {
                 dateId: searchConfig[dataDateIdProperty],
                 key: searchConfig[dataKeyProperty],
-                requireOne: false,
                 title: searchConfig[dataTitleProperty],
-                useInNetworkSearch: false,
-                value: isDate ? {} : ''
+                value: isDate ? {} : '',
+                enableNetworkExpansion: isDate ? undefined : (searchConfig.enableNetworkExpansion || false),
+                networkExpansionOn: isDate ? undefined : false,
+                requireOne: isDate ? undefined : true
               };
             }),
             name: dialogConfig[nameProperty],
@@ -671,36 +701,48 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Returns the active style class for the button with the given toggle status.
+       * Returns the style class for the button with the given toggle status.
        *
-       * @param {Boolean} active
+       * @param {Boolean} on
        * @return {String}
        * @private
        */
-      _getActiveStyleClass: function(active) {
-        return active ? 'active' : '';
+      _getButtonStyleClass: function(on) {
+        return on ? 'on' : '';
       },
 
       /**
-       * Returns the active text for the button with the given toggle status.
+       * Returns the text for the button with the given toggle status.
        *
-       * @param {Boolean} active
+       * @param {Boolean} on
        * @return {String}
        * @private
        */
-      _getActiveText: function(active) {
-        return active ? 'On' : 'Off';
+      _getButtonText: function(on) {
+        return on ? 'On' : 'Off';
       },
 
       /**
        * Returns the checkbox icon with the given toggle status.
        *
+       * @param {Boolean} on
+       * @return {String}
+       * @private
+       */
+      _getCheckboxIcon: function(on) {
+        return on ? 'fa:check-square' : 'fa:square-o';
+      },
+
+      /**
+       * Returns the network expansion style class for the button with the given toggle status.
+       *
+       * @param {Boolean} on
        * @param {Boolean} active
        * @return {String}
        * @private
        */
-      _getCheckboxIcon: function(active) {
-        return active ? 'fa:check-square' : 'fa:square-o';
+      _getNetworkExpansionStyleClass: function(on, active) {
+        return this._getButtonStyleClass(on) + (active ? '' : ' inactive');
       },
 
       /**
@@ -715,22 +757,14 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Toggles the useInNetworkSearch property of the searchConfig in the model of the given event.
+       * Toggles the networkExpansionOn property of the searchConfig in the model of the given event.
        *
        * @param {Event} event
        * @private
        */
       _toggleNetworkExpansion: function(event) {
-        event.model.set('searchConfig.useInNetworkSearch', !event.model.searchConfig.useInNetworkSearch);
-      },
-
-      /**
-       * Toggles required.
-       *
-       * @private
-       */
-      _toggleRequired: function() {
-        this.set('required', !this.required);
+        event.model.set('searchConfig.networkExpansionOn', !event.model.searchConfig.networkExpansionOn);
+        this._updateNetworkExpansion();
       },
 
       /**
@@ -741,6 +775,23 @@ A Polymer Element showing search fields in a modal dialog.
        */
       _toggleRequireOne: function(event) {
         event.model.set('searchConfig.requireOne', !event.model.searchConfig.requireOne);
+      },
+
+      /**
+       * Returns a string of unformatted phones separated by newlines.
+       *
+       * @param {String} phone
+       * @return {String}
+       * @private
+       */
+      _unformatPhones: function(phone) {
+        // Replace all delimiters (whitespace, commas, and, semicolons) with single spaces.
+        return phone.replace(/[\s,;]/g, ' ')
+          // Remove all non-digit, non-whitespace characters.
+          .replace(/[^\d\s]/g, '')
+          // Remove extra spaces.
+          .replace(/\s+/g, '\n')
+          .trim();
       },
 
       /**
@@ -771,10 +822,10 @@ A Polymer Element showing search fields in a modal dialog.
         var terms = searchConfig.value.split(',').map(function(term) {
           return term.trim();
         }).reduce(function(terms, term) {
-          var search = searchConfig.requireOne ? 'union' : (self.required ? 'required' : 'optional');
+          var search = searchConfig.requireOne ? 'union' : 'optional';
           var key = term;
 
-          // An excluded term overrides searchConfig.requireOne and this.required.
+          // An excluded term overrides searchConfig.requireOne.
           if(key.indexOf('-') === 0) {
             search = 'excluded';
             key = key.substring(1);
@@ -787,8 +838,7 @@ A Polymer Element showing search fields in a modal dialog.
 
           // TODO Move custom formatting.
           if(searchConfig.key === 'phone') {
-            // From DigBehaviors.PhoneBehavior
-            key = self.getUnformattedPhones(key);
+            key = self._unformatPhones(key);
           }
 
           if(key) {
@@ -813,10 +863,10 @@ A Polymer Element showing search fields in a modal dialog.
         });
 
         // TODO: network expansion -- do we need notify?
-        if(self.networkExpansionParameters[searchConfig.key] !== undefined &&
-          self.networkExpansionParameters[searchConfig.key] !== searchConfig.useInNetworkSearch) {
-          self.networkExpansionParameters[searchConfig.key] = searchConfig.useInNetworkSearch;
-          self.notifyPath(['networkExpansionParameters', searchConfig.key], searchConfig.useInNetworkSearch);
+        if(self._isNetworkExpansionActive && self.networkExpansionParameters[searchConfig.key] !== undefined &&
+            self.networkExpansionParameters[searchConfig.key] !== searchConfig.networkExpansionOn) {
+          self.networkExpansionParameters[searchConfig.key] = searchConfig.networkExpansionOn;
+          self.notifyPath(['networkExpansionParameters', searchConfig.key], searchConfig.networkExpansionOn);
         }
       },
 
@@ -899,7 +949,7 @@ A Polymer Element showing search fields in a modal dialog.
           var prefix = (data.search === 'required' ? '+' : (data.search === 'excluded' ? '-' : ''));
           return prefix + data.text;
         }).join(', ');
-        searchConfig.requireOne = termData.some(function(data) {
+        searchConfig.requireOne = !termData.length ? true : termData.some(function(data) {
           return data.search === 'union';
         });
 
@@ -923,13 +973,46 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
+       * Updates whether network expansion is active based on the active network expansion fields and values in network expansion fields.
+       *
+       * @private
+       */
+      _updateNetworkExpansion: function() {
+        // Find all fields for which network expansion is active.
+        var fields = this._searchFields.reduce(function(fields, dialogConfig) {
+          return fields.concat(dialogConfig.data.filter(function(searchConfig) {
+            return searchConfig.networkExpansionOn;
+          }).map(function(searchConfig) {
+            return searchConfig.title;
+          }));
+        }, []);
+
+        // Find all values (search terms) in fields with the network expansion option.
+        var values = this._searchFields.reduce(function(values, dialogConfig) {
+          return values.concat(dialogConfig.data.filter(function(searchConfig) {
+            return searchConfig.enableNetworkExpansion && !!(searchConfig.value.trim());
+          }).map(function(searchConfig) {
+            return searchConfig.value.trim();
+          }));
+        }, []).reduce(function(values, value) {
+          // Split values into individual search terms.
+          return values.concat(value.split(',').map(function(term) {
+            return term.trim();
+          }).filter(function(term) {
+            return term && term !== '+' && term !== '-';
+          }));
+        }, []);
+
+        this._isNetworkExpansionActive = (fields.length && values.length);
+      },
+
+      /**
        * Updates the searchParameters from the search fields and closes the dialog so that new queries can run.
        */
       handleSearch: function() {
         this._updateSearchParametersFromFields();
 
-        // From DigBehaviors.FilterBehavior
-        if(this.areAllFacetsDisabled(this.searchParameters)) {
+        if(this.areSearchParametersDisabled(this.searchParameters)) {
           this.resetAllSearchFields();
           return;
         }
@@ -981,6 +1064,7 @@ A Polymer Element showing search fields in a modal dialog.
        * @private
        */
       _checkSearchFieldInputKey: function(event) {
+        this._updateNetworkExpansion();
         if(event.keyCode === 13) {
           this.handleSearch();
         }
