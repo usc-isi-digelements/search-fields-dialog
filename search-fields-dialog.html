@@ -16,7 +16,6 @@ limitations under the License.
 
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../button-action/button-action.html">
-<link rel="import" href="../date-picker-display/date-picker-display.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../iron-icon/iron-icon.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
@@ -24,6 +23,7 @@ limitations under the License.
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../styled-dialog/styled-dialog.html">
+<link rel="import" href="../vaadin-date-picker-display/vaadin-date-picker-display.html">
 
 <!--
 A Polymer Element showing search fields in a modal dialog.
@@ -88,11 +88,11 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       .date-labels {
-        padding-top: 12px;
+        padding-top: 24px;
         text-align: end;
       }
 
-      .date-fields-container > date-picker-display {
+      vaadin-date-picker-display {
         display: inline-block;
         padding: 2px 5px 2px 20px;
         width: 335px;
@@ -225,14 +225,14 @@ A Polymer Element showing search fields in a modal dialog.
             <div class="styled-dialog-name date-labels">[[dialogConfig.name]]</div>
             <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
               <div class="layout horizontal date-fields-container nowrap">
-                <date-picker-display
+                <vaadin-date-picker-display
                   facet-key="value"
                   facets="{{searchConfig}}"
                   key="[[searchConfig.key]]"
                   prefix-label="[[searchConfig.title]]"
                   date-identifier="[[searchConfig.dateId]]"
                   title="[[searchConfig.title]]">
-                </date-picker-display>
+                </vaadin-date-picker-display>
               </div>
             </template>
           </template>
