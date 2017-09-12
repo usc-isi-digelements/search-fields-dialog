@@ -19,118 +19,120 @@ limitations under the License.
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-  <script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
   <link rel="import" href="../search-fields-dialog.html">
 </head>
 
 <body unresolved>
-  <template is="dom-bind" id="demo">
-    <p>Date Config:  <strong>[[stringify(dateConfig)]]</strong></p>
-    <p>Search Fields Config:  <strong>[[stringify(searchFieldsConfig)]]</strong></p>
-    <p>Search Parameters:  <strong>[[stringify(searchParameters, searchParameters.*)]]</strong></p>
-    <p>Network Expansion Parameters:  <strong>[[stringify(networkExpansionParameters, networkExpansionParameters.*)]]</strong></p>
+  <dom-bind id="demo">
+    <script>
+      (function (document) {
+        var demo = document.querySelector('dom-bind');
 
-    <search-fields-dialog
-      date-config="[[dateConfig]]"
-      search-fields-config="[[searchFieldsConfig]]"
-      search-parameters="{{searchParameters}}"
-      network-expansion-parameters="{{networkExpansionParameters}}">
-    </search-fields-dialog>
-  </template>
+        var cityConfig = {
+          key: 'city',
+          title: 'City',
+          enableNetworkExpansion: true
+        };
+        var countryConfig = {
+          key: 'country',
+          title: 'Country',
+          enableNetworkExpansion: true
+        };
+        var dateStartConfig = {
+          key: 'dateStart',
+          title: 'Start Date'
+        };
+        var dateEndConfig = {
+          key: 'dateEnd',
+          title: 'End Date'
+        };
+        var descriptionConfig = {
+          key: 'description',
+          title: 'Description'
+        };
+        var emailConfig = {
+          key: 'email',
+          title: 'Email Address',
+          enableNetworkExpansion: true
+        };
+        var phoneConfig = {
+          key: 'phone',
+          title: 'Telephone Number',
+          enableNetworkExpansion: true
+        };
+        var titleConfig = {
+          key: 'title',
+          title: 'Title'
+        };
+        var urlConfig = {
+          key: 'url',
+          title: 'URL'
+        };
+        var websiteConfig = {
+          key: 'website',
+          title: 'Website'
+        };
+        
+        demo.dateConfig = {
+          dateStart: 'postingDate',
+          dateEnd: 'postingDate'
+        };
 
-  <script>
-    (function (document) {
-      var demo = document.querySelector('#demo');
+        demo.networkExpansionParameters = {
+          city: false,
+          country: false,
+          email: false,
+          phone: false
+        };
 
-      var cityConfig = {
-        key: 'city',
-        title: 'City',
-        enableNetworkExpansion: true
-      };
-      var countryConfig = {
-        key: 'country',
-        title: 'Country',
-        enableNetworkExpansion: true
-      };
-      var dateStartConfig = {
-        key: 'dateStart',
-        title: 'Start Date'
-      };
-      var dateEndConfig = {
-        key: 'dateEnd',
-        title: 'End Date'
-      };
-      var descriptionConfig = {
-        key: 'description',
-        title: 'Description'
-      };
-      var emailConfig = {
-        key: 'email',
-        title: 'Email Address',
-        enableNetworkExpansion: true
-      };
-      var phoneConfig = {
-        key: 'phone',
-        title: 'Telephone Number',
-        enableNetworkExpansion: true
-      };
-      var titleConfig = {
-        key: 'title',
-        title: 'Title'
-      };
-      var urlConfig = {
-        key: 'url',
-        title: 'URL'
-      };
-      var websiteConfig = {
-        key: 'website',
-        title: 'Website'
-      };
-      
-      demo.dateConfig = {
-        dateStart: 'postingDate',
-        dateEnd: 'postingDate'
-      };
+        demo.searchFieldsConfig = [{
+          type: 'date',
+          name: 'Dates',
+          data: [dateStartConfig, dateEndConfig]
+        }, {
+          name: 'Identifiers',
+          data: [phoneConfig, emailConfig]
+        }, {
+          name: 'Location',
+          data: [cityConfig, countryConfig]
+        }, {
+          name: 'Ad',
+          data: [websiteConfig, titleConfig, descriptionConfig, urlConfig]
+        }];
 
-      demo.networkExpansionParameters = {
-        city: false,
-        country: false,
-        email: false,
-        phone: false
-      };
+        demo.searchParameters = {
+          city: {},
+          country: {},
+          description: {},
+          email: {},
+          phone: {},
+          postingDate: {},
+          title: {},
+          url: {},
+          website: {}
+        };
 
-      demo.searchFieldsConfig = [{
-        type: 'date',
-        name: 'Dates',
-        data: [dateStartConfig, dateEndConfig]
-      }, {
-        name: 'Identifiers',
-        data: [phoneConfig, emailConfig]
-      }, {
-        name: 'Location',
-        data: [cityConfig, countryConfig]
-      }, {
-        name: 'Ad',
-        data: [websiteConfig, titleConfig, descriptionConfig, urlConfig]
-      }];
+        demo.stringify = function(object) {
+          return JSON.stringify(object);
+        };
+      })(document);
+    </script>
 
-      demo.searchParameters = {
-        city: {},
-        country: {},
-        description: {},
-        email: {},
-        phone: {},
-        postingDate: {},
-        title: {},
-        url: {},
-        website: {}
-      };
+    <template is="dom-bind">
+      <p>Date Config:  <strong>[[stringify(dateConfig)]]</strong></p>
+      <p>Search Fields Config:  <strong>[[stringify(searchFieldsConfig)]]</strong></p>
+      <p>Search Parameters:  <strong>[[stringify(searchParameters, searchParameters.*)]]</strong></p>
+      <p>Network Expansion Parameters:  <strong>[[stringify(networkExpansionParameters, networkExpansionParameters.*)]]</strong></p>
 
-      demo.stringify = function(object) {
-        return JSON.stringify(object);
-      };
-    })(document);
-  </script>
+      <search-fields-dialog
+        date-config="[[dateConfig]]"
+        search-fields-config="[[searchFieldsConfig]]"
+        search-parameters="{{searchParameters}}"
+        network-expansion-parameters="{{networkExpansionParameters}}">
+      </search-fields-dialog>
+    </template>
+  </dom-bind>
 </body>
 
 </html>

@@ -23,10 +23,12 @@ limitations under the License.
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../styled-dialog/styled-dialog.html">
+<link rel="import" href="../styled-dialog/styled-dialog-styles.html">
 <link rel="import" href="../vaadin-date-picker-display/vaadin-date-picker-display.html">
 
 <!--
 A Polymer Element showing search fields in a modal dialog.
+
 ### Example
 ```html
 <search-fields-dialog
@@ -36,12 +38,15 @@ A Polymer Element showing search fields in a modal dialog.
   process-request="{{processRequest}}">
 </search-fields-dialog>
 ```
+
 @demo demo/index.html
 -->
 
 <dom-module id="search-fields-dialog">
   <template>
     <style include="iron-flex iron-flex-alignment"></style>
+    <style include="styled-dialog-styles"></style>
+
     <style>
       :host {
         display: block;
@@ -55,7 +60,7 @@ A Polymer Element showing search fields in a modal dialog.
       .search-labels {
         text-align: end;
         /* Vertically align the search-labels with their paper-input-containers. */
-        padding-top: 24px;
+        padding-top: 22px;
       }
 
       .search-dialog paper-input {
@@ -64,7 +69,7 @@ A Polymer Element showing search fields in a modal dialog.
         --paper-input-container-input-color: var(--dark-primary-color);
         --paper-input-container-focus-color: var(--dark-primary-color);
         --paper-input-container: {
-          padding: 2px 5px 2px 20px;
+          padding: 0 5px 4px 20px;
           width: 275px;
         }
         --paper-input-container-input: {
@@ -73,13 +78,13 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       .date-labels {
-        padding-top: 24px;
+        padding-top: 30px;
         text-align: end;
       }
 
       vaadin-date-picker-display {
         display: inline-block;
-        padding: 2px 5px 2px 20px;
+        padding: 0 5px 6px 20px;
         width: 335px;
         --date-select-bg-color: #ffffff;
         --date-select-text-color: #000000;
@@ -90,20 +95,27 @@ A Polymer Element showing search fields in a modal dialog.
         --styled-dialog-max-width: 825px;
       }
 
-      .search-dialog ::content paper-dialog {
-        max-width: 900px;
-        overflow: auto;
+      .search-dialog {
+        --styled-dialog-max-width: 840px;
+        --styled-dialog-style-mixin: {
+          overflow: auto;
+        };
+        --styled-dialog-inside-style-mixin: {
+          overflow: none;
+        };
       }
 
-      styled-dialog.search-dialog ::content .inside.styled-dialog .styled-dialog-name {
-        max-width: 100px;
-        min-width: 100px;
+      .styled-dialog-name {
+        max-width: var(--styled-dialog-label-width, 100px);
+        min-width: var(--styled-dialog-label-width, 100px);
         overflow: hidden;
         text-overflow: ellipsis;
       }
 
-      styled-dialog.backdrop ::content paper-dialog {
-        opacity: 0.6;
+      styled-dialog.backdrop {
+        --styled-dialog-style-mixin: {
+          opacity: 0.6;
+        };
       }
 
       .toggle-buttons paper-icon-button {
@@ -195,6 +207,10 @@ A Polymer Element showing search fields in a modal dialog.
         padding-top: 10px;
       }
 
+      .search-buttons > button-action {
+        margin: 5px 10px;
+      }
+
       .search-options-title {
         font-size: 18px;
         text-transform: none;
@@ -266,10 +282,10 @@ A Polymer Element showing search fields in a modal dialog.
       </template>
 
       <div class="layout horizontal center-justified search-buttons">
-        <button-action class="styled-dialog-button" icon="fa:search" text="Search" on-tap="handleSearch"></button-action>
-        <button-action class="styled-dialog-button" icon="fa:undo" text="Reset" on-tap="resetAllSearchFields"></button-action>
-        <button-action class="styled-dialog-button" icon="fa:times" text="Cancel" on-tap="cancelSearch"></button-action>
-        <button-action class="styled-dialog-button" icon="fa:question" text="Help" on-tap="openHelp"></button-action>
+        <button-action icon="fa:search" text="Search" on-tap="handleSearch"></button-action>
+        <button-action icon="fa:undo" text="Reset" on-tap="resetAllSearchFields"></button-action>
+        <button-action icon="fa:times" text="Cancel" on-tap="cancelSearch"></button-action>
+        <button-action icon="fa:question" text="Help" on-tap="openHelp"></button-action>
       </div>
     </styled-dialog>
 
@@ -646,7 +662,7 @@ A Polymer Element showing search fields in a modal dialog.
        */
       _createSearchFields: function(config, dataProperty, nameProperty, typeProperty, dataKeyProperty, dataTitleProperty) {
         var dateKeys = _.keys(this.dateConfig);
-        return config.map(function(dialogConfig) {
+        return (config || []).map(function(dialogConfig) {
           return {
             data: dialogConfig[dataProperty].map(function(searchConfig) {
               var isDate = (dateKeys.indexOf(searchConfig[dataKeyProperty]) >= 0);
