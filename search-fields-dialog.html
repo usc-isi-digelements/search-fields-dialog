@@ -52,21 +52,6 @@ A Polymer Element showing search fields in a modal dialog.
         color: yellowgreen;
       }
 
-      .options-row {
-        min-height: 40px;
-      }
-
-      .options-label {
-        text-align: end;
-      }
-
-      .options-row paper-icon-button {
-        margin: 1px 5px 3px 15px;
-        padding: 5px;
-        height: 26px;
-        width: 26px;
-      }
-
       .search-labels {
         text-align: end;
         /* Vertically align the search-labels with their paper-input-containers. */
@@ -187,14 +172,17 @@ A Polymer Element showing search fields in a modal dialog.
         min-height: 18px;
       }
 
-      .help-text iron-icon {
-        --iron-icon: {
-          margin-left: 5px;
-          margin-right: 20px;
-          min-width: 20px;
-        }
+      iron-icon {
         --iron-icon-height: 20px;
         --iron-icon-width: 20px;
+        --iron-icon: {
+          margin: 0 5px;
+          min-width: 20px;
+        }
+      }
+
+      .help-text > div {
+        margin-left: 15px;
       }
 
       .button-spacer {
@@ -205,6 +193,11 @@ A Polymer Element showing search fields in a modal dialog.
       .network-expansion-info,
       .search-buttons {
         padding-top: 10px;
+      }
+
+      .search-options-title {
+        font-size: 18px;
+        text-transform: none;
       }
     </style>
 
