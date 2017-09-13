@@ -217,16 +217,15 @@ A Polymer Element showing search fields in a modal dialog.
       }
     </style>
 
-    <paper-button class="layout horizontal center bottom green" active="[[opened]]" on-tap="toggleSearchFieldsDialog" title="Click to Enter Search Terms">
-      <iron-icon icon="search" class="bottom" style="margin-right: 5px;"></iron-icon>
+    <paper-button class="layout horizontal center green" active="[[opened]]" on-tap="toggleSearchFieldsDialog" title="Click to Enter Search Terms">
+      <iron-icon icon="search" style="margin-top: 1px;"></iron-icon>
       <span class="search-options-title">Click to Enter Search Terms</span>
     </paper-button>
 
     <styled-dialog
       class$="search-dialog [[_isBackdrop(_helpOpened)]]"
       modal
-      opened="{{opened}}"
-      on-opened-changed="toggleProcessRequest">
+      opened="{{opened}}">
 
       <template is="dom-repeat" items="[[_searchFields]]" as="dialogConfig">
         <div class="layout horizontal">
@@ -611,7 +610,7 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       observers: [
-        'toggleProcessRequest(searchParameters.*)'
+        'toggleProcessRequest(searchParameters.*, opened)'
       ],
 
       /**
