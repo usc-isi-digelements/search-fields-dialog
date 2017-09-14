@@ -202,8 +202,7 @@ A Polymer Element showing search fields in a modal dialog.
         width: 30px;
       }
 
-      .network-expansion-info,
-      .search-buttons {
+      .network-expansion-info {
         padding-top: 10px;
       }
 
@@ -226,6 +225,13 @@ A Polymer Element showing search fields in a modal dialog.
       class$="search-dialog [[_isBackdrop(_helpOpened)]]"
       modal
       opened="{{opened}}">
+
+      <div class="layout horizontal center-justified search-buttons">
+        <button-action icon="fa:search" text="Search" on-tap="handleSearch"></button-action>
+        <button-action icon="fa:undo" text="Reset" on-tap="resetAllSearchFields"></button-action>
+        <button-action icon="fa:times" text="Cancel" on-tap="cancelSearch"></button-action>
+        <button-action icon="fa:question" text="Help" on-tap="openHelp"></button-action>
+      </div>
 
       <template is="dom-repeat" items="[[_searchFields]]" as="dialogConfig">
         <div class="layout horizontal">
@@ -279,13 +285,6 @@ A Polymer Element showing search fields in a modal dialog.
           </template>
         </div>
       </template>
-
-      <div class="layout horizontal center-justified search-buttons">
-        <button-action icon="fa:search" text="Search" on-tap="handleSearch"></button-action>
-        <button-action icon="fa:undo" text="Reset" on-tap="resetAllSearchFields"></button-action>
-        <button-action icon="fa:times" text="Cancel" on-tap="cancelSearch"></button-action>
-        <button-action icon="fa:question" text="Help" on-tap="openHelp"></button-action>
-      </div>
     </styled-dialog>
 
     <styled-dialog class="help-dialog" header="Search Help" opened="{{_helpOpened}}">
