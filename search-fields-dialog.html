@@ -263,9 +263,9 @@ A Polymer Element showing search fields in a modal dialog.
                     </paper-icon-button>
                     <template is="dom-if" if="[[searchConfig.enableNetworkExpansion]]">
                       <paper-icon-button
-                        class$="network-expansion-icon [[_getNetworkExpansionStyleClass(searchConfig.networkExpansionOn, _isNetworkExpansionActive)]]"
+                        class$="network-expansion-icon [[_getNetworkExpansionStyleClass(searchConfig.activateNetworkExpansion, _isNetworkExpansionViable)]]"
                         icon="fa:arrows-alt"
-                        title="Click to Toggle Network Expansion of [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.networkExpansionOn)]])"
+                        title="Click to Toggle Network Expansion of [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.activateNetworkExpansion)]])"
                         on-tap="_toggleNetworkExpansion">
                       </paper-icon-button>
                     </template>
@@ -586,13 +586,13 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
-         * Whether network expansion is active based on the fields and values.
+         * Whether network expansion is viable based on the fields and values.
          *
          * @type {Boolean}
          * @default false
          * @private
          */
-        _isNetworkExpansionActive: {
+        _isNetworkExpansionViable: {
           type: Boolean,
           value: false
         },
@@ -637,7 +637,7 @@ A Polymer Element showing search fields in a modal dialog.
                 if(dateKeys.indexOf(searchConfig.key) >= 0) {
                   self._updateDateFieldFromParameter(searchConfig, ['_searchFields', dialogIndex, 'data', searchIndex, 'value']);
                 } else {
-                  self._updateSearchFieldFromParameter(searchConfig);
+                  self._updateSearchFieldFromParameter(searchConfig, ['_searchFields', dialogIndex, 'data', searchIndex]);
                 }
               });
             }
@@ -669,9 +669,11 @@ A Polymer Element showing search fields in a modal dialog.
                 key: searchConfig[dataKeyProperty],
                 title: searchConfig[dataTitleProperty],
                 value: isDate ? {} : '',
+                activateNetworkExpansion: isDate ? undefined : false,
+                activateNetworkExpansionPrevious: isDate ? undefined : false,
                 enableNetworkExpansion: isDate ? undefined : (searchConfig.enableNetworkExpansion || false),
-                networkExpansionOn: isDate ? undefined : false,
-                requireOne: isDate ? undefined : true
+                requireOne: isDate ? undefined : true,
+                requireOnePrevious: isDate ? undefined : true
               };
             }),
             name: dialogConfig[nameProperty],
@@ -748,13 +750,13 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Toggles the networkExpansionOn property of the searchConfig in the model of the given event.
+       * Toggles the activateNetworkExpansion property of the searchConfig in the model of the given event.
        *
        * @param {Event} event
        * @private
        */
       _toggleNetworkExpansion: function(event) {
-        event.model.set('searchConfig.networkExpansionOn', !event.model.searchConfig.networkExpansionOn);
+        event.model.set('searchConfig.activateNetworkExpansion', !event.model.searchConfig.activateNetworkExpansion);
         this._updateNetworkExpansion();
       },
 
@@ -853,11 +855,11 @@ A Polymer Element showing search fields in a modal dialog.
           }
         });
 
-        // TODO: network expansion -- do we need notify?
-        if(self._isNetworkExpansionActive && self.networkExpansionParameters[searchConfig.key] !== undefined &&
-            self.networkExpansionParameters[searchConfig.key] !== searchConfig.networkExpansionOn) {
-          self.networkExpansionParameters[searchConfig.key] = searchConfig.networkExpansionOn;
-          self.notifyPath(['networkExpansionParameters', searchConfig.key], searchConfig.networkExpansionOn);
+        var activateNetworkExpansion = (this._isNetworkExpansionViable && searchConfig.activateNetworkExpansion);
+
+        if(this.networkExpansionParameters[searchConfig.key] !== activateNetworkExpansion) {
+          this.networkExpansionParameters[searchConfig.key] = activateNetworkExpansion;
+          this.notifyPath(['networkExpansionParameters', searchConfig.key], this.networkExpansionParameters[searchConfig.key]);
         }
       },
 
@@ -929,22 +931,27 @@ A Polymer Element showing search fields in a modal dialog.
        * @param {Object} searchConfig
        * @private
        */
-      _updateSearchFieldFromParameter: function(searchConfig) {
+      _updateSearchFieldFromParameter: function(searchConfig, updatePath) {
         var self = this;
         var termData = _.keys(this.searchParameters[searchConfig.key]).filter(function(term) {
           return self.getSearchParameterData(self.searchParameters[searchConfig.key][term]).enabled;
         }).map(function(term) {
           return self.getSearchParameterData(self.searchParameters[searchConfig.key][term]);
         });
+
         searchConfig.value = termData.map(function(data) {
           var prefix = (data.search === 'required' ? '+' : (data.search === 'excluded' ? '-' : ''));
           return prefix + data.text;
         }).join(', ');
-        searchConfig.requireOne = !termData.length ? true : termData.some(function(data) {
+        this.$$('#input_' + searchConfig.key).value = searchConfig.value;
+
+        searchConfig.activateNetworkExpansion = this.networkExpansionParameters[searchConfig.key] || searchConfig.activateNetworkExpansion;
+        this.notifyPath(updatePath.concat(['activateNetworkExpansion']), searchConfig.activateNetworkExpansion);
+
+        searchConfig.requireOne = !termData.length ? searchConfig.requireOne : termData.some(function(data) {
           return data.search === 'union';
         });
-
-        this.$$('#input_' + searchConfig.key).value = searchConfig.value;
+        this.notifyPath(updatePath.concat(['requireOne']), searchConfig.requireOne);
       },
 
       /**
@@ -972,7 +979,7 @@ A Polymer Element showing search fields in a modal dialog.
         // Find all fields for which network expansion is active.
         var fields = this._searchFields.reduce(function(fields, dialogConfig) {
           return fields.concat(dialogConfig.data.filter(function(searchConfig) {
-            return searchConfig.networkExpansionOn;
+            return searchConfig.activateNetworkExpansion;
           }).map(function(searchConfig) {
             return searchConfig.title;
           }));
@@ -994,13 +1001,20 @@ A Polymer Element showing search fields in a modal dialog.
           }));
         }, []);
 
-        this._isNetworkExpansionActive = (fields.length && values.length);
+        this._isNetworkExpansionViable = (fields.length && values.length);
       },
 
       /**
        * Updates the searchParameters from the search fields and closes the dialog so that new queries can run.
        */
       handleSearch: function() {
+        this._searchFields.forEach(function(dialogConfig) {
+          dialogConfig.data.forEach(function(searchConfig) {
+            searchConfig.activateNetworkExpansionPrevious = searchConfig.activateNetworkExpansion;
+            searchConfig.requireOnePrevious = searchConfig.requireOne;
+          });
+        });
+
         this._updateSearchParametersFromFields();
 
         if(this.areSearchParametersDisabled(this.searchParameters)) {
@@ -1037,6 +1051,13 @@ A Polymer Element showing search fields in a modal dialog.
        * Cancels the changes to the search fields and closes the dialog.
        */
       cancelSearch: function() {
+        this._searchFields.forEach(function(dialogConfig) {
+          dialogConfig.data.forEach(function(searchConfig) {
+            searchConfig.activateNetworkExpansion = searchConfig.activateNetworkExpansionPrevious;
+            searchConfig.requireOne = searchConfig.requireOnePrevious;
+          });
+        });
+
         this.userCanceled = true;
         this.toggleSearchFieldsDialog();
       },

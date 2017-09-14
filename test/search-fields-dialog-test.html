@@ -41,7 +41,7 @@ limitations under the License.
         key: 'city',
         title: 'City',
         enableNetworkExpansion: true,
-        networkExpansionOn: true
+        activateNetworkExpansion: true
       };
       var dateStartConfig = {
         key: 'dateStart',
@@ -140,9 +140,11 @@ limitations under the License.
           key: 'dateStart',
           title: 'From',
           value: {},
+          activateNetworkExpansion: undefined,
+          activateNetworkExpansionPrevious: undefined,
+          enableNetworkExpansion: undefined,
           requireOne: undefined,
-          networkExpansionOn: undefined,
-          enableNetworkExpansion: undefined
+          requireOnePrevious: undefined,
         });
         assert.deepEqual(datePickers[0].key, 'dateStart');
         assert.deepEqual(datePickers[0].category, 'From');
@@ -152,9 +154,11 @@ limitations under the License.
           key: 'dateEnd',
           title: 'To',
           value: {},
+          activateNetworkExpansion: undefined,
+          activateNetworkExpansionPrevious: undefined,
+          enableNetworkExpansion: undefined,
           requireOne: undefined,
-          networkExpansionOn: undefined,
-          enableNetworkExpansion: undefined
+          requireOnePrevious: undefined,
         });
         assert.deepEqual(datePickers[1].key, 'dateEnd');
         assert.deepEqual(datePickers[1].category, 'To');
@@ -208,16 +212,20 @@ limitations under the License.
             key: 'dateStart',
             title: 'From',
             value: {},
+            activateNetworkExpansion: undefined,
+            activateNetworkExpansionPrevious: undefined,
+            enableNetworkExpansion: undefined,
             requireOne: undefined,
-            networkExpansionOn: undefined,
-            enableNetworkExpansion: undefined
+            requireOnePrevious: undefined,
           }, {
             key: 'dateEnd',
             title: 'To',
             value: {},
+            activateNetworkExpansion: undefined,
+            activateNetworkExpansionPrevious: undefined,
+            enableNetworkExpansion: undefined,
             requireOne: undefined,
-            networkExpansionOn: undefined,
-            enableNetworkExpansion: undefined
+            requireOnePrevious: undefined,
           }]
         }, {
           type: undefined,
@@ -226,16 +234,20 @@ limitations under the License.
             key: 'phone',
             title: 'Telephone Number',
             value: '',
+            activateNetworkExpansion: false,
+            activateNetworkExpansionPrevious: false,
+            enableNetworkExpansion: true,
             requireOne: true,
-            networkExpansionOn: false,
-            enableNetworkExpansion: true
+            requireOnePrevious: true
           }, {
             key: 'email',
             title: 'Email Address',
             value: '',
+            activateNetworkExpansion: false,
+            activateNetworkExpansionPrevious: false,
+            enableNetworkExpansion: true,
             requireOne: true,
-            networkExpansionOn: false,
-            enableNetworkExpansion: true
+            requireOnePrevious: true
           }]
         }, {
           type: undefined,
@@ -244,9 +256,11 @@ limitations under the License.
             key: 'city',
             title: 'City',
             value: '',
+            activateNetworkExpansion: false,
+            activateNetworkExpansionPrevious: false,
+            enableNetworkExpansion: true,
             requireOne: true,
-            networkExpansionOn: false,
-            enableNetworkExpansion: true
+            requireOnePrevious: true
           }]
         }, {
           type: undefined,
@@ -255,23 +269,29 @@ limitations under the License.
             key: 'website',
             title: 'Website',
             value: '',
+            activateNetworkExpansion: false,
+            activateNetworkExpansionPrevious: false,
+            enableNetworkExpansion: false,
             requireOne: true,
-            networkExpansionOn: false,
-            enableNetworkExpansion: false
+            requireOnePrevious: true
           }, {
             key: 'title',
             title: 'Title',
             value: '',
+            activateNetworkExpansion: false,
+            activateNetworkExpansionPrevious: false,
+            enableNetworkExpansion: false,
             requireOne: true,
-            networkExpansionOn: false,
-            enableNetworkExpansion: false
+            requireOnePrevious: true
           }, {
             key: 'description',
             title: 'Description',
             value: '',
+            activateNetworkExpansion: false,
+            activateNetworkExpansionPrevious: false,
+            enableNetworkExpansion: false,
             requireOne: true,
-            networkExpansionOn: false,
-            enableNetworkExpansion: false
+            requireOnePrevious: true
           }]
         }]);
       });
@@ -327,36 +347,47 @@ limitations under the License.
             category: 'City',
             enabled: true,
             text: 'nyc',
+            activateNetworkExpansion: false,
+            activateNetworkExpansionPrevious: false,
+            enableNetworkExpansion: true,
             requireOne: false,
-            networkExpansionOn: false
+            requireOnePrevious: false
           },
           chicago: {
             key: 'chicago',
             category: 'City',
             enabled: true,
             text: 'chicago',
+            activateNetworkExpansion: false,
+            activateNetworkExpansionPrevious: false,
+            enableNetworkExpansion: true,
             requireOne: false,
-            networkExpansionOn: false,
+            requireOnePrevious: false
           },
           la: {
             key: 'la',
             category: 'City',
             enabled: false,
             text: 'la',
+            activateNetworkExpansion: false,
+            activateNetworkExpansionPrevious: false,
+            enableNetworkExpansion: true,
             requireOne: false,
-            networkExpansionOn: false
+            requireOnePrevious: false
           }
         };
         // cityConfig is in index 0 of data array for location
-        element._updateSearchFieldFromParameter(element._searchFields[2].data[0]);
+        element._updateSearchFieldFromParameter(element._searchFields[2].data[0], ['_searchFields', 2, 'data', 0]);
 
         assert.deepEqual(element._searchFields[2].data[0], {
           key: 'city',
           title: 'City',
           value: 'nyc, chicago',
+          activateNetworkExpansion: false,
+          activateNetworkExpansionPrevious: false,
+          enableNetworkExpansion: true,
           requireOne: false,
-          networkExpansionOn: false,
-          enableNetworkExpansion: true
+          requireOnePrevious: true
         });
         assert.equal(element.$$('#input_city').value, 'nyc, chicago');
       });
@@ -369,29 +400,35 @@ limitations under the License.
             enabled: true,
             search: 'required',
             text: 'nyc',
+            activateNetworkExpansion: false,
+            activateNetworkExpansionPrevious: false,
+            enableNetworkExpansion: true,
             requireOne: false,
-            networkExpansionOn: false,
-            enableNetworkExpansion: true
+            requireOnePrevious: false
           },
           chicago: {
             key: 'chicago',
             category: 'City',
             enabled: true,
             text: 'chicago',
+            activateNetworkExpansion: false,
+            activateNetworkExpansionPrevious: false,
+            enableNetworkExpansion: true,
             requireOne: false,
-            networkExpansionOn: false,
-            enableNetworkExpansion: true
+            requireOnePrevious: false
           }
         };
-        element._updateSearchFieldFromParameter(element._searchFields[2].data[0]);
+        element._updateSearchFieldFromParameter(element._searchFields[2].data[0], ['_searchFields', 2, 'data', 0]);
 
         assert.deepEqual(element._searchFields[2].data[0], {
           key: 'city',
           title: 'City',
           value: '+nyc, chicago',
+          activateNetworkExpansion: false,
+          activateNetworkExpansionPrevious: false,
+          enableNetworkExpansion: true,
           requireOne: false,
-          networkExpansionOn: false,
-          enableNetworkExpansion: true
+          requireOnePrevious: true
         });
         assert.equal(element.$$('#input_city').value, '+nyc, chicago');
       });
@@ -404,29 +441,35 @@ limitations under the License.
             enabled: true,
             search: 'excluded',
             text: 'nyc',
+            activateNetworkExpansion: false,
+            activateNetworkExpansionPrevious: false,
+            enableNetworkExpansion: true,
             requireOne: false,
-            networkExpansionOn: false,
-            enableNetworkExpansion: true
+            requireOnePrevious: false
           },
           chicago: {
             key: 'chicago',
             category: 'City',
             enabled: true,
             text: 'chicago',
+            activateNetworkExpansion: false,
+            activateNetworkExpansionPrevious: false,
+            enableNetworkExpansion: true,
             requireOne: false,
-            networkExpansionOn: false,
-            enableNetworkExpansion: true
+            requireOnePrevious: false
           }
         };
-        element._updateSearchFieldFromParameter(element._searchFields[2].data[0]);
+        element._updateSearchFieldFromParameter(element._searchFields[2].data[0], ['_searchFields', 2, 'data', 0]);
 
         assert.deepEqual(element._searchFields[2].data[0], {
           key: 'city',
           title: 'City',
           value: '-nyc, chicago',
+          activateNetworkExpansion: false,
+          activateNetworkExpansionPrevious: false,
+          enableNetworkExpansion: true,
           requireOne: false,
-          networkExpansionOn: false,
-          enableNetworkExpansion: true
+          requireOnePrevious: true
         });
         assert.equal(element.$$('#input_city').value, '-nyc, chicago');
       });
@@ -618,13 +661,13 @@ limitations under the License.
         });
       });
 
-      test('_updateSearchAndNetworkParameterFromField does work as expected if network expasion is on and _isNetworkExpansionActive is true', function() {
+      test('_updateSearchAndNetworkParameterFromField does work as expected if network expasion is on and _isNetworkExpansionViable is true', function() {
         element.$$('#input_city').value = 'nyc, chicago';
 
         // cityConfig is first in data array for location
-        element._searchFields[2].data[0].networkExpansionOn = true;
+        element._searchFields[2].data[0].activateNetworkExpansion = true;
 
-        element._isNetworkExpansionActive = true;
+        element._isNetworkExpansionViable = true;
 
         element._updateSearchAndNetworkParameterFromField(element._searchFields[2].data[0]);
 
@@ -652,13 +695,13 @@ limitations under the License.
         });
       });
 
-      test('_updateSearchAndNetworkParameterFromField does work as expected if network expansion is on and _isNetworkExpansionActive is false', function() {
+      test('_updateSearchAndNetworkParameterFromField does work as expected if network expansion is on and _isNetworkExpansionViable is false', function() {
         element.$$('#input_city').value = 'nyc, chicago';
 
         // cityConfig is first in data array for location
-        element._searchFields[2].data[0].networkExpansionOn = true;
+        element._searchFields[2].data[0].activateNetworkExpansion = true;
 
-        element._isNetworkExpansionActive = false;
+        element._isNetworkExpansionViable = false;
 
         element._updateSearchAndNetworkParameterFromField(element._searchFields[2].data[0]);
 
