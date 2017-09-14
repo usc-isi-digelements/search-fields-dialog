@@ -43,6 +43,12 @@ limitations under the License.
         enableNetworkExpansion: true,
         activateNetworkExpansion: true
       };
+      var countryConfig = {
+        key: 'country',
+        title: 'Country',
+        enableNetworkExpansion: true,
+        activateNetworkExpansion: true
+      };
       var dateStartConfig = {
         key: 'dateStart',
         title: 'From'
@@ -69,6 +75,10 @@ limitations under the License.
         key: 'title',
         title: 'Title'
       };
+      var urlConfig = {
+        key: 'url',
+        title: 'URL'
+      };
       var websiteConfig = {
         key: 'website',
         title: 'Website'
@@ -82,11 +92,13 @@ limitations under the License.
         };
         element.searchParameters = {
           city: {},
+          country: {},
           description: {},
           email: {},
           phone: {},
           postingDate: {},
           title: {},
+          url: {},
           website: {}
         };
         element.searchFieldsConfig = [{
@@ -98,10 +110,10 @@ limitations under the License.
           data: [phoneConfig, emailConfig]
         }, {
           name: 'Location',
-          data: [cityConfig]
+          data: [cityConfig, countryConfig]
         }, {
           name: 'Ad',
-          data: [websiteConfig, titleConfig, descriptionConfig]
+          data: [websiteConfig, titleConfig, descriptionConfig, urlConfig]
         }];
         element.networkExpansionParameters = {
           city: false
@@ -167,7 +179,7 @@ limitations under the License.
       test('template has paper inputs', function() {
         var paperInputs = Polymer.dom(element.root).querySelectorAll('paper-input');
         assert.isNotNull(paperInputs);
-        assert.equal(paperInputs.length, 6);
+        assert.equal(paperInputs.length, 8);
         assert.equal(paperInputs[0].id, 'input_phone');
         assert.equal(paperInputs[0].label, 'Telephone Number');
         assert.equal(paperInputs[0].value, '');
@@ -177,21 +189,27 @@ limitations under the License.
         assert.equal(paperInputs[2].id, 'input_city');
         assert.equal(paperInputs[2].label, 'City');
         assert.equal(paperInputs[2].value, '');
-        assert.equal(paperInputs[3].id, 'input_website');
-        assert.equal(paperInputs[3].label, 'Website');
+        assert.equal(paperInputs[3].id, 'input_country');
+        assert.equal(paperInputs[3].label, 'Country');
         assert.equal(paperInputs[3].value, '');
-        assert.equal(paperInputs[4].id, 'input_title');
-        assert.equal(paperInputs[4].label, 'Title');
+        assert.equal(paperInputs[4].id, 'input_website');
+        assert.equal(paperInputs[4].label, 'Website');
         assert.equal(paperInputs[4].value, '');
-        assert.equal(paperInputs[5].id, 'input_description');
-        assert.equal(paperInputs[5].label, 'Description');
+        assert.equal(paperInputs[5].id, 'input_title');
+        assert.equal(paperInputs[5].label, 'Title');
         assert.equal(paperInputs[5].value, '');
+        assert.equal(paperInputs[6].id, 'input_description');
+        assert.equal(paperInputs[6].label, 'Description');
+        assert.equal(paperInputs[6].value, '');
+        assert.equal(paperInputs[7].id, 'input_url');
+        assert.equal(paperInputs[7].label, 'URL');
+        assert.equal(paperInputs[7].value, '');
       });
 
       test('template has paper icon buttons', function() {
         var buttons = Polymer.dom(element.root).querySelectorAll('.toggle-buttons paper-icon-button');
         assert.isNotNull(buttons);
-        assert.equal(buttons.length, 9);
+        assert.equal(buttons.length, 12);
       });
 
       test('template has expected buttons at the bottom', function() {
@@ -261,6 +279,15 @@ limitations under the License.
             enableNetworkExpansion: true,
             requireOne: true,
             requireOnePrevious: true
+          }, {
+            key: 'country',
+            title: 'Country',
+            value: '',
+            activateNetworkExpansion: false,
+            activateNetworkExpansionPrevious: false,
+            enableNetworkExpansion: true,
+            requireOne: true,
+            requireOnePrevious: true
           }]
         }, {
           type: undefined,
@@ -286,6 +313,15 @@ limitations under the License.
           }, {
             key: 'description',
             title: 'Description',
+            value: '',
+            activateNetworkExpansion: false,
+            activateNetworkExpansionPrevious: false,
+            enableNetworkExpansion: false,
+            requireOne: true,
+            requireOnePrevious: true
+          }, {
+            key: 'url',
+            title: 'URL',
             value: '',
             activateNetworkExpansion: false,
             activateNetworkExpansionPrevious: false,
@@ -994,6 +1030,7 @@ limitations under the License.
               text: 'chicago'
             }
           },
+          country: {},
           description: {},
           email: {},
           phone: {
@@ -1008,6 +1045,7 @@ limitations under the License.
           },
           postingDate: {},
           title: {},
+          url: {},
           website: {}
         });
       });
@@ -1020,6 +1058,19 @@ limitations under the License.
         assert.isTrue(element.opened);
       });
 
+      test('handleSearch does update previous toggle values', function() {
+        element.$$('#input_city').value = 'nyc, chicago';
+        element.opened = true;
+        element._searchFields[2].data[0].activateNetworkExpansion = true;
+        element._searchFields[2].data[0].requireOne = false;
+
+        element.handleSearch();
+
+        assert.isFalse(element.opened);
+        assert.isTrue(element._searchFields[2].data[0].activateNetworkExpansionPrevious);
+        assert.isFalse(element._searchFields[2].data[0].requireOnePrevious);
+      });
+
       test('cancelSearch closes dialog and does not update searchParameters', function() {
         element.$$('#input_city').value = 'nyc, chicago';
         element.opened = true;
@@ -1028,6 +1079,17 @@ limitations under the License.
         assert.isFalse(element.opened);
         assert.equal(element.$$('#input_city').value, 'nyc, chicago');
         assert.deepEqual(element.searchParameters.city, {});
+      });
+
+      test('cancelSearch does update toggle values with previous values', function() {
+        element.$$('#input_city').value = 'nyc, chicago';
+        element.opened = true;
+
+        element.cancelSearch();
+
+        assert.isFalse(element.opened);
+        assert.isFalse(element._searchFields[2].data[0].activateNetworkExpansion);
+        assert.isTrue(element._searchFields[2].data[0].requireOne);
       });
 
       test('_checkSearchFieldInputKey does not call handleSearch if search parameters are undefined', function() {
