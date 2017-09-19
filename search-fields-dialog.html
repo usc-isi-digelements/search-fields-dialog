@@ -185,11 +185,11 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       iron-icon {
-        --iron-icon-height: 20px;
-        --iron-icon-width: 20px;
+        --iron-icon-height: 30px;
+        --iron-icon-width: 30px;
         --iron-icon: {
           margin: 0 5px;
-          min-width: 20px;
+          min-width: 30px;
         }
       }
 
@@ -211,13 +211,14 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       .search-options-title {
-        font-size: 18px;
+        font-size: 24px;
+        font-weight: 500;
         text-transform: none;
       }
     </style>
 
     <paper-button class="layout horizontal center green" active="[[opened]]" on-tap="toggleSearchFieldsDialog" title="Click to Enter Search Terms">
-      <iron-icon icon="search" style="margin-top: 1px;"></iron-icon>
+      <iron-icon icon="fa:search"></iron-icon>
       <span class="search-options-title">Click to Enter Search Terms</span>
     </paper-button>
 
@@ -263,7 +264,7 @@ A Polymer Element showing search fields in a modal dialog.
                   <div class="layout horizontal toggle-buttons">
                     <paper-icon-button
                       class$="require-one-icon [[_getButtonStyleClass(searchConfig.requireOne)]]"
-                      icon="fa:star"
+                      icon="fa:asterisk"
                       title="Click to Require at Least One Term from [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.requireOne)]])"
                       on-tap="_toggleRequireOne">
                     </paper-icon-button>
@@ -310,11 +311,11 @@ A Polymer Element showing search fields in a modal dialog.
       <div class="styled-dialog-divider"></div>
 
       <div class="help-text layout horizontal center">
-        <iron-icon class="require-one-icon on" icon="fa:star"></iron-icon>
+        <iron-icon class="require-one-icon on" icon="fa:asterisk"></iron-icon>
         <div>
-          Click the <strong>star</strong> button to <strong>require at least one term from a field</strong> to match every search result.
+          Click the <strong>asterisk</strong> button to <strong>require at least one term from a field</strong> to match every search result.
           (Terms may still be marked as excluded.)
-          This is helpful if you want results that match one term but you don't need results that match all terms simultaneously.
+          This is helpful if you want results that match one term but don't need results that match all terms simultaneously.
           Example:  <strong>New York, Bronx, Brooklyn, Manhattan, Queens</strong>
         </div>
       </div>
@@ -888,7 +889,6 @@ A Polymer Element showing search fields in a modal dialog.
        * @private
        */
       _updateDateParameterFromField: function(searchConfig) {
-
         var parameterKey = this.dateConfig[searchConfig.key];
         // TODO Don't assume data structure.
         if(!_.isEmpty(searchConfig.value[searchConfig.key])) {

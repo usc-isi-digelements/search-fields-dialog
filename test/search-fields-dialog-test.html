@@ -136,7 +136,7 @@ limitations under the License.
         var startSearchBtn = element.$$('paper-button[title="Click to Enter Search Terms"]');
         assert.isNotNull(startSearchBtn);
         assert.equal(startSearchBtn.active, element.opened);
-        assert.isNotNull(element.$$('iron-icon[icon="search"]'));
+        assert.isNotNull(element.$$('iron-icon[icon="fa:search"]'));
         assert.isNotNull(element.$$('styled-dialog.search-dialog'));
         assert.equal(element.$$('styled-dialog.search-dialog').opened, false);
         assert.isNotNull(element.$$('styled-dialog.help-dialog'));
