@@ -635,7 +635,7 @@ A Polymer Element showing search fields in a modal dialog.
             if(dialogConfig.data) {
               dialogConfig.data.forEach(function(searchConfig, searchIndex) {
                 if(dateKeys.indexOf(searchConfig.key) >= 0) {
-                  self._updateDateFieldFromParameter(searchConfig, ['_searchFields', dialogIndex, 'data', searchIndex, 'value']);
+                  self._updateDateFieldFromParameter(searchConfig, ['_searchFields', dialogIndex, 'data', searchIndex]);
                 } else {
                   self._updateSearchFieldFromParameter(searchConfig, ['_searchFields', dialogIndex, 'data', searchIndex]);
                 }
@@ -966,7 +966,8 @@ A Polymer Element showing search fields in a modal dialog.
         if(this.searchParameters[parameterKey][searchConfig.key]) {
           searchConfig.value[searchConfig.key] = this.searchParameters[parameterKey][searchConfig.key];
         }
-        this.set(updatePath, searchConfig.value);
+        // Must call notify path to update the value in the date picker element.
+        this.notifyPath(updatePath.concat('value'), searchConfig.value);
       },
 
       /**
