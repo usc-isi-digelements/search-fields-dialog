@@ -16,6 +16,7 @@ limitations under the License.
 
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../button-action/button-action.html">
+<link rel="import" href="../image-gallery/image-gallery.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../iron-icon/iron-icon.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
@@ -57,9 +58,9 @@ A Polymer Element showing search fields in a modal dialog.
         color: yellowgreen;
       }
 
-      .search-labels {
+      .search-label {
         text-align: end;
-        /* Vertically align the search-labels with their paper-input-containers. */
+        /* Vertically align the search-label with their paper-input-containers. */
         padding-top: 22px;
       }
 
@@ -77,14 +78,26 @@ A Polymer Element showing search fields in a modal dialog.
         }
       }
 
-      .date-labels {
-        padding-top: 30px;
+      .search-dialog paper-input.add-width {
+        --paper-input-container: {
+          padding: 0 5px 4px 20px;
+          width: 305px;
+        }
+      }
+
+      .date-label {
+        padding-top: 32px;
+        text-align: end;
+      }
+
+      .image-label {
+        padding-top: 5px;
         text-align: end;
       }
 
       vaadin-date-picker-display {
         display: inline-block;
-        padding: 0 5px 6px 20px;
+        padding: 0 5px 4px 20px;
         width: 335px;
         --date-select-bg-color: #ffffff;
         --date-select-text-color: #000000;
@@ -118,17 +131,64 @@ A Polymer Element showing search fields in a modal dialog.
         };
       }
 
-      .toggle-buttons paper-icon-button {
-        border-radius: 50%;
-        height: 30px;
-        width: 30px;
-        padding: 5px;
-        /* Vertically align the toggle-buttons with their search-labels & paper-input-containers. */
-        margin-top: 19px;
+      .image-list {
+        margin-left: 20px;
+        margin-bottom: 5px;
       }
 
-      .network-expansion-icon {
-        color: lightgray;
+      .image-item {
+        cursor: default;
+        display: -webkit-box;
+        overflow: hidden;
+        padding-right: 5px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 695px;
+        word-break: break-word;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+      }
+
+      .image-item a {
+        color: inherit;
+      }
+
+      .image-item a:hover {
+        color: var(--secondary-text-color);
+      }
+
+      .selected {
+        background-color: var(--primary-background-color);
+      }
+
+      .hovering {
+        background-color: yellow;
+      }
+
+      image-gallery {
+        --image-hovering-color: yellow;
+        --image-selected-color: var(--primary-background-color);
+        margin-left: 15px;
+      }
+
+      .image-item paper-icon-button,
+      .toggle-buttons paper-icon-button {
+        border-radius: 50%;
+        color: var(--disabled-text-color);
+        cursor: pointer;
+        height: 30px;
+        width: 30px;
+        min-width: 30px;
+        padding: 5px;
+      }
+
+      .image-item paper-icon-button.on {
+        color: var(--primary-text-color);
+      }
+
+      .toggle-buttons paper-icon-button {
+        /* Vertically align the toggle-buttons with their search-label & paper-input-containers. */
+        margin-top: 15px;
       }
 
       .network-expansion-icon:hover,
@@ -140,36 +200,9 @@ A Polymer Element showing search fields in a modal dialog.
         color: orangered;
       }
 
-      .require-one-icon {
-        color: lightgray;
-      }
-
       .require-one-icon:hover,
       .require-one-icon.on {
         color: gold;
-      }
-
-      @media all and (min-width: 500px) and (max-width: 650px) {
-        .search-options-title {
-          width: 80px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .search-fields-selected {
-          padding: 0px 10px 10px 10px;
-        }
-      }
-
-      @media all and (min-width: 0px) and (max-width: 500px) {
-        .search-options-title {
-          display: none;
-        }
-
-        .search-fields-selected {
-          padding: 0px 10px 10px 10px;
-        }
       }
 
       .help-dialog {
@@ -195,11 +228,6 @@ A Polymer Element showing search fields in a modal dialog.
 
       .help-text > div {
         margin-left: 15px;
-      }
-
-      .button-spacer {
-        height: 30px;
-        width: 30px;
       }
 
       .network-expansion-info {
@@ -236,8 +264,8 @@ A Polymer Element showing search fields in a modal dialog.
 
       <template is="dom-repeat" items="[[_searchFields]]" as="dialogConfig">
         <div class="layout horizontal">
-          <template is="dom-if" if="[[_equalsDate(dialogConfig.type)]]">
-            <div class="styled-dialog-name date-labels">[[dialogConfig.name]]</div>
+          <template is="dom-if" if="[[dialogConfig.isDate]]">
+            <div class="styled-dialog-name date-label">[[dialogConfig.name]]</div>
             <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
               <div class="layout horizontal date-fields-container nowrap">
                 <vaadin-date-picker-display
@@ -250,39 +278,82 @@ A Polymer Element showing search fields in a modal dialog.
             </template>
           </template>
 
-          <template is="dom-if" if="[[!_equalsDate(dialogConfig.type)]]">
-            <div class="styled-dialog-name search-labels">[[dialogConfig.name]]</div>
-            <div class="layout horizontal wrap">
-              <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
-                <div class="layout horizontal nowrap">
-                  <paper-input
-                    id$="input_[[searchConfig.key]]"
-                    label="[[searchConfig.title]]"
-                    value="{{searchConfig.value}}"
-                    on-keyup="_checkSearchFieldInputKey">
-                  </paper-input>
-                  <div class="layout horizontal toggle-buttons">
-                    <paper-icon-button
-                      class$="require-one-icon [[_getButtonStyleClass(searchConfig.requireOne)]]"
-                      icon="fa:asterisk"
-                      title="Click to Require at Least One Term from [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.requireOne)]])"
-                      on-tap="_toggleRequireOne">
-                    </paper-icon-button>
-                    <template is="dom-if" if="[[searchConfig.enableNetworkExpansion]]">
-                      <paper-icon-button
-                        class$="network-expansion-icon [[_getNetworkExpansionStyleClass(searchConfig.activateNetworkExpansion, _isNetworkExpansionViable)]]"
-                        icon="fa:arrows-alt"
-                        title="Click to Toggle Network Expansion of [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.activateNetworkExpansion)]])"
-                        on-tap="_toggleNetworkExpansion">
-                      </paper-icon-button>
-                    </template>
-                    <template is="dom-if" if="[[!searchConfig.enableNetworkExpansion]]">
-                      <div class="button-spacer"></div>
+          <template is="dom-if" if="[[!dialogConfig.isDate]]">
+            <template is="dom-if" if="[[dialogConfig.isImage]]">
+              <div class="styled-dialog-name image-label">[[dialogConfig.name]]</div>
+              <div class="layout vertical">
+                <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
+                  <div class="layout vertical image-list">
+                    <template is="dom-repeat" items="[[searchConfig.images]]" as="image">
+                      <div class$="layout horizontal center image-item [[_isInList(searchConfig.selected, image.id, 'selected')]] [[_isInList(searchConfig.hovering, image.id, 'hovering')]]"
+                        on-mouseover="_hoverImageBegin"
+                        on-mouseout="_hoverImageEnd">
+
+                        <paper-icon-button
+                          class$="[[_getImageButtonStyleClass(searchConfig.selected, image.id)]]"
+                          icon="fa:search"
+                          title$="[[_getImageSearchButtonText(searchConfig.selected, image.id)]]"
+                          on-tap="_toggleImageSearch"></paper-icon-button>
+
+                        <paper-icon-button
+                          class$="[[_getImageButtonStyleClass(searchConfig.selected, image.id, image.search, 'required')]]"
+                          icon="fa:plus"
+                          title$="[[_getImageRequiredButtonText(image.search)]]"
+                          on-tap="_toggleImageRequired"></paper-icon-button>
+
+                        <paper-icon-button
+                          class$="[[_getImageButtonStyleClass(searchConfig.selected, image.id, image.search, 'excluded')]]"
+                          icon="fa:minus"
+                          title$="[[_getImageExcludedButtonText(image.search)]]"
+                          on-tap="_toggleImageExcluded"></paper-icon-button>
+
+                        <a href$="[[image.source]]" target="_blank" title="Click to Open Image">[[image.id]]</a>
+                      </div>
                     </template>
                   </div>
-                </div>
-              </template>
-            </div>
+
+                  <image-gallery
+                    hovering="{{searchConfig.hovering}}"
+                    images="[[searchConfig.images]]"
+                    selected="[[searchConfig.selected]]"></image-gallery>
+                </template>
+              </div>
+            </template>
+
+            <template is="dom-if" if="[[!dialogConfig.isImage]]">
+              <div class="styled-dialog-name search-label">[[dialogConfig.name]]</div>
+              <div class="layout horizontal wrap">
+                <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
+                  <div class="layout horizontal nowrap">
+                    <paper-input
+                      class$="[[_getInputWidthStyleClass(searchConfig.enableNetworkExpansion)]]"
+                      id$="input_[[searchConfig.key]]"
+                      label="[[searchConfig.title]]"
+                      value="{{searchConfig.value}}"
+                      on-keyup="_checkSearchFieldInputKey">
+                    </paper-input>
+
+                    <div class="layout horizontal toggle-buttons">
+                      <template is="dom-if" if="[[searchConfig.enableNetworkExpansion]]">
+                        <paper-icon-button
+                          class$="network-expansion-icon [[_getNetworkExpansionStyleClass(searchConfig.activateNetworkExpansion, _isNetworkExpansionViable)]]"
+                          icon="fa:arrows-alt"
+                          title="Click to Toggle Network Expansion of [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.activateNetworkExpansion)]])"
+                          on-tap="_toggleNetworkExpansion">
+                        </paper-icon-button>
+                      </template>
+
+                      <paper-icon-button
+                        class$="require-one-icon [[_getButtonStyleClass(searchConfig.requireOne)]]"
+                        icon="fa:asterisk"
+                        title="Click to Require at Least One Term from [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.requireOne)]])"
+                        on-tap="_toggleRequireOne">
+                      </paper-icon-button>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </template>
           </template>
         </div>
       </template>
@@ -362,6 +433,19 @@ A Polymer Element showing search fields in a modal dialog.
           value: function() {
             return {};
           }
+        },
+
+        /**
+         * (Optional)
+         *
+         * The prefix for the image URL for image field data.
+         *
+         * @type {String}
+         * @default ''
+         */
+        imageUrlPrefix: {
+          type: String,
+          value: ''
         },
 
         /**
@@ -623,19 +707,20 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Updates the search fields shown in the dialog from the search parameters if opening the dialog, then opens or closes the dialog.
+       * Updates the search fields shown in the dialog using the search parameters if opening the dialog, then opens or closes the dialog.
        */
       toggleSearchFieldsDialog: function() {
         var self = this;
-        var dateKeys = _.keys(this.dateConfig);
 
         // Set or clear the search fields whenever the dialog is opened.
         if(!this.opened && this._searchFields) {
           this._searchFields.forEach(function(dialogConfig, dialogIndex) {
             if(dialogConfig.data) {
               dialogConfig.data.forEach(function(searchConfig, searchIndex) {
-                if(dateKeys.indexOf(searchConfig.key) >= 0) {
+                if(dialogConfig.isDate) {
                   self._updateDateFieldFromParameter(searchConfig, ['_searchFields', dialogIndex, 'data', searchIndex]);
+                } else if(dialogConfig.isImage) {
+                  self._updateImageGalleryFromParameter(searchConfig, ['_searchFields', dialogIndex, 'data', searchIndex]);
                 } else {
                   self._updateSearchFieldFromParameter(searchConfig, ['_searchFields', dialogIndex, 'data', searchIndex]);
                 }
@@ -660,37 +745,42 @@ A Polymer Element showing search fields in a modal dialog.
        * @private
        */
       _createSearchFields: function(config, dataProperty, nameProperty, typeProperty, dataKeyProperty, dataTitleProperty) {
-        var dateKeys = _.keys(this.dateConfig);
+        var self = this;
         return (config || []).map(function(dialogConfig) {
+          var isDate = dialogConfig[typeProperty] === 'date';
+          var isImage = dialogConfig[typeProperty] === 'image';
           return {
             data: dialogConfig[dataProperty].map(function(searchConfig) {
-              var isDate = (dateKeys.indexOf(searchConfig[dataKeyProperty]) >= 0);
-              return {
+              var item = {
                 key: searchConfig[dataKeyProperty],
-                title: searchConfig[dataTitleProperty],
-                value: isDate ? {} : '',
-                activateNetworkExpansion: isDate ? undefined : false,
-                activateNetworkExpansionPrevious: isDate ? undefined : false,
-                enableNetworkExpansion: isDate ? undefined : (searchConfig.enableNetworkExpansion || false),
-                requireOne: isDate ? undefined : true,
-                requireOnePrevious: isDate ? undefined : true
+                title: searchConfig[dataTitleProperty]
               };
+
+              if(!isImage) {
+                item.value = isDate ? {} : '';
+              }
+
+              if(!isImage && !isDate) {
+                item.activateNetworkExpansion = false;
+                item.activateNetworkExpansionPrevious = false;
+                item.enableNetworkExpansion = (searchConfig.enableNetworkExpansion || false);
+                item.requireOne = true;
+                item.requireOnePrevious = true;
+              }
+
+              if(isImage) {
+                item.hovering = [];
+                item.images = [];
+                item.selected = [];
+              }
+
+              return item;
             }),
-            name: dialogConfig[nameProperty],
-            type: dialogConfig[typeProperty]
+            isDate: isDate,
+            isImage: isImage,
+            name: dialogConfig[nameProperty]
           };
         });
-      },
-
-      /**
-       * Returns whether the given argument is 'date'.
-       *
-       * @param {String} string
-       * @return {Boolean}
-       * @private
-       */
-      _equalsDate: function(string) {
-        return string === 'date';
       },
 
       /**
@@ -716,14 +806,62 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Returns the checkbox icon with the given toggle status.
+       * Returns the style class of an image button.
        *
-       * @param {Boolean} on
+       * @param {Array} list
+       * @param {Number|String} id
+       * @param {String} search
+       * @param {String} type
        * @return {String}
        * @private
        */
-      _getCheckboxIcon: function(on) {
-        return on ? 'fa:check-square' : 'fa:square-o';
+      _getImageButtonStyleClass: function(list, id, search, type) {
+        return (list.indexOf(id) >= 0 && (_.isUndefined(type) ? true : search === type)) ? 'on' : '';
+      },
+
+      /**
+       * Returns the text of the "excluded" image button.
+       *
+       * @param {String} search
+       * @return {String}
+       * @private
+       */
+      _getImageExcludedButtonText: function(search) {
+        return (search === 'excluded' ? 'Click to Not Exclude Image from Search Results' : 'Click to Exclude Image from Search Results');
+      },
+
+      /**
+       * Returns the text of the "required" image button.
+       *
+       * @param {String} search
+       * @return {String}
+       * @private
+       */
+      _getImageRequiredButtonText: function(search) {
+        return (search === 'required' ? 'Click to Not Require Image in Search Results' : 'Click to Require Image in Search Results');
+      },
+
+      /**
+       * Returns the text of the "search" image button.
+       *
+       * @param {Array} list
+       * @param {Number|String} id
+       * @return {String}
+       * @private
+       */
+      _getImageSearchButtonText: function(list, id) {
+        return (list.indexOf(id) >= 0 ? 'Click to Remove Image from Search' : 'Click to Add Image to Search');
+      },
+
+      /**
+       * Returns the style class of an input element.
+       *
+       * @param {Boolean} enableNetworkExpansion
+       * @return {String}
+       * @private
+       */
+      _getInputWidthStyleClass: function(enableNetworkExpansion) {
+        return enableNetworkExpansion ? '' : 'add-width';
       },
 
       /**
@@ -739,6 +877,26 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
+       * Begins hovering over an image using the search config object and image ID in the model of the given event.
+       *
+       * @param {Event} event
+       * @private
+       */
+      _hoverImageBegin: function(event) {
+        event.model.set('searchConfig.hovering', [event.model.image.id]);
+      },
+
+      /**
+       * Ends hovering over an image using the search config object and image ID in the model of the given event.
+       *
+       * @param {Event} event
+       * @private
+       */
+      _hoverImageEnd: function(event) {
+        event.model.set('searchConfig.hovering', []);
+      },
+
+      /**
        * Returns the backdrop style class.
        *
        * @param {Boolean} helpOpened
@@ -747,6 +905,88 @@ A Polymer Element showing search fields in a modal dialog.
        */
       _isBackdrop: function(helpOpened) {
         return helpOpened ? 'backdrop' : '';
+      },
+
+      /**
+       * Returns the given object if the given ID is in the given list.
+       *
+       * @param {Array} list
+       * @param {Number|String} id
+       * @param {Object} object
+       * @return {Object}
+       * @private
+       */
+      _isInList: function(list, id, object) {
+        return list.indexOf(id) >= 0 ? object : '';
+      },
+
+      /**
+       * Selects an image and toggles its excluded status using the search config object and image ID/search status in the model of the given event.
+       *
+       * @param {Event} event
+       * @private
+       */
+      _toggleImageExcluded: function(event) {
+        var search = event.model.image.search === 'excluded' ? 'optional' : 'excluded';
+        event.model.set('image.search', search);
+
+        // Add image ID to list of selected image IDs (if not there already).
+        var index = event.model.searchConfig.selected.indexOf(event.model.image.id);
+        if(index < 0) {
+          // Use the map function to create a new array.
+          var selected = event.model.searchConfig.selected.map(function(id) {
+            return id;
+          });
+          selected.push(event.model.image.id);
+          event.model.set('searchConfig.selected', selected);
+        }
+      },
+
+      /**
+       * Selects an image and toggles its required status using the search config object and image ID/search status in the model of the given event.
+       *
+       * @param {Event} event
+       * @private
+       */
+      _toggleImageRequired: function(event) {
+        var search = event.model.image.search === 'required' ? 'optional' : 'required';
+        event.model.set('image.search', search);
+
+        // Add image ID to list of selected image IDs (if not there already).
+        var index = event.model.searchConfig.selected.indexOf(event.model.image.id);
+        if(index < 0) {
+          // Use the map function to create a new array.
+          var selected = event.model.searchConfig.selected.map(function(id) {
+            return id;
+          });
+          selected.push(event.model.image.id);
+          event.model.set('searchConfig.selected', selected);
+        }
+      },
+
+      /**
+       * Toggles the selected status of an image using the search config object and image ID/search status in the model of the given event.
+       *
+       * @param {Event} event
+       * @private
+       */
+      _toggleImageSearch: function(event) {
+        event.model.set('image.search', 'optional');
+
+        var index = event.model.searchConfig.selected.indexOf(event.model.image.id);
+
+        // Use the map function to create a new array.
+        var selected = event.model.searchConfig.selected.map(function(id) {
+          return id;
+        });
+
+        if(index < 0) {
+          selected.push(event.model.image.id);
+        } else {
+          selected.splice(index, 1);
+        }
+
+        event.model.set('searchConfig.selected', selected);
       },
 
       /**
@@ -804,7 +1044,32 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Updates the searchParameters and networkExpansionParameters from the given config object by adding or removing search terms.
+       * Updates the searchParameters for the given searchConfig using the given search terms.
+       *
+       * @param {Object} searchConfig
+       * @param {Object} searchTermToSearchStatus
+       * @private
+       */
+      _updateSearchParameterTerms: function(searchConfig, searchTermToSearchStatus) {
+        var self = this;
+
+        _.keys(self.searchParameters[searchConfig.key]).forEach(function(term) {
+          // Disable deleted terms.
+          if(self.searchParameters[searchConfig.key][term].enabled && _.keys(searchTermToSearchStatus).indexOf(term) < 0) {
+            self._updateSearchParameterAndNotify(searchConfig.key, term, searchConfig.title, false);
+          }
+        });
+
+        _.keys(searchTermToSearchStatus).forEach(function(term) {
+          // Add new terms.
+          if(term) {
+            self._updateSearchParameterAndNotify(searchConfig.key, term, searchConfig.title, true, searchTermToSearchStatus[term]);
+          }
+        });
+      },
+
+      /**
+       * Updates the searchParameters and networkExpansionParameters using the given config object by adding or removing search terms.
        *
        * @param {Object} searchConfig
        * @private
@@ -812,20 +1077,15 @@ A Polymer Element showing search fields in a modal dialog.
       _updateSearchAndNetworkParameterFromField: function(searchConfig) {
         var self = this;
 
-        var terms = searchConfig.value.split(',').map(function(term) {
+        var searchTermToSearchStatus = searchConfig.value.split(',').map(function(term) {
           return term.trim();
-        }).reduce(function(terms, term) {
+        }).reduce(function(searchTermToSearchStatus, term) {
           var search = searchConfig.requireOne ? 'union' : 'optional';
           var key = term;
 
-          // An excluded term overrides searchConfig.requireOne.
-          if(key.indexOf('-') === 0) {
-            search = 'excluded';
-            key = key.substring(1);
-          }
-
-          if(key.indexOf('+') === 0) {
-            search = (search === 'union' ? 'union' : 'required');
+          // A required or excluded term overrides searchConfig.requireOne.
+          if(key.indexOf('+') === 0 || key.indexOf('-') === 0) {
+            search = key.indexOf('+') === 0 ? 'required' : 'excluded';
             key = key.substring(1);
           }
 
@@ -835,25 +1095,13 @@ A Polymer Element showing search fields in a modal dialog.
           }
 
           if(key) {
-            terms[key] = search;
+            searchTermToSearchStatus[key] = search;
           }
 
-          return terms;
+          return searchTermToSearchStatus;
         }, {});
 
-        _.keys(self.searchParameters[searchConfig.key]).forEach(function(term) {
-          // Disable deleted terms.
-          if(self.searchParameters[searchConfig.key][term].enabled && _.keys(terms).indexOf(term) < 0) {
-            self._updateSearchParameterAndNotify(searchConfig.key, term, searchConfig.title, false);
-          }
-        });
-
-        _.keys(terms).forEach(function(term) {
-          // Add new terms.
-          if(term) {
-            self._updateSearchParameterAndNotify(searchConfig.key, term, searchConfig.title, true, terms[term]);
-          }
-        });
+        this._updateSearchParameterTerms(searchConfig, searchTermToSearchStatus);
 
         var activateNetworkExpansion = (this._isNetworkExpansionViable && searchConfig.activateNetworkExpansion);
 
@@ -861,6 +1109,23 @@ A Polymer Element showing search fields in a modal dialog.
           this.networkExpansionParameters[searchConfig.key] = activateNetworkExpansion;
           this.notifyPath(['networkExpansionParameters', searchConfig.key], this.networkExpansionParameters[searchConfig.key]);
         }
+      },
+
+      /**
+       * Updates the searchParameters using the given search config object by adding or removing selected images.
+       *
+       * @param {Object} searchConfig
+       * @private
+       */
+      _updateImageParameterFromGallery: function(searchConfig) {
+        var searchTermToSearchStatus = searchConfig.images.reduce(function(searchTermToSearchStatus, image) {
+          if(searchConfig.selected.indexOf(image.id) >= 0) {
+            searchTermToSearchStatus[image.id] = image.search;
+          }
+          return searchTermToSearchStatus;
+        }, {});
+
+        this._updateSearchParameterTerms(searchConfig, searchTermToSearchStatus);
       },
 
       /**
@@ -883,7 +1148,7 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Updates the searchParameters from the given date config object by adding or removing search terms.
+       * Updates the searchParameters using the given date config object by adding or removing search terms.
        *
        * @param {Object} searchConfig
        * @private
@@ -901,20 +1166,21 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Updates the searchParameters from the search fields in the dialog by adding or removing search terms.
+       * Updates the searchParameters using the search fields in the dialog by adding or removing search terms.
        *
        * @private
        */
       _updateSearchParametersFromFields: function() {
         var self = this;
-        var dateKeys = _.keys(this.dateConfig);
 
         if(this._searchFields) {
           this._searchFields.forEach(function(dialogConfig) {
             if(dialogConfig.data) {
               dialogConfig.data.forEach(function(searchConfig) {
-                if(dateKeys.indexOf(searchConfig.key) >= 0) {
+                if(dialogConfig.isDate) {
                   self._updateDateParameterFromField(searchConfig);
+                } else if(dialogConfig.isImage) {
+                  self._updateImageParameterFromGallery(searchConfig);
                 } else {
                   self._updateSearchAndNetworkParameterFromField(searchConfig);
                 }
@@ -925,9 +1191,10 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Updates the search field input of the given config object from the searchParameters.
+       * Updates the search field input of the given config object using the searchParameters and notifies observers on the given path.
        *
        * @param {Object} searchConfig
+       * @param {Array|String} updatePath
        * @private
        */
       _updateSearchFieldFromParameter: function(searchConfig, updatePath) {
@@ -954,7 +1221,33 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Updates the date input of the given config object from the searchParameters and notifies observers on the given path.
+       * Updates the image gallery input of the given config object using the searchParameters and notifies observers on the given path.
+       *
+       * @param {Object} searchConfig
+       * @param {Array|String} updatePath
+       * @private
+       */
+      _updateImageGalleryFromParameter: function(searchConfig, updatePath) {
+        var self = this;
+        var images = _.keys(this.searchParameters[searchConfig.key]).filter(function(term) {
+          return self.getSearchParameterData(self.searchParameters[searchConfig.key][term]).enabled;
+        }).map(function(term) {
+          var search = self.getSearchParameterData(self.searchParameters[searchConfig.key][term]).search;
+          return {
+            id: term,
+            search: search || 'optional',
+            source: self.imageUrlPrefix + term
+          };
+        });
+
+        this.set(updatePath.concat('images'), images);
+        this.set(updatePath.concat('selected'), images.map(function(object) {
+          return object.id;
+        }));
+      },
+
+      /**
+       * Updates the date input of the given config object using the searchParameters and notifies observers on the given path.
        *
        * @param {Object} searchConfig
        * @param {Array|String} updatePath
@@ -966,7 +1259,6 @@ A Polymer Element showing search fields in a modal dialog.
         if(this.searchParameters[parameterKey][searchConfig.key]) {
           searchConfig.value[searchConfig.key] = this.searchParameters[parameterKey][searchConfig.key];
         }
-        // Must call notify path to update the value in the date picker element.
         this.notifyPath(updatePath.concat('value'), searchConfig.value);
       },
 
@@ -1005,7 +1297,7 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Updates the searchParameters from the search fields and closes the dialog so that new queries can run.
+       * Updates the searchParameters using the search fields and closes the dialog so that new queries can run.
        */
       handleSearch: function() {
         this._searchFields.forEach(function(dialogConfig) {
@@ -1030,14 +1322,16 @@ A Polymer Element showing search fields in a modal dialog.
        */
       resetAllSearchFields: function() {
         var self = this;
-        var dateKeys = _.keys(this.dateConfig);
 
         if(this._searchFields) {
           this._searchFields.forEach(function(dialogConfig, dialogIndex) {
             if(dialogConfig.data) {
               dialogConfig.data.forEach(function(searchConfig, searchIndex) {
-                if(dateKeys.indexOf(searchConfig.key) >= 0) {
+                if(dialogConfig.isDate) {
                   self.set(['_searchFields', dialogIndex, 'data', searchIndex, 'value'], {});
+                } else if(dialogConfig.isImage) {
+                  self.set(['_searchFields', dialogIndex, 'data', searchIndex, 'selected'], []);
+                  self.set(['_searchFields', dialogIndex, 'data', searchIndex, 'images'], []);
                 } else {
                   self.$$('#input_' + searchConfig.key).value = '';
                 }
@@ -1070,7 +1364,7 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Updates the searchParameters from the search fields and closes the dialog if ENTER was pressed.
+       * Updates the searchParameters using the search fields and closes the dialog if ENTER was pressed.
        *
        * @param {Object} event
        * @private

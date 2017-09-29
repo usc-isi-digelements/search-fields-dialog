@@ -66,6 +66,10 @@ limitations under the License.
         title: 'Email Address',
         enableNetworkExpansion: true
       };
+      var imageConfig = {
+        key: 'image',
+        title: 'Image'
+      };
       var phoneConfig = {
         key: 'phone',
         title: 'Telephone Number',
@@ -90,16 +94,8 @@ limitations under the License.
           dateStart: 'postingDate',
           dateEnd: 'postingDate'
         };
-        element.searchParameters = {
-          city: {},
-          country: {},
-          description: {},
-          email: {},
-          phone: {},
-          postingDate: {},
-          title: {},
-          url: {},
-          website: {}
+        element.networkExpansionParameters = {
+          city: false
         };
         element.searchFieldsConfig = [{
           type: 'date',
@@ -114,28 +110,61 @@ limitations under the License.
         }, {
           name: 'Ad',
           data: [websiteConfig, titleConfig, descriptionConfig, urlConfig]
+        }, {
+          type: 'image',
+          name: 'Image',
+          data: [imageConfig]
         }];
-        element.networkExpansionParameters = {
-          city: false
+        element.searchParameters = {
+          city: {},
+          country: {},
+          description: {},
+          email: {},
+          image: {},
+          phone: {},
+          postingDate: {},
+          title: {},
+          url: {},
+          website: {}
         };
         flush(done);
       });
 
-      test('properties not explicitly set previously are initialized correctly', function() {
+      test('properties are set as expected', function() {
         assert.equal(element.dataProperty, 'data');
         assert.equal(element.nameProperty, 'name');
         assert.equal(element.typeProperty, 'type');
         assert.equal(element.dataKeyProperty, 'key');
         assert.equal(element.dataTitleProperty, 'title');
+        assert.equal(element.imageUrlPrefix, '');
         assert.isFalse(element.opened);
         assert.isTrue(element.processRequest);
         assert.isFalse(element.userCanceled);
+        assert.deepEqual(element.dateConfig, {
+          dateStart: 'postingDate',
+          dateEnd: 'postingDate'
+        });
+        assert.deepEqual(element.networkExpansionParameters, {
+          city: false
+        });
+        assert.deepEqual(element.searchParameters, {
+          city: {},
+          country: {},
+          description: {},
+          email: {},
+          image: {},
+          phone: {},
+          postingDate: {},
+          title: {},
+          url: {},
+          website: {}
+        });
       });
 
-      test('template has correct elements at the top', function() {
-        var startSearchBtn = element.$$('paper-button[title="Click to Enter Search Terms"]');
-        assert.isNotNull(startSearchBtn);
-        assert.equal(startSearchBtn.active, element.opened);
+      test('template does have the dialogs and the button to open the search dialog', function() {
+        var button = element.$$('paper-button[title="Click to Enter Search Terms"]');
+        assert.isNotNull(button);
+        assert.equal(button.active, element.opened);
         assert.isNotNull(element.$$('iron-icon[icon="fa:search"]'));
         assert.isNotNull(element.$$('styled-dialog.search-dialog'));
         assert.equal(element.$$('styled-dialog.search-dialog').opened, false);
@@ -143,7 +172,7 @@ limitations under the License.
         assert.equal(element.$$('styled-dialog.help-dialog').opened, false);
       });
 
-      test('template has date pickers', function() {
+      test('template does have date pickers', function() {
         var datePickers = Polymer.dom(element.root).querySelectorAll('vaadin-date-picker-display');
         assert.equal(datePickers.length, 2);
         assert.deepEqual(datePickers[0].facetKey, 'value');
@@ -151,12 +180,7 @@ limitations under the License.
         assert.deepEqual(datePickers[0].facets, {
           key: 'dateStart',
           title: 'From',
-          value: {},
-          activateNetworkExpansion: undefined,
-          activateNetworkExpansionPrevious: undefined,
-          enableNetworkExpansion: undefined,
-          requireOne: undefined,
-          requireOnePrevious: undefined,
+          value: {}
         });
         assert.deepEqual(datePickers[0].key, 'dateStart');
         assert.deepEqual(datePickers[0].category, 'From');
@@ -165,18 +189,13 @@ limitations under the License.
         assert.deepEqual(datePickers[1].facets, {
           key: 'dateEnd',
           title: 'To',
-          value: {},
-          activateNetworkExpansion: undefined,
-          activateNetworkExpansionPrevious: undefined,
-          enableNetworkExpansion: undefined,
-          requireOne: undefined,
-          requireOnePrevious: undefined,
+          value: {}
         });
         assert.deepEqual(datePickers[1].key, 'dateEnd');
         assert.deepEqual(datePickers[1].category, 'To');
       });
 
-      test('template has paper inputs', function() {
+      test('template does have paper inputs', function() {
         var paperInputs = Polymer.dom(element.root).querySelectorAll('paper-input');
         assert.isNotNull(paperInputs);
         assert.equal(paperInputs.length, 8);
@@ -206,13 +225,21 @@ limitations under the License.
         assert.equal(paperInputs[7].value, '');
       });
 
-      test('template has paper icon buttons', function() {
+      test('template does have paper icon buttons', function() {
         var buttons = Polymer.dom(element.root).querySelectorAll('.toggle-buttons paper-icon-button');
         assert.isNotNull(buttons);
         assert.equal(buttons.length, 12);
       });
 
-      test('template has expected buttons at the bottom', function() {
+      test('template does have image elements', function() {
+        assert.isNotNull(element.$$('.image-list'));
+        assert.isNotNull(element.$$('image-gallery'));
+        assert.deepEqual(element.$$('image-gallery').hovering, []);
+        assert.deepEqual(element.$$('image-gallery').images, []);
+        assert.deepEqual(element.$$('image-gallery').selected, []);
+      });
+
+      test('template does have expected buttons', function() {
         var buttons = Polymer.dom(element.root).querySelectorAll('button-action');
         assert.isNotNull(buttons);
         assert.equal(buttons.length, 4);
@@ -222,32 +249,24 @@ limitations under the License.
         assert.equal(buttons[3].text, 'Help');
       });
 
-      test('_searchFields is created correctly', function() {
+      test('_searchFields is as expected', function() {
         assert.deepEqual(element._searchFields, [{
-          type: 'date',
           name: 'Dates',
+          isImage: false,
+          isDate: true,
           data: [{
             key: 'dateStart',
             title: 'From',
-            value: {},
-            activateNetworkExpansion: undefined,
-            activateNetworkExpansionPrevious: undefined,
-            enableNetworkExpansion: undefined,
-            requireOne: undefined,
-            requireOnePrevious: undefined,
+            value: {}
           }, {
             key: 'dateEnd',
             title: 'To',
-            value: {},
-            activateNetworkExpansion: undefined,
-            activateNetworkExpansionPrevious: undefined,
-            enableNetworkExpansion: undefined,
-            requireOne: undefined,
-            requireOnePrevious: undefined,
+            value: {}
           }]
         }, {
-          type: undefined,
           name: 'Identifiers',
+          isImage: false,
+          isDate: false,
           data: [{
             key: 'phone',
             title: 'Telephone Number',
@@ -268,8 +287,9 @@ limitations under the License.
             requireOnePrevious: true
           }]
         }, {
-          type: undefined,
           name: 'Location',
+          isImage: false,
+          isDate: false,
           data: [{
             key: 'city',
             title: 'City',
@@ -290,8 +310,9 @@ limitations under the License.
             requireOnePrevious: true
           }]
         }, {
-          type: undefined,
           name: 'Ad',
+          isImage: false,
+          isDate: false,
           data: [{
             key: 'website',
             title: 'Website',
@@ -329,10 +350,21 @@ limitations under the License.
             requireOne: true,
             requireOnePrevious: true
           }]
+        }, {
+          name: 'Image',
+          isImage: true,
+          isDate: false,
+          data: [{
+            key: 'image',
+            title: 'Image',
+            hovering: [],
+            images: [],
+            selected: []
+          }]
         }]);
       });
 
-      test('default buildSearchParameter is set correctly', function() {
+      test('default buildSearchParameter is as expected', function() {
         assert.isFunction(element.buildSearchParameter);
         assert.deepEqual(element.buildSearchParameter('category', 'enabled', 'key', 'text', 'search'), {
           category: 'category',
@@ -352,7 +384,7 @@ limitations under the License.
         });
       });
 
-      test('default getSearchParameterData is set correctly', function() {
+      test('default getSearchParameterData is as expected', function() {
         assert.isFunction(element.getSearchParameterData);
         assert.deepEqual(element.getSearchParameterData({
           category: 'category',
@@ -368,15 +400,7 @@ limitations under the License.
         });
       });
 
-      test('_equalsDate does work', function() {
-        assert.isTrue(element._equalsDate('date'));
-        assert.isFalse(element._equalsDate('location'));
-        assert.isFalse(element._equalsDate('number'));
-        assert.isFalse(element._equalsDate('string'));
-        assert.isFalse(element._equalsDate());
-      });
-
-      test('_updateSearchFieldFromParameter has expected behavior for most common cases', function() {
+      test('_updateSearchFieldFromParameter does have expected behavior for most common cases', function() {
         element.searchParameters.city = {
           nyc: {
             key: 'nyc',
@@ -510,7 +534,7 @@ limitations under the License.
         assert.equal(element.$$('#input_city').value, '-nyc, chicago');
       });
 
-      test('_updateDateFieldFromParameter has expected behavior', function() {
+      test('_updateDateFieldFromParameter does have expected behavior', function() {
         element.searchParameters.postingDate = {
           dateStart: {
             category: 'From',
@@ -522,7 +546,7 @@ limitations under the License.
           }
         };
 
-        element._updateDateFieldFromParameter(element._searchFields[0].data[0], ['_searchFields', 0, 'data', 0, 'value']);
+        element._updateDateFieldFromParameter(element._searchFields[0].data[0], ['_searchFields', 0, 'data', 0]);
 
         assert.deepEqual(element._searchFields[0].data[0].value, {
           dateStart: {
@@ -536,7 +560,7 @@ limitations under the License.
         });
       });
 
-      test('toggleSearchFieldsDialog has expected behavior when toggling dialog open', function() {
+      test('toggleSearchFieldsDialog does have expected behavior when toggling dialog open', function() {
         element.searchParameters.city = {
           nyc: {
             key: 'nyc',
@@ -574,7 +598,7 @@ limitations under the License.
         });
       });
 
-      test('toggleSearchFieldsDialog has expected behavior when toggling dialog closed', function() {
+      test('toggleSearchFieldsDialog does have expected behavior when toggling dialog closed', function() {
         element.opened = true;
         element.searchParameters.city = {
           la: {
@@ -934,7 +958,7 @@ limitations under the License.
         assert.deepEqual(element.searchParameters.postingDate.dateEnd, {});
       });
 
-      test('_updateSearchParametersFromFields has expected behavior', function() {
+      test('_updateSearchParametersFromFields does have expected behavior', function() {
         element.$$('#input_city').value = 'nyc, chicago';
         element._searchFields[0].data[0].value = {};
         element._searchFields[0].data[1].value = {
@@ -981,7 +1005,7 @@ limitations under the License.
         });
       });
 
-      test('resetAllSearchFields has expected behavior', function() {
+      test('resetAllSearchFields does have expected behavior', function() {
         element.$$('#input_city').value = 'nyc, chicago';
         element._searchFields[0].data[0].value = {};
         element._searchFields[0].data[1].value = {
@@ -994,12 +1018,18 @@ limitations under the License.
             text: '03/01/2017'
           }
         };
+        element._searchFields[4].data[0].images = [{
+          id: 'image1'
+        }];
+        element._searchFields[4].data[0].selected = ['image1'];
 
         element.resetAllSearchFields();
 
-        assert.deepEqual(element._searchFields[2].data[0].value, '');
         assert.deepEqual(element._searchFields[0].data[0].value, {});
         assert.deepEqual(element._searchFields[0].data[1].value, {});
+        assert.deepEqual(element._searchFields[2].data[0].value, '');
+        assert.deepEqual(element._searchFields[4].data[0].images, []);
+        assert.deepEqual(element._searchFields[4].data[0].selected, []);
       });
 
       test('handleSearch updates searchParameters and closes dialog', function() {
@@ -1033,6 +1063,7 @@ limitations under the License.
           country: {},
           description: {},
           email: {},
+          image: {},
           phone: {
             '1112223333': {
               key: '1112223333',
@@ -1112,6 +1143,431 @@ limitations under the License.
         element._checkSearchFieldInputKey({keyCode: 10});
 
         assert.isTrue(element.opened);
+      });
+
+      test('_getImageButtonStyleClass does return as expected', function() {
+        assert.equal(element._getImageButtonStyleClass([], '5678'), '');
+        assert.equal(element._getImageButtonStyleClass(['1234'], '5678'), '');
+        assert.equal(element._getImageButtonStyleClass(['5678'], '5678'), 'on');
+        assert.equal(element._getImageButtonStyleClass(['1234', '5678'], '5678'), 'on');
+        assert.equal(element._getImageButtonStyleClass(['5678'], '5678', 'required', 'required'), 'on');
+        assert.equal(element._getImageButtonStyleClass(['1234', '5678'], '5678', 'required', 'required'), 'on');
+        assert.equal(element._getImageButtonStyleClass(['5678'], '5678', 'optional', 'required'), '');
+        assert.equal(element._getImageButtonStyleClass(['1234', '5678'], '5678', 'optional', 'required'), '');
+        assert.equal(element._getImageButtonStyleClass(['5678'], '5678', 'required', 'optional'), '');
+        assert.equal(element._getImageButtonStyleClass(['1234', '5678'], '5678', 'required', 'optional'), '');
+      });
+
+      test('_getImageExcludedButtonText does return as expected', function() {
+        var string1 = element._getImageExcludedButtonText('optional');
+        var string2 = element._getImageExcludedButtonText('required');
+        var string3 = element._getImageExcludedButtonText('excluded');
+        assert.isString(string1);
+        assert.isString(string2);
+        assert.isString(string3);
+        assert.equal(string1, string2);
+        assert.notEqual(string1, string3);
+      });
+
+      test('_getImageRequiredButtonText does return as expected', function() {
+        var string1 = element._getImageRequiredButtonText('optional');
+        var string2 = element._getImageRequiredButtonText('excluded');
+        var string3 = element._getImageRequiredButtonText('required');
+        assert.isString(string1);
+        assert.isString(string2);
+        assert.isString(string3);
+        assert.equal(string1, string2);
+        assert.notEqual(string1, string3);
+      });
+
+      test('_getImageSearchButtonText does return as expected', function() {
+        var string1 = element._getImageSearchButtonText([], '5678');
+        var string2 = element._getImageSearchButtonText(['1234'], '5678');
+        var string3 = element._getImageSearchButtonText(['5678'], '5678');
+        var string4 = element._getImageSearchButtonText(['1234', '5678'], '5678');
+        assert.isString(string1);
+        assert.isString(string2);
+        assert.isString(string3);
+        assert.isString(string4);
+        assert.equal(string1, string2);
+        assert.equal(string3, string4);
+        assert.notEqual(string1, string3);
+      });
+
+      test('_getInputWidthStyleClass does return as expected', function() {
+        assert.equal(element._getInputWidthStyleClass(true), '');
+        assert.equal(element._getInputWidthStyleClass(false), 'add-width');
+      });
+
+      test('_hoverImageBegin does set hovering', function() {
+        var testEvent = {
+          model: {
+            image: {
+              id: '1234'
+            },
+            searchConfig: {
+              hovering: []
+            },
+            set: function(path, item) {
+              if(path === 'searchConfig.hovering') {
+                testEvent.model.searchConfig.hovering = item;
+              }
+            }
+          }
+        };
+
+        element._hoverImageBegin(testEvent);
+        assert.deepEqual(testEvent.model.searchConfig.hovering, ['1234']);
+      });
+
+      test('_hoverImageEnd does unset hovering', function() {
+        var testEvent = {
+          model: {
+            searchConfig: {
+              hovering: ['1234']
+            },
+            set: function(path, item) {
+              if(path === 'searchConfig.hovering') {
+                testEvent.model.searchConfig.hovering = item;
+              }
+            }
+          }
+        };
+
+        element._hoverImageEnd(testEvent);
+        assert.deepEqual(testEvent.model.searchConfig.hovering, []);
+      });
+
+      test('_isInList does return as expected', function() {
+        assert.equal(element._isInList([], '5678', 'testString'), '');
+        assert.equal(element._isInList(['1234'], '5678', 'testString'), '');
+        assert.equal(element._isInList(['5678'], '5678', 'testString'), 'testString');
+        assert.equal(element._isInList(['1234', '5678'], '5678', 'testString'), 'testString');
+      });
+
+      test('_toggleImageExcluded does set image search status and add image ID to selected', function() {
+        var testEvent = {
+          model: {
+            image: {
+              id: '1234',
+              search: 'optional'
+            },
+            searchConfig: {
+              selected: ['5678']
+            },
+            set: function(path, item) {
+              if(path === 'image.search') {
+                testEvent.model.image.search = item;
+              }
+              if(path === 'searchConfig.selected') {
+                testEvent.model.searchConfig.selected = item;
+              }
+            }
+          }
+        };
+
+        element._toggleImageExcluded(testEvent);
+        assert.equal(testEvent.model.image.search, 'excluded');
+        assert.deepEqual(testEvent.model.searchConfig.selected, ['5678', '1234']);
+      });
+
+      test('_toggleImageExcluded does not add image ID to selected if it is in the list', function() {
+        var testEvent = {
+          model: {
+            image: {
+              id: '1234',
+              search: 'optional'
+            },
+            searchConfig: {
+              selected: ['1234']
+            },
+            set: function(path, item) {
+              if(path === 'image.search') {
+                testEvent.model.image.search = item;
+              }
+              if(path === 'searchConfig.selected') {
+                testEvent.model.searchConfig.selected = item;
+              }
+            }
+          }
+        };
+
+        element._toggleImageExcluded(testEvent);
+        assert.equal(testEvent.model.image.search, 'excluded');
+        assert.deepEqual(testEvent.model.searchConfig.selected, ['1234']);
+      });
+
+      test('_toggleImageRequired does set image search status and add image ID to selected', function() {
+        var testEvent = {
+          model: {
+            image: {
+              id: '1234',
+              search: 'optional'
+            },
+            searchConfig: {
+              selected: ['5678']
+            },
+            set: function(path, item) {
+              if(path === 'image.search') {
+                testEvent.model.image.search = item;
+              }
+              if(path === 'searchConfig.selected') {
+                testEvent.model.searchConfig.selected = item;
+              }
+            }
+          }
+        };
+
+        element._toggleImageRequired(testEvent);
+        assert.equal(testEvent.model.image.search, 'required');
+        assert.deepEqual(testEvent.model.searchConfig.selected, ['5678', '1234']);
+      });
+
+      test('_toggleImageRequired does not add image ID to selected if it is in the list', function() {
+        var testEvent = {
+          model: {
+            image: {
+              id: '1234',
+              search: 'optional'
+            },
+            searchConfig: {
+              selected: ['1234']
+            },
+            set: function(path, item) {
+              if(path === 'image.search') {
+                testEvent.model.image.search = item;
+              }
+              if(path === 'searchConfig.selected') {
+                testEvent.model.searchConfig.selected = item;
+              }
+            }
+          }
+        };
+
+        element._toggleImageRequired(testEvent);
+        assert.equal(testEvent.model.image.search, 'required');
+        assert.deepEqual(testEvent.model.searchConfig.selected, ['1234']);
+      });
+
+      test('_toggleImageSearch does set image search status and add image ID to selected if it is not in the list', function() {
+        var testEvent = {
+          model: {
+            image: {
+              id: '1234',
+              search: 'required'
+            },
+            searchConfig: {
+              selected: ['5678']
+            },
+            set: function(path, item) {
+              if(path === 'image.search') {
+                testEvent.model.image.search = item;
+              }
+              if(path === 'searchConfig.selected') {
+                testEvent.model.searchConfig.selected = item;
+              }
+            }
+          }
+        };
+
+        element._toggleImageSearch(testEvent);
+        assert.equal(testEvent.model.image.search, 'optional');
+        assert.deepEqual(testEvent.model.searchConfig.selected, ['5678', '1234']);
+      });
+
+      test('_toggleImageSearch does remove image ID from selected if it is in the list', function() {
+        var testEvent = {
+          model: {
+            image: {
+              id: '1234',
+              search: 'required'
+            },
+            searchConfig: {
+              selected: ['1234', '5678']
+            },
+            set: function(path, item) {
+              if(path === 'image.search') {
+                testEvent.model.image.search = item;
+              }
+              if(path === 'searchConfig.selected') {
+                testEvent.model.searchConfig.selected = item;
+              }
+            }
+          }
+        };
+
+        element._toggleImageSearch(testEvent);
+        assert.equal(testEvent.model.image.search, 'optional');
+        assert.deepEqual(testEvent.model.searchConfig.selected, ['5678']);
+      });
+
+      test('_updateImageGalleryFromParameter does add enabled images to the search config', function() {
+        element.imageUrlPrefix = 'testPrefix/';
+
+        element.searchParameters.image = {
+          image1: {
+            category: 'Image',
+            date: undefined,
+            enabled: true,
+            key: 'image1',
+            search: 'optional',
+            text: 'image1'
+          },
+          image2: {
+            category: 'Image',
+            date: undefined,
+            enabled: true,
+            key: 'image2',
+            search: 'required',
+            text: 'image2'
+          },
+          image3: {
+            category: 'Image',
+            date: undefined,
+            enabled: true,
+            key: 'image3',
+            search: 'excluded',
+            text: 'image3'
+          },
+          image4: {
+            category: 'Image',
+            date: undefined,
+            enabled: false,
+            key: 'image4',
+            search: 'optional',
+            text: 'image4'
+          }
+        };
+
+        element._searchFields[4].data[0] = {
+          key: 'image',
+          images: [{
+            id: 'image5'
+          }],
+          selected: ['image5']
+        };
+
+        element._updateImageGalleryFromParameter(element._searchFields[4].data[0], ['_searchFields', 4, 'data', 0]);
+
+        assert.deepEqual(element._searchFields[4].data[0], {
+          key: 'image',
+          images: [{
+            id: 'image1',
+            search: 'optional',
+            source: 'testPrefix/image1'
+          }, {
+            id: 'image2',
+            search: 'required',
+            source: 'testPrefix/image2'
+          }, {
+            id: 'image3',
+            search: 'excluded',
+            source: 'testPrefix/image3'
+          }],
+          selected: ['image1', 'image2', 'image3']
+        });
+      });
+
+      test('_updateImageParameterFromGallery does add selected images to searchParameters', function() {
+        element.searchParameters.image = {
+          image1: {
+            category: 'Image',
+            date: undefined,
+            enabled: true,
+            key: 'image1',
+            search: 'optional',
+            text: 'image1'
+          },
+          image2: {
+            category: 'Image',
+            date: undefined,
+            enabled: true,
+            key: 'image2',
+            search: 'optional',
+            text: 'image2'
+          },
+          image3: {
+            category: 'Image',
+            date: undefined,
+            enabled: false,
+            key: 'image3',
+            search: 'optional',
+            text: 'image3'
+          },
+          image4: {
+            category: 'Image',
+            date: undefined,
+            enabled: false,
+            key: 'image4',
+            search: 'optional',
+            text: 'image4'
+          }
+        };
+
+        element._updateImageParameterFromGallery({
+          key: 'image',
+          title: 'Image',
+          images: [{
+            id: 'image1',
+            search: 'required'
+          }, {
+            id: 'image2',
+            search: 'required'
+          }, {
+            id: 'image3',
+            search: 'required'
+          }, {
+            id: 'image4',
+            search: 'required'
+          }, {
+            id: 'image5',
+            search: 'required'
+          }],
+          selected: ['image1', 'image4', 'image5']
+        });
+
+        assert.deepEqual(element.searchParameters.image, {
+          image1: {
+            category: 'Image',
+            date: undefined,
+            enabled: true,
+            key: 'image1',
+            search: 'required',
+            text: 'image1'
+          },
+          image2: {
+            category: 'Image',
+            date: undefined,
+            enabled: false,
+            key: 'image2',
+            search: undefined,
+            text: 'image2'
+          },
+          image3: {
+            category: 'Image',
+            date: undefined,
+            enabled: false,
+            key: 'image3',
+            search: 'optional',
+            text: 'image3'
+          },
+          image4: {
+            category: 'Image',
+            date: undefined,
+            enabled: true,
+            key: 'image4',
+            search: 'required',
+            text: 'image4'
+          },
+          image5: {
+            category: 'Image',
+            date: undefined,
+            enabled: true,
+            key: 'image5',
+            search: 'required',
+            text: 'image5'
+          }
+        });
       });
     });
   </script>
