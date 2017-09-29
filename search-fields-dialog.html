@@ -330,7 +330,7 @@ A Polymer Element showing search fields in a modal dialog.
                       id$="input_[[searchConfig.key]]"
                       label="[[searchConfig.title]]"
                       value="{{searchConfig.value}}"
-                      on-keyup="_checkSearchFieldInputKey">
+                      on-keyup="_didUserHitEnterKey">
                     </paper-input>
 
                     <div class="layout horizontal toggle-buttons">
@@ -423,162 +423,6 @@ A Polymer Element showing search fields in a modal dialog.
         /**
          * (Optional)
          *
-         * The keys of dates in the searchFieldsConfig mapped to the keys of dates in the searchParameters.
-         *
-         * @type {Object}
-         * @default {}
-         */
-        dateConfig: {
-          type: Object,
-          value: function() {
-            return {};
-          }
-        },
-
-        /**
-         * (Optional)
-         *
-         * The prefix for the image URL for image field data.
-         *
-         * @type {String}
-         * @default ''
-         */
-        imageUrlPrefix: {
-          type: String,
-          value: ''
-        },
-
-        /**
-         * (Optional|Output)
-         *
-         * Whether the dialog is opened.
-         *
-         * @type {Boolean}
-         * @default false
-         */
-        opened: {
-          notify: true,
-          type: Boolean,
-          value: false
-        },
-
-        /**
-         * (Optional|Output)
-         *
-         * Whether to let queries run.
-         *
-         * @type {Boolean}
-         */
-        processRequest: {
-          notify: true,
-          type: Boolean
-        },
-
-        /**
-         * (Optional|Output)
-         *
-         * Whether the user canceled the changes.
-         *
-         * @type {Boolean}
-         * @default false
-         */
-        userCanceled: {
-          notify: true,
-          type: Boolean,
-          value: false
-        },
-
-        /**
-         * (Optional)
-         *
-         * The data property in the searchFieldsConfig.
-         *
-         * @type {String}
-         * @default 'data'
-         */
-        dataProperty: {
-          type: String,
-          value: 'data'
-        },
-
-        /**
-         * (Optional)
-         *
-         * The key property in the data in the searchFieldsConfig.
-         *
-         * @type {String}
-         * @default 'key'
-         */
-        dataKeyProperty: {
-          type: String,
-          value: 'key'
-        },
-
-        /**
-         * (Optional)
-         *
-         * The title property in the data in the searchFieldsConfig.
-         *
-         * @type {String}
-         * @default 'title'
-         */
-        dataTitleProperty: {
-          type: String,
-          value: 'title'
-        },
-
-        /**
-         * (Optional)
-         *
-         * The name property in the searchFieldsConfig.
-         *
-         * @type {String}
-         * @default 'name'
-         */
-        nameProperty: {
-          type: String,
-          value: 'name'
-        },
-
-        /**
-         * (Optional)
-         *
-         * The type property in the searchFieldsConfig.
-         *
-         * @type {String}
-         * @default 'type'
-         */
-        typeProperty: {
-          type: String,
-          value: 'type'
-        },
-
-        /**
-         * (Optional|Output)
-         *
-         * The network expansion parameters passed in.
-         *
-         * @type {Object}
-         */
-        networkExpansionParameters: {
-          type: Object,
-          notify: true
-        },
-
-        /**
-         * (Required|Output)
-         *
-         * A list of objects that correspond to groupings of search fields.
-         *
-         * @type {Array}
-         */
-        searchFieldsConfig: {
-          type: Array
-        },
-
-        /**
-         * (Optional)
-         *
          * A function that returns whether all the search parameters in the given object are disabled (or empty).
          *
          * @type {Object}
@@ -627,6 +471,60 @@ A Polymer Element showing search fields in a modal dialog.
         /**
          * (Optional)
          *
+         * The data property in the searchFieldsConfig.
+         *
+         * @type {String}
+         * @default 'data'
+         */
+        dataProperty: {
+          type: String,
+          value: 'data'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The key property in the data in the searchFieldsConfig.
+         *
+         * @type {String}
+         * @default 'key'
+         */
+        dataKeyProperty: {
+          type: String,
+          value: 'key'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The title property in the data in the searchFieldsConfig.
+         *
+         * @type {String}
+         * @default 'title'
+         */
+        dataTitleProperty: {
+          type: String,
+          value: 'title'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The keys of dates in the searchFieldsConfig mapped to the keys of dates in the searchParameters.
+         *
+         * @type {Object}
+         * @default {}
+         */
+        dateConfig: {
+          type: Object,
+          value: function() {
+            return {};
+          }
+        },
+
+        /**
+         * (Optional)
+         *
          * A function that transforms a search parameter object into an object with "enabled", "search", and "text" properties.
          *
          * @type {Object}
@@ -646,6 +544,81 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
+         * (Optional)
+         *
+         * The prefix for the image URL for image field data.
+         *
+         * @type {String}
+         * @default ''
+         */
+        imageUrlPrefix: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Optional)
+         *
+         * The name property in the searchFieldsConfig.
+         *
+         * @type {String}
+         * @default 'name'
+         */
+        nameProperty: {
+          type: String,
+          value: 'name'
+        },
+
+        /**
+         * (Optional|Output)
+         *
+         * The network expansion parameters passed in.
+         *
+         * @type {Object}
+         */
+        networkExpansionParameters: {
+          type: Object,
+          notify: true
+        },
+
+        /**
+         * (Optional|Output)
+         *
+         * Whether the dialog is opened.
+         *
+         * @type {Boolean}
+         * @default false
+         */
+        opened: {
+          notify: true,
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * (Optional|Output)
+         *
+         * Whether to let queries run.
+         *
+         * @type {Boolean}
+         */
+        processRequest: {
+          notify: true,
+          type: Boolean
+        },
+
+        /**
+         * (Required|Output)
+         *
+         * A list of objects that correspond to groupings of search fields.
+         *
+         * @type {Array}
+         */
+        searchFieldsConfig: {
+          type: Array
+        },
+
+        /**
          * (Required|Output)
          *
          * The search parameters created from the terms entered into the dialog.
@@ -655,6 +628,33 @@ A Polymer Element showing search fields in a modal dialog.
         searchParameters: {
           notify: true,
           type: Object
+        },
+
+        /**
+         * (Optional)
+         *
+         * The type property in the searchFieldsConfig.
+         *
+         * @type {String}
+         * @default 'type'
+         */
+        typeProperty: {
+          type: String,
+          value: 'type'
+        },
+
+        /**
+         * (Optional|Output)
+         *
+         * Whether the user canceled the changes.
+         *
+         * @type {Boolean}
+         * @default false
+         */
+        userCanceled: {
+          notify: true,
+          type: Boolean,
+          value: false
         },
 
         /**
@@ -696,41 +696,6 @@ A Polymer Element showing search fields in a modal dialog.
       observers: [
         'toggleProcessRequest(searchParameters.*, opened)'
       ],
-
-      /**
-       * Toggles whether to let queries run whenever the search parameters change or the dialog is opened or closed.
-       */
-      toggleProcessRequest: function() {
-        this.processRequest = !this.opened && !this.userCanceled;
-        // reset user canceled variable
-        this.userCanceled = false;
-      },
-
-      /**
-       * Updates the search fields shown in the dialog using the search parameters if opening the dialog, then opens or closes the dialog.
-       */
-      toggleSearchFieldsDialog: function() {
-        var self = this;
-
-        // Set or clear the search fields whenever the dialog is opened.
-        if(!this.opened && this._searchFields) {
-          this._searchFields.forEach(function(dialogConfig, dialogIndex) {
-            if(dialogConfig.data) {
-              dialogConfig.data.forEach(function(searchConfig, searchIndex) {
-                if(dialogConfig.isDate) {
-                  self._updateDateFieldFromParameter(searchConfig, ['_searchFields', dialogIndex, 'data', searchIndex]);
-                } else if(dialogConfig.isImage) {
-                  self._updateImageGalleryFromParameter(searchConfig, ['_searchFields', dialogIndex, 'data', searchIndex]);
-                } else {
-                  self._updateSearchFieldFromParameter(searchConfig, ['_searchFields', dialogIndex, 'data', searchIndex]);
-                }
-              });
-            }
-          });
-        }
-
-        this.opened = !this.opened;
-      },
 
       /**
        * Creates and returns the search fields shown in the dialog.
@@ -781,6 +746,19 @@ A Polymer Element showing search fields in a modal dialog.
             name: dialogConfig[nameProperty]
           };
         });
+      },
+
+      /**
+       * Updates the searchParameters using the search fields and closes the dialog if ENTER was pressed.
+       *
+       * @param {Object} event
+       * @private
+       */
+      _didUserHitEnterKey: function(event) {
+        this._updateNetworkExpansion();
+        if(event.keyCode === 13) {
+          this.handleSearch();
+        }
       },
 
       /**
@@ -1028,104 +1006,19 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Updates the searchParameters with a new object and notifies observers.
-       *
-       * @param {String} type
-       * @param {String} term
-       * @param {String} title
-       * @param {Boolean} enabled
-       * @private
-       */
-      _updateSearchParameterAndNotify: function(type, term, name, enabled, search) {
-        this.searchParameters[type][term] = this.buildSearchParameter(name, enabled, term, term, search);
-
-        // TODO Do we really need to create a new object for the second argument?  Do we need to use an object at all?
-        this.notifyPath(['searchParameters', type, '*'], this.buildSearchParameter(name, enabled, term, term, search));
-      },
-
-      /**
-       * Updates the searchParameters for the given searchConfig using the given search terms.
+       * Updates the date input of the given config object using the searchParameters and notifies observers on the given path.
        *
        * @param {Object} searchConfig
-       * @param {Object} searchTermToSearchStatus
+       * @param {Array|String} updatePath
        * @private
        */
-      _updateSearchParameterTerms: function(searchConfig, searchTermToSearchStatus) {
-        var self = this;
-
-        _.keys(self.searchParameters[searchConfig.key]).forEach(function(term) {
-          // Disable deleted terms.
-          if(self.searchParameters[searchConfig.key][term].enabled && _.keys(searchTermToSearchStatus).indexOf(term) < 0) {
-            self._updateSearchParameterAndNotify(searchConfig.key, term, searchConfig.title, false);
-          }
-        });
-
-        _.keys(searchTermToSearchStatus).forEach(function(term) {
-          // Add new terms.
-          if(term) {
-            self._updateSearchParameterAndNotify(searchConfig.key, term, searchConfig.title, true, searchTermToSearchStatus[term]);
-          }
-        });
-      },
-
-      /**
-       * Updates the searchParameters and networkExpansionParameters using the given config object by adding or removing search terms.
-       *
-       * @param {Object} searchConfig
-       * @private
-       */
-      _updateSearchAndNetworkParameterFromField: function(searchConfig) {
-        var self = this;
-
-        var searchTermToSearchStatus = searchConfig.value.split(',').map(function(term) {
-          return term.trim();
-        }).reduce(function(searchTermToSearchStatus, term) {
-          var search = searchConfig.requireOne ? 'union' : 'optional';
-          var key = term;
-
-          // A required or excluded term overrides searchConfig.requireOne.
-          if(key.indexOf('+') === 0 || key.indexOf('-') === 0) {
-            search = key.indexOf('+') === 0 ? 'required' : 'excluded';
-            key = key.substring(1);
-          }
-
-          // TODO Move custom formatting.
-          if(searchConfig.key === 'phone') {
-            key = self._unformatPhones(key);
-          }
-
-          if(key) {
-            searchTermToSearchStatus[key] = search;
-          }
-
-          return searchTermToSearchStatus;
-        }, {});
-
-        this._updateSearchParameterTerms(searchConfig, searchTermToSearchStatus);
-
-        var activateNetworkExpansion = (this._isNetworkExpansionViable && searchConfig.activateNetworkExpansion);
-
-        if(this.networkExpansionParameters[searchConfig.key] !== activateNetworkExpansion) {
-          this.networkExpansionParameters[searchConfig.key] = activateNetworkExpansion;
-          this.notifyPath(['networkExpansionParameters', searchConfig.key], this.networkExpansionParameters[searchConfig.key]);
+      _updateDateFieldFromParameter: function(searchConfig, updatePath) {
+        var parameterKey = this.dateConfig[searchConfig.key];
+        searchConfig.value = {};
+        if(this.searchParameters[parameterKey][searchConfig.key]) {
+          searchConfig.value[searchConfig.key] = this.searchParameters[parameterKey][searchConfig.key];
         }
-      },
-
-      /**
-       * Updates the searchParameters using the given search config object by adding or removing selected images.
-       *
-       * @param {Object} searchConfig
-       * @private
-       */
-      _updateImageParameterFromGallery: function(searchConfig) {
-        var searchTermToSearchStatus = searchConfig.images.reduce(function(searchTermToSearchStatus, image) {
-          if(searchConfig.selected.indexOf(image.id) >= 0) {
-            searchTermToSearchStatus[image.id] = image.search;
-          }
-          return searchTermToSearchStatus;
-        }, {});
-
-        this._updateSearchParameterTerms(searchConfig, searchTermToSearchStatus);
+        this.notifyPath(updatePath.concat('value'), searchConfig.value);
       },
 
       /**
@@ -1166,61 +1059,6 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Updates the searchParameters using the search fields in the dialog by adding or removing search terms.
-       *
-       * @private
-       */
-      _updateSearchParametersFromFields: function() {
-        var self = this;
-
-        if(this._searchFields) {
-          this._searchFields.forEach(function(dialogConfig) {
-            if(dialogConfig.data) {
-              dialogConfig.data.forEach(function(searchConfig) {
-                if(dialogConfig.isDate) {
-                  self._updateDateParameterFromField(searchConfig);
-                } else if(dialogConfig.isImage) {
-                  self._updateImageParameterFromGallery(searchConfig);
-                } else {
-                  self._updateSearchAndNetworkParameterFromField(searchConfig);
-                }
-              });
-            }
-          });
-        }
-      },
-
-      /**
-       * Updates the search field input of the given config object using the searchParameters and notifies observers on the given path.
-       *
-       * @param {Object} searchConfig
-       * @param {Array|String} updatePath
-       * @private
-       */
-      _updateSearchFieldFromParameter: function(searchConfig, updatePath) {
-        var self = this;
-        var termData = _.keys(this.searchParameters[searchConfig.key]).filter(function(term) {
-          return self.getSearchParameterData(self.searchParameters[searchConfig.key][term]).enabled;
-        }).map(function(term) {
-          return self.getSearchParameterData(self.searchParameters[searchConfig.key][term]);
-        });
-
-        searchConfig.value = termData.map(function(data) {
-          var prefix = (data.search === 'required' ? '+' : (data.search === 'excluded' ? '-' : ''));
-          return prefix + data.text;
-        }).join(', ');
-        this.$$('#input_' + searchConfig.key).value = searchConfig.value;
-
-        searchConfig.activateNetworkExpansion = this.networkExpansionParameters[searchConfig.key] || searchConfig.activateNetworkExpansion;
-        this.notifyPath(updatePath.concat(['activateNetworkExpansion']), searchConfig.activateNetworkExpansion);
-
-        searchConfig.requireOne = !termData.length ? searchConfig.requireOne : termData.some(function(data) {
-          return data.search === 'union';
-        });
-        this.notifyPath(updatePath.concat(['requireOne']), searchConfig.requireOne);
-      },
-
-      /**
        * Updates the image gallery input of the given config object using the searchParameters and notifies observers on the given path.
        *
        * @param {Object} searchConfig
@@ -1247,19 +1085,20 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Updates the date input of the given config object using the searchParameters and notifies observers on the given path.
+       * Updates the searchParameters using the given search config object by adding or removing selected images.
        *
        * @param {Object} searchConfig
-       * @param {Array|String} updatePath
        * @private
        */
-      _updateDateFieldFromParameter: function(searchConfig, updatePath) {
-        var parameterKey = this.dateConfig[searchConfig.key];
-        searchConfig.value = {};
-        if(this.searchParameters[parameterKey][searchConfig.key]) {
-          searchConfig.value[searchConfig.key] = this.searchParameters[parameterKey][searchConfig.key];
-        }
-        this.notifyPath(updatePath.concat('value'), searchConfig.value);
+      _updateImageParameterFromGallery: function(searchConfig) {
+        var searchTermToSearchStatus = searchConfig.images.reduce(function(searchTermToSearchStatus, image) {
+          if(searchConfig.selected.indexOf(image.id) >= 0) {
+            searchTermToSearchStatus[image.id] = image.search;
+          }
+          return searchTermToSearchStatus;
+        }, {});
+
+        this._updateSearchParameterTerms(searchConfig, searchTermToSearchStatus);
       },
 
       /**
@@ -1297,6 +1136,160 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
+       * Updates the search field input of the given config object using the searchParameters and notifies observers on the given path.
+       *
+       * @param {Object} searchConfig
+       * @param {Array|String} updatePath
+       * @private
+       */
+      _updateSearchFieldFromParameter: function(searchConfig, updatePath) {
+        var self = this;
+        var termData = _.keys(this.searchParameters[searchConfig.key]).filter(function(term) {
+          return self.getSearchParameterData(self.searchParameters[searchConfig.key][term]).enabled;
+        }).map(function(term) {
+          return self.getSearchParameterData(self.searchParameters[searchConfig.key][term]);
+        });
+
+        searchConfig.value = termData.map(function(data) {
+          var prefix = (data.search === 'required' ? '+' : (data.search === 'excluded' ? '-' : ''));
+          return prefix + data.text;
+        }).join(', ');
+        this.$$('#input_' + searchConfig.key).value = searchConfig.value;
+
+        searchConfig.activateNetworkExpansion = this.networkExpansionParameters[searchConfig.key] || searchConfig.activateNetworkExpansion;
+        this.notifyPath(updatePath.concat(['activateNetworkExpansion']), searchConfig.activateNetworkExpansion);
+
+        searchConfig.requireOne = !termData.length ? searchConfig.requireOne : termData.some(function(data) {
+          return data.search === 'union';
+        });
+        this.notifyPath(updatePath.concat(['requireOne']), searchConfig.requireOne);
+      },
+
+      /**
+       * Updates the searchParameters with a new object and notifies observers.
+       *
+       * @param {String} type
+       * @param {String} term
+       * @param {String} title
+       * @param {Boolean} enabled
+       * @private
+       */
+      _updateSearchParameterAndNotify: function(type, term, name, enabled, search) {
+        this.searchParameters[type][term] = this.buildSearchParameter(name, enabled, term, term, search);
+
+        // TODO Do we really need to create a new object for the second argument?  Do we need to use an object at all?
+        this.notifyPath(['searchParameters', type, '*'], this.buildSearchParameter(name, enabled, term, term, search));
+      },
+
+      /**
+       * Updates the searchParameters and networkExpansionParameters using the given config object by adding or removing search terms.
+       *
+       * @param {Object} searchConfig
+       * @private
+       */
+      _updateSearchParameterFromField: function(searchConfig) {
+        var self = this;
+
+        var searchTermToSearchStatus = searchConfig.value.split(',').map(function(term) {
+          return term.trim();
+        }).reduce(function(searchTermToSearchStatus, term) {
+          var search = searchConfig.requireOne ? 'union' : 'optional';
+          var key = term;
+
+          // A required or excluded term overrides searchConfig.requireOne.
+          if(key.indexOf('+') === 0 || key.indexOf('-') === 0) {
+            search = key.indexOf('+') === 0 ? 'required' : 'excluded';
+            key = key.substring(1);
+          }
+
+          // TODO Move custom formatting.
+          if(searchConfig.key === 'phone') {
+            key = self._unformatPhones(key);
+          }
+
+          if(key) {
+            searchTermToSearchStatus[key] = search;
+          }
+
+          return searchTermToSearchStatus;
+        }, {});
+
+        this._updateSearchParameterTerms(searchConfig, searchTermToSearchStatus);
+
+        var activateNetworkExpansion = (this._isNetworkExpansionViable && searchConfig.activateNetworkExpansion);
+
+        if(this.networkExpansionParameters[searchConfig.key] !== activateNetworkExpansion) {
+          this.networkExpansionParameters[searchConfig.key] = activateNetworkExpansion;
+          this.notifyPath(['networkExpansionParameters', searchConfig.key], this.networkExpansionParameters[searchConfig.key]);
+        }
+      },
+
+      /**
+       * Updates the searchParameters using the search fields in the dialog by adding or removing search terms.
+       *
+       * @private
+       */
+      _updateSearchParametersFromFields: function() {
+        var self = this;
+
+        if(this._searchFields) {
+          this._searchFields.forEach(function(dialogConfig) {
+            if(dialogConfig.data) {
+              dialogConfig.data.forEach(function(searchConfig) {
+                if(dialogConfig.isDate) {
+                  self._updateDateParameterFromField(searchConfig);
+                } else if(dialogConfig.isImage) {
+                  self._updateImageParameterFromGallery(searchConfig);
+                } else {
+                  self._updateSearchParameterFromField(searchConfig);
+                }
+              });
+            }
+          });
+        }
+      },
+
+      /**
+       * Updates the searchParameters for the given searchConfig using the given search terms.
+       *
+       * @param {Object} searchConfig
+       * @param {Object} searchTermToSearchStatus
+       * @private
+       */
+      _updateSearchParameterTerms: function(searchConfig, searchTermToSearchStatus) {
+        var self = this;
+
+        _.keys(self.searchParameters[searchConfig.key]).forEach(function(term) {
+          // Disable deleted terms.
+          if(self.searchParameters[searchConfig.key][term].enabled && _.keys(searchTermToSearchStatus).indexOf(term) < 0) {
+            self._updateSearchParameterAndNotify(searchConfig.key, term, searchConfig.title, false);
+          }
+        });
+
+        _.keys(searchTermToSearchStatus).forEach(function(term) {
+          // Add new terms.
+          if(term) {
+            self._updateSearchParameterAndNotify(searchConfig.key, term, searchConfig.title, true, searchTermToSearchStatus[term]);
+          }
+        });
+      },
+
+      /**
+       * Cancels the changes to the search fields and closes the dialog.
+       */
+      cancelSearch: function() {
+        this._searchFields.forEach(function(dialogConfig) {
+          dialogConfig.data.forEach(function(searchConfig) {
+            searchConfig.activateNetworkExpansion = searchConfig.activateNetworkExpansionPrevious;
+            searchConfig.requireOne = searchConfig.requireOnePrevious;
+          });
+        });
+
+        this.userCanceled = true;
+        this.toggleSearchFieldsDialog();
+      },
+
+      /**
        * Updates the searchParameters using the search fields and closes the dialog so that new queries can run.
        */
       handleSearch: function() {
@@ -1315,6 +1308,13 @@ A Polymer Element showing search fields in a modal dialog.
         }
 
         this.toggleSearchFieldsDialog();
+      },
+
+      /**
+       * Opens the help dialog.
+       */
+      openHelp: function() {
+        this.set('_helpOpened', true);
       },
 
       /**
@@ -1342,38 +1342,38 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Cancels the changes to the search fields and closes the dialog.
+       * Toggles whether to let queries run whenever the search parameters change or the dialog is opened or closed.
        */
-      cancelSearch: function() {
-        this._searchFields.forEach(function(dialogConfig) {
-          dialogConfig.data.forEach(function(searchConfig) {
-            searchConfig.activateNetworkExpansion = searchConfig.activateNetworkExpansionPrevious;
-            searchConfig.requireOne = searchConfig.requireOnePrevious;
+      toggleProcessRequest: function() {
+        this.processRequest = !this.opened && !this.userCanceled;
+        // reset user canceled variable
+        this.userCanceled = false;
+      },
+
+      /**
+       * Updates the search fields shown in the dialog using the search parameters if opening the dialog, then opens or closes the dialog.
+       */
+      toggleSearchFieldsDialog: function() {
+        var self = this;
+
+        // Set or clear the search fields whenever the dialog is opened.
+        if(!this.opened && this._searchFields) {
+          this._searchFields.forEach(function(dialogConfig, dialogIndex) {
+            if(dialogConfig.data) {
+              dialogConfig.data.forEach(function(searchConfig, searchIndex) {
+                if(dialogConfig.isDate) {
+                  self._updateDateFieldFromParameter(searchConfig, ['_searchFields', dialogIndex, 'data', searchIndex]);
+                } else if(dialogConfig.isImage) {
+                  self._updateImageGalleryFromParameter(searchConfig, ['_searchFields', dialogIndex, 'data', searchIndex]);
+                } else {
+                  self._updateSearchFieldFromParameter(searchConfig, ['_searchFields', dialogIndex, 'data', searchIndex]);
+                }
+              });
+            }
           });
-        });
-
-        this.userCanceled = true;
-        this.toggleSearchFieldsDialog();
-      },
-
-      /**
-       * Opens the help dialog.
-       */
-      openHelp: function() {
-        this.set('_helpOpened', true);
-      },
-
-      /**
-       * Updates the searchParameters using the search fields and closes the dialog if ENTER was pressed.
-       *
-       * @param {Object} event
-       * @private
-       */
-      _checkSearchFieldInputKey: function(event) {
-        this._updateNetworkExpansion();
-        if(event.keyCode === 13) {
-          this.handleSearch();
         }
+
+        this.opened = !this.opened;
       }
     });
   })();

@@ -692,10 +692,10 @@ limitations under the License.
         element._updateDateParameterAndNotify('dateStart', '2017-03-01T00:00:00', '03/01/2017', 'From', true);
       });
 
-      test('_updateSearchAndNetworkParameterFromField does work as expected', function() {
+      test('_updateSearchParameterFromField does work as expected', function() {
         element.$$('#input_city').value = 'nyc, chicago';
 
-        element._updateSearchAndNetworkParameterFromField(element._searchFields[2].data[0]);
+        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
 
         assert.deepEqual(element.searchParameters.city, {
           nyc: {
@@ -721,7 +721,7 @@ limitations under the License.
         });
       });
 
-      test('_updateSearchAndNetworkParameterFromField does work as expected if network expasion is on and _isNetworkExpansionViable is true', function() {
+      test('_updateSearchParameterFromField does work as expected if network expasion is on and _isNetworkExpansionViable is true', function() {
         element.$$('#input_city').value = 'nyc, chicago';
 
         // cityConfig is first in data array for location
@@ -729,7 +729,7 @@ limitations under the License.
 
         element._isNetworkExpansionViable = true;
 
-        element._updateSearchAndNetworkParameterFromField(element._searchFields[2].data[0]);
+        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
 
         assert.deepEqual(element.searchParameters.city, {
           nyc: {
@@ -755,7 +755,7 @@ limitations under the License.
         });
       });
 
-      test('_updateSearchAndNetworkParameterFromField does work as expected if network expansion is on and _isNetworkExpansionViable is false', function() {
+      test('_updateSearchParameterFromField does work as expected if network expansion is on and _isNetworkExpansionViable is false', function() {
         element.$$('#input_city').value = 'nyc, chicago';
 
         // cityConfig is first in data array for location
@@ -763,7 +763,7 @@ limitations under the License.
 
         element._isNetworkExpansionViable = false;
 
-        element._updateSearchAndNetworkParameterFromField(element._searchFields[2].data[0]);
+        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
 
         assert.deepEqual(element.searchParameters.city, {
           nyc: {
@@ -789,11 +789,11 @@ limitations under the License.
         });
       });
 
-      test('_updateSearchAndNetworkParameterFromField will remove formatting from phone numbers', function() {
+      test('_updateSearchParameterFromField will remove formatting from phone numbers', function() {
         element.$$('#input_phone').value = '111-222-3333';
 
         // phoneConfig is first in data array for identifiers
-        element._updateSearchAndNetworkParameterFromField(element._searchFields[1].data[0]);
+        element._updateSearchParameterFromField(element._searchFields[1].data[0]);
 
         assert.deepEqual(element.searchParameters.phone, {
           '1112223333': {
@@ -807,10 +807,10 @@ limitations under the License.
         });
       });
 
-      test('_updateSearchAndNetworkParameterFromField does work as expected if a term is a minus sign', function() {
+      test('_updateSearchParameterFromField does work as expected if a term is a minus sign', function() {
         element.$$('#input_city').value = '-nyc, chicago';
 
-        element._updateSearchAndNetworkParameterFromField(element._searchFields[2].data[0]);
+        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
 
         assert.deepEqual(element.searchParameters.city, {
           nyc: {
@@ -832,13 +832,13 @@ limitations under the License.
         });
       });
 
-      test('_updateSearchAndNetworkParameterFromField does work as expected if requireOne is false', function() {
+      test('_updateSearchParameterFromField does work as expected if requireOne is false', function() {
         element.$$('#input_city').value = 'nyc, chicago';
 
         // cityConfig is first in data array for location
         element._searchFields[2].data[0].requireOne = false;
 
-        element._updateSearchAndNetworkParameterFromField(element._searchFields[2].data[0]);
+        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
 
         assert.deepEqual(element.searchParameters.city, {
           nyc: {
@@ -860,13 +860,13 @@ limitations under the License.
         });
       });
 
-      test('_updateSearchAndNetworkParameterFromField does work as expected if requireOne is false and a term is a plus sign', function() {
+      test('_updateSearchParameterFromField does work as expected if requireOne is false and a term is a plus sign', function() {
         element.$$('#input_city').value = '+nyc, chicago';
 
         // cityConfig is first in data array for location
         element._searchFields[2].data[0].requireOne = false;
 
-        element._updateSearchAndNetworkParameterFromField(element._searchFields[2].data[0]);
+        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
 
         assert.deepEqual(element.searchParameters.city, {
           nyc: {
@@ -888,13 +888,13 @@ limitations under the License.
         });
       });
 
-      test('_updateSearchAndNetworkParameterFromField does work as expected if requireOne is false and a term is a minus sign', function() {
+      test('_updateSearchParameterFromField does work as expected if requireOne is false and a term is a minus sign', function() {
         element.$$('#input_city').value = '-nyc, chicago';
 
         // cityConfig is first in data array for location
         element._searchFields[2].data[0].requireOne = false;
 
-        element._updateSearchAndNetworkParameterFromField(element._searchFields[2].data[0]);
+        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
 
         assert.deepEqual(element.searchParameters.city, {
           nyc: {
@@ -1123,24 +1123,24 @@ limitations under the License.
         assert.isTrue(element._searchFields[2].data[0].requireOne);
       });
 
-      test('_checkSearchFieldInputKey does not call handleSearch if search parameters are undefined', function() {
+      test('_didUserHitEnterKey does not call handleSearch if search parameters are undefined', function() {
         element.opened = true;
-        element._checkSearchFieldInputKey({keyCode: 13});
+        element._didUserHitEnterKey({keyCode: 13});
 
         assert.isTrue(element.opened);
       });
 
-      test('_checkSearchFieldInputKey does call handleSearch if search parameters are enabled and enter key is used', function() {
+      test('_didUserHitEnterKey does call handleSearch if search parameters are enabled and enter key is used', function() {
         element.opened = true;
         element._searchFields[2].data[0].value = 'nyc';
-        element._checkSearchFieldInputKey({keyCode: 13});
+        element._didUserHitEnterKey({keyCode: 13});
 
         assert.isFalse(element.opened);
       });
 
-      test('_checkSearchFieldInputKey will not call handleSearch if something besides the enter key is clicked', function() {
+      test('_didUserHitEnterKey will not call handleSearch if something besides the enter key is clicked', function() {
         element.opened = true;
-        element._checkSearchFieldInputKey({keyCode: 10});
+        element._didUserHitEnterKey({keyCode: 10});
 
         assert.isTrue(element.opened);
       });
