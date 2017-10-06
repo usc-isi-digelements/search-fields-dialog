@@ -23,9 +23,11 @@ limitations under the License.
 <link rel="import" href="../fontawesome-iconset/fa-all.html">
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../search-image-gallery/search-image-gallery.html">
 <link rel="import" href="../styled-dialog/styled-dialog.html">
 <link rel="import" href="../styled-dialog/styled-dialog-styles.html">
 <link rel="import" href="../vaadin-date-picker-display/vaadin-date-picker-display.html">
+<link rel="import" href="../vaadin-upload/vaadin-upload.html">
 
 <!--
 A Polymer Element showing search fields in a modal dialog.
@@ -53,64 +55,44 @@ A Polymer Element showing search fields in a modal dialog.
         display: block;
       }
 
-      .green[active],
-      .green:hover {
+      iron-icon {
+        --iron-icon-height: 30px;
+        --iron-icon-width: 30px;
+        --iron-icon: {
+          margin: 0 5px;
+          min-width: 30px;
+        }
+      }
+
+      .open-dialog-button[active],
+      .open-dialog-button:hover {
         color: yellowgreen;
       }
 
-      .search-label {
-        text-align: end;
-        /* Vertically align the search-label with their paper-input-containers. */
-        padding-top: 22px;
+      .open-dialog-button > div {
+        font-size: 24px;
+        font-weight: 500;
+        text-transform: none;
       }
 
-      .search-dialog paper-input {
-        display: inline-block;
-        --paper-input-container-color: var(--secondary-text-color);
-        --paper-input-container-input-color: var(--primary-text-color);
-        --paper-input-container-focus-color: var(--primary-text-color);
-        --paper-input-container: {
-          padding: 0 5px 4px 20px;
-          width: 275px;
-        }
-        --paper-input-container-input: {
-          font-weight: 500;
-        }
+      .header {
+        margin-bottom: 10px;
       }
 
-      .search-dialog paper-input.add-width {
-        --paper-input-container: {
-          padding: 0 5px 4px 20px;
-          width: 305px;
-        }
+      .header > button-action {
+        margin: 5px 10px;
       }
 
-      .date-label {
-        padding-top: 32px;
-        text-align: end;
-      }
-
-      .image-label {
-        padding-top: 5px;
-        text-align: end;
-      }
-
-      vaadin-date-picker-display {
-        display: inline-block;
-        padding: 0 5px 4px 20px;
-        width: 335px;
-        --date-select-bg-color: #ffffff;
-        --date-select-text-color: #000000;
+      .footer {
+        margin-top: 10px;
       }
 
       .search-dialog {
-        --styled-dialog-min-width: 825px;
-        --styled-dialog-max-width: 825px;
-      }
-
-      .search-dialog {
-        --styled-dialog-max-width: 840px;
+        --styled-dialog-min-width: 920px;
+        --styled-dialog-max-width: 920px;
         --styled-dialog-style-mixin: {
+          max-width: 980px;
+          min-width: 980px;
           overflow: auto;
         };
         --styled-dialog-inside-style-mixin: {
@@ -118,43 +100,72 @@ A Polymer Element showing search fields in a modal dialog.
         };
       }
 
-      .styled-dialog-name {
+      .search-dialog.backdrop {
+        --styled-dialog-style-mixin: {
+          max-width: 960px;
+          min-width: 960px;
+          opacity: 0.6;
+          overflow: auto;
+        };
+      }
+
+      .search-dialog .styled-dialog-name {
         max-width: var(--styled-dialog-label-width, 100px);
         min-width: var(--styled-dialog-label-width, 100px);
         overflow: hidden;
         text-overflow: ellipsis;
       }
 
-      styled-dialog.backdrop {
-        --styled-dialog-style-mixin: {
-          opacity: 0.6;
+      .search-name {
+        text-align: end;
+        /* Vertically align the label with their paper-input-containers. */
+        padding-top: 24px;
+      }
+
+      .images-name {
+        text-align: end;
+        padding-top: 5px;
+      }
+
+      .no-images {
+        margin-left: 20px;
+        padding-top: 5px;
+      }
+
+      vaadin-date-picker-display {
+        display: inline-block;
+        padding: 2px 10px 2px 20px;
+        width: 370px;
+        --date-picker-style-mixin: {
+          padding-bottom: 0;
         };
       }
 
-      .image-list {
-        margin-left: 20px;
-        margin-bottom: 5px;
+      paper-input {
+        width: 100%;
+        --paper-input-container-color: var(--secondary-text-color);
+        --paper-input-container-input-color: var(--primary-text-color);
+        --paper-input-container-focus-color: var(--primary-text-color);
+        --paper-input-container: {
+          padding: 2px 0 2px 20px;
+        }
+        --paper-input-container-input: {
+          font-weight: 500;
+        }
       }
 
-      .image-item {
-        cursor: default;
-        display: -webkit-box;
-        overflow: hidden;
-        padding-right: 5px;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        width: 695px;
-        word-break: break-word;
-        -webkit-line-clamp: 1;
-        -webkit-box-orient: vertical;
+      .search-data paper-input {
+        --paper-input-container: {
+          padding: 2px 0 2px 20px;
+          width: 320px;
+        }
       }
 
-      .image-item a {
-        color: inherit;
-      }
-
-      .image-item a:hover {
-        color: var(--secondary-text-color);
+      .search-data paper-input.add-width {
+        --paper-input-container: {
+          padding: 2px 0 2px 20px;
+          width: 350px;
+        }
       }
 
       .selected {
@@ -165,14 +176,28 @@ A Polymer Element showing search fields in a modal dialog.
         background-color: yellow;
       }
 
-      image-gallery {
-        --image-hovering-color: yellow;
-        --image-selected-color: var(--primary-background-color);
-        margin-left: 15px;
+      image-gallery,
+      search-image-gallery {
+        --image-gallery-hovering-color: yellow;
+        --image-gallery-selected-color: var(--primary-background-color);
       }
 
-      .image-item paper-icon-button,
-      .toggle-buttons paper-icon-button {
+      search-image-gallery {
+        margin: 0 10px 0 20px;
+      }
+
+      image-gallery.input-gallery {
+        margin-right: 10px;
+        max-height: 310px;
+        overflow: auto;
+      }
+
+      .link-data {
+        margin: 10px;
+      }
+
+      .link-data paper-icon-button,
+      .search-data paper-icon-button {
         border-radius: 50%;
         color: var(--disabled-text-color);
         cursor: pointer;
@@ -182,13 +207,21 @@ A Polymer Element showing search fields in a modal dialog.
         padding: 5px;
       }
 
-      .image-item paper-icon-button.on {
+      paper-icon-button.on {
         color: var(--primary-text-color);
       }
 
-      .toggle-buttons paper-icon-button {
-        /* Vertically align the toggle-buttons with their search-label & paper-input-containers. */
-        margin-top: 15px;
+      vaadin-upload {
+        margin: 10px;
+        padding: 10px;
+        --vaadin-upload-file-list: {
+          display: none;
+        };
+      }
+
+      .search-data paper-icon-button {
+        /* Vertically align the buttons with their label & paper-input-containers. */
+        margin-top: 20px;
       }
 
       .network-expansion-icon:hover,
@@ -217,55 +250,31 @@ A Polymer Element showing search fields in a modal dialog.
         min-height: 18px;
       }
 
-      iron-icon {
-        --iron-icon-height: 30px;
-        --iron-icon-width: 30px;
-        --iron-icon: {
-          margin: 0 5px;
-          min-width: 30px;
-        }
-      }
-
       .help-text > div {
         margin-left: 15px;
       }
-
-      .network-expansion-info {
-        padding-top: 10px;
-      }
-
-      .search-buttons > button-action {
-        margin: 5px 10px;
-      }
-
-      .search-options-title {
-        font-size: 24px;
-        font-weight: 500;
-        text-transform: none;
-      }
     </style>
 
-    <paper-button class="layout horizontal center green" active="[[opened]]" on-tap="toggleSearchFieldsDialog" title="Click to Enter Search Terms">
+    <paper-button class="layout horizontal center open-dialog-button" active="[[opened]]" on-tap="toggleSearchFieldsDialog" title="Click to Enter Search Terms">
       <iron-icon icon="fa:search"></iron-icon>
-      <span class="search-options-title">Click to Enter Search Terms</span>
+      <div>Click to Enter Search Terms</div>
     </paper-button>
 
-    <styled-dialog
-      class$="search-dialog [[_isBackdrop(_helpOpened)]]"
-      modal
-      opened="{{opened}}">
-
-      <div class="layout horizontal center-justified search-buttons">
+    <styled-dialog class$="search-dialog [[_isBackdrop(_openedDialogHelp, _openedDialogImages)]]" fill modal opened="{{opened}}">
+      <div slot="top" class="layout horizontal center-justified header">
         <button-action icon="fa:search" text="Search" on-tap="handleSearch"></button-action>
         <button-action icon="fa:undo" text="Reset" on-tap="resetAllSearchFields"></button-action>
         <button-action icon="fa:times" text="Cancel" on-tap="cancelSearch"></button-action>
         <button-action icon="fa:question" text="Help" on-tap="openHelp"></button-action>
+        <template is="dom-if" if="[[!hideImages]]">
+          <button-action icon="fa:picture-o" text="Images" on-tap="openImages"></button-action>
+        </template>
       </div>
 
       <template is="dom-repeat" items="[[_searchFields]]" as="dialogConfig">
         <div class="layout horizontal">
           <template is="dom-if" if="[[dialogConfig.isDate]]">
-            <div class="styled-dialog-name date-label">[[dialogConfig.name]]</div>
+            <div class="styled-dialog-name search-name">[[dialogConfig.name]]</div>
             <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
               <div class="layout horizontal date-fields-container nowrap">
                 <vaadin-date-picker-display
@@ -280,51 +289,28 @@ A Polymer Element showing search fields in a modal dialog.
 
           <template is="dom-if" if="[[!dialogConfig.isDate]]">
             <template is="dom-if" if="[[dialogConfig.isImage]]">
-              <div class="styled-dialog-name image-label">[[dialogConfig.name]]</div>
-              <div class="layout vertical">
+              <div class="styled-dialog-name images-name">[[dialogConfig.name]]</div>
+              <div class="layout vertical flex">
                 <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
-                  <div class="layout vertical image-list">
-                    <template is="dom-repeat" items="[[searchConfig.images]]" as="image">
-                      <div class$="layout horizontal center image-item [[_isInList(searchConfig.selected, image.id, 'selected')]] [[_isInList(searchConfig.hovering, image.id, 'hovering')]]"
-                        on-mouseover="_hoverImageBegin"
-                        on-mouseout="_hoverImageEnd">
+                  <template is="dom-if" if="[[!searchConfig.images.length]]">
+                    <div class="styled-dialog-name no-images">None</div>
+                  </template>
 
-                        <paper-icon-button
-                          class$="[[_getImageButtonStyleClass(searchConfig.selected, image.id)]]"
-                          icon="fa:search"
-                          title$="[[_getImageSearchButtonText(searchConfig.selected, image.id)]]"
-                          on-tap="_toggleImageSearch"></paper-icon-button>
-
-                        <paper-icon-button
-                          class$="[[_getImageButtonStyleClass(searchConfig.selected, image.id, image.search, 'required')]]"
-                          icon="fa:plus"
-                          title$="[[_getImageRequiredButtonText(image.search)]]"
-                          on-tap="_toggleImageRequired"></paper-icon-button>
-
-                        <paper-icon-button
-                          class$="[[_getImageButtonStyleClass(searchConfig.selected, image.id, image.search, 'excluded')]]"
-                          icon="fa:minus"
-                          title$="[[_getImageExcludedButtonText(image.search)]]"
-                          on-tap="_toggleImageExcluded"></paper-icon-button>
-
-                        <a href$="[[image.source]]" target="_blank" title="Click to Open Image">[[image.id]]</a>
-                      </div>
-                    </template>
-                  </div>
-
-                  <image-gallery
-                    hovering="{{searchConfig.hovering}}"
-                    images="[[searchConfig.images]]"
-                    selected="[[searchConfig.selected]]"></image-gallery>
+                  <search-image-gallery
+                    excluded="{{searchConfig.excluded}}"
+                    images="{{searchConfig.images}}"
+                    required="{{searchConfig.required}}"
+                    selected="{{searchConfig.selected}}">
+                  </search-image-gallery>
                 </template>
               </div>
             </template>
 
             <template is="dom-if" if="[[!dialogConfig.isImage]]">
-              <div class="styled-dialog-name search-label">[[dialogConfig.name]]</div>
+              <div class="styled-dialog-name search-name">[[dialogConfig.name]]</div>
               <div class="layout horizontal wrap">
                 <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
-                  <div class="layout horizontal nowrap">
+                  <div class="layout horizontal nowrap search-data">
                     <paper-input
                       class$="[[_getInputWidthStyleClass(searchConfig.enableNetworkExpansion)]]"
                       id$="input_[[searchConfig.key]]"
@@ -333,12 +319,12 @@ A Polymer Element showing search fields in a modal dialog.
                       on-keyup="_didUserHitEnterKey">
                     </paper-input>
 
-                    <div class="layout horizontal toggle-buttons">
+                    <div class="layout horizontal">
                       <template is="dom-if" if="[[searchConfig.enableNetworkExpansion]]">
                         <paper-icon-button
                           class$="network-expansion-icon [[_getNetworkExpansionStyleClass(searchConfig.activateNetworkExpansion, _isNetworkExpansionViable)]]"
                           icon="fa:arrows-alt"
-                          title="Click to Toggle Network Expansion of [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.activateNetworkExpansion)]])"
+                          title="Toggle Network Expansion of [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.activateNetworkExpansion)]])"
                           on-tap="_toggleNetworkExpansion">
                         </paper-icon-button>
                       </template>
@@ -346,7 +332,7 @@ A Polymer Element showing search fields in a modal dialog.
                       <paper-icon-button
                         class$="require-one-icon [[_getButtonStyleClass(searchConfig.requireOne)]]"
                         icon="fa:asterisk"
-                        title="Click to Require at Least One Term from [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.requireOne)]])"
+                        title="Require at Least One Term from [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.requireOne)]])"
                         on-tap="_toggleRequireOne">
                       </paper-icon-button>
                     </div>
@@ -357,9 +343,38 @@ A Polymer Element showing search fields in a modal dialog.
           </template>
         </div>
       </template>
+
+      <template is="dom-if" if="[[!hideImages]]">
+        <div slot="bottom" class="footer">
+          <div class="layout horizontal link-data">
+            <paper-input
+              no-label-float
+              placeholder="Enter or Paste Image Links"
+              value="{{_linksInput}}"
+              on-keyup="_didUserHitEnterKeyOnLinksInput">
+            </paper-input>
+
+            <paper-icon-button
+              class="on"
+              icon="fa:plus-circle"
+              title="Add Image Links"
+              disabled="[[!_linksInput]]"
+              on-tap="_handleLinksInput">
+            </paper-icon-button>
+          </div>
+
+          <vaadin-upload
+            accept="image/*"
+            files="{{_uploadedFiles}}"
+            method="POST"
+            target="[[imageUploadUrl]]"
+            on-upload-success="_handleImageFileUploadSuccess">
+          </vaadin-upload>
+        </div>
+      </template>
     </styled-dialog>
 
-    <styled-dialog class="help-dialog" header="Search Help" opened="{{_helpOpened}}">
+    <styled-dialog class="help-dialog" header="Search Help" opened="{{_openedDialogHelp}}">
       <div class="help-text">
         Enter words or phrases as <strong>search terms</strong> in one or more text fields.
         Use <strong>commas</strong> to separate search terms.
@@ -407,6 +422,75 @@ A Polymer Element showing search fields in a modal dialog.
             Please note that it may take a minute or more to run a search with network expansion activated.
           </div>
         </div>
+      </div>
+    </styled-dialog>
+
+    <styled-dialog class="images-dialog" fill header="Images" opened="{{_openedDialogImages}}">
+      <div class="styled-dialog-bold styled-dialog-tall">Your Links and Uploaded Files</div>
+
+      <div class="styled-dialog-text">Click the check icon next to an image to see the image matches from the DIG data.</div>
+
+      <image-gallery
+        class="input-gallery"
+        show-delete
+        show-labels
+        show-select
+        image-name-property="id"
+        images="{{images}}"
+        processing="[[imagesProcessing]]"
+        selected="{{_imagesSelected}}">
+      </image-gallery>
+
+      <div class="styled-dialog-note">
+        <strong>How does it work?</strong>
+        Image matches are found by looking at the features in the image like physical characteristics, hairstyle, dress, environment, and pose.  Better matches are shown first in the gallery.  To learn more, please visit <a href="http://www.ee.columbia.edu/ln/dvmm/memex/" target="_blank">here</a>.
+      </div>
+
+      <div class="styled-dialog-divider"></div>
+
+      <template is="dom-if" if="[[_imageResults.id]]">
+        <div class="styled-dialog-bold styled-dialog-tall">DIG Images Matching [[_imageResults.id]]</div>
+
+        <div class="styled-dialog-text">Click the check icon next to an image match to add it to your search.</div>
+
+        <image-gallery
+          class="results-gallery"
+          new-tab
+          show-delete
+          show-delete-following
+          show-labels
+          show-select
+          show-select-preceding
+          images="{{_imageResults.images}}"
+          selected="{{_imageResults.selected}}">
+        </image-gallery>
+      </template>
+
+      <div slot="bottom" class="footer">
+        <div class="layout horizontal link-data">
+          <paper-input
+            no-label-float
+            placeholder="Enter or Paste Image Links"
+            value="{{_linksInput}}"
+            on-keyup="_didUserHitEnterKeyOnLinksInput">
+          </paper-input>
+
+          <paper-icon-button
+            class="on"
+            icon="fa:plus-circle"
+            title="Add Image Links"
+            disabled="[[!_linksInput]]"
+            on-tap="_handleLinksInput">
+          </paper-icon-button>
+        </div>
+
+        <vaadin-upload
+          accept="image/*"
+          files="{{_uploadedFiles}}"
+          method="POST"
+          target="[[imageUploadUrl]]"
+          on-upload-success="_handleImageFileUploadSuccess">
+        </vaadin-upload>
       </div>
     </styled-dialog>
   </template>
@@ -546,6 +630,63 @@ A Polymer Element showing search fields in a modal dialog.
         /**
          * (Optional)
          *
+         * Whether to hide the image button and upload elements.
+         *
+         * @type {Boolean}
+         * @default false
+         */
+        hideImages: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * (Output)
+         *
+         * The list of image objects (links and/or file data) added and/or uploaded by the user.
+         *
+         * @type {Array}
+         * @default []
+         */
+        images: {
+          notify: true,
+          type: Array,
+          value: function() {
+            return [];
+          }
+        },
+
+        /**
+         * (Optional)
+         *
+         * The list of image IDs corresponding to each ID in `images` that is processing.
+         *
+         * @type {Array}
+         * @default []
+         */
+        imagesProcessing: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        },
+
+        /**
+         * (Optional)
+         *
+         * The URL for the image uploads.
+         *
+         * @type {String}
+         * @default '/uploadImage'
+         */
+        imageUploadUrl: {
+          type: String,
+          value: '/uploadImage'
+        },
+
+        /**
+         * (Optional)
+         *
          * The prefix for the image URL for image field data.
          *
          * @type {String}
@@ -601,10 +742,12 @@ A Polymer Element showing search fields in a modal dialog.
          * Whether to let queries run.
          *
          * @type {Boolean}
+         * @default false
          */
         processRequest: {
           notify: true,
-          type: Boolean
+          type: Boolean,
+          value: false
         },
 
         /**
@@ -658,15 +801,34 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
-         * Whether the help dialog is opened.
+         * An object containing the list of image results and the list of selected image IDs to be shown in the images dialog.
          *
-         * @type {Boolean}
-         * @default false
+         * @type {Object}
+         * @default {images:[],selected:[]}
          * @private
          */
-        _helpOpened: {
-          type: Boolean,
-          value: false
+        _imageResults: {
+          type: Object,
+          value: function() {
+            return {
+              images: [],
+              selected: []
+            };
+          }
+        },
+
+        /**
+         * The list of image IDs corresponding to each ID in `images` that is selected.
+         *
+         * @type {Array}
+         * @default []
+         * @private
+         */
+        _imagesSelected: {
+          type: Array,
+          value: function() {
+            return [];
+          }
         },
 
         /**
@@ -682,6 +844,42 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
+         * The image links entered by the user.
+         *
+         * @type {String}
+         * @default ''
+         * @private
+         */
+        _linksInput: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * Whether the help dialog is opened.
+         *
+         * @type {Boolean}
+         * @default false
+         * @private
+         */
+        _openedDialogHelp: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * Whether the images dialog is opened.
+         *
+         * @type {Boolean}
+         * @default false
+         * @private
+         */
+        _openedDialogImages: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
          * The search fields shown in the dialog.
          *
          * @type {Array}
@@ -690,10 +888,23 @@ A Polymer Element showing search fields in a modal dialog.
         _searchFields: {
           computed: '_createSearchFields(searchFieldsConfig, dataProperty, nameProperty, typeProperty, dataKeyProperty, dataTitleProperty)',
           type: Array
+        },
+
+        /**
+         * The list of uploaded files.
+         *
+         * @type {Array}
+         * @private
+         */
+        _uploadedFiles: {
+          type: Array
         }
       },
 
       observers: [
+        '_handleImagesSelected(_imagesSelected)',
+        '_handleImageResultsModified(_imageResults.id, _imageResults.images)',
+        '_handleImageResultsSelected(_imageResults.selected)',
         'toggleProcessRequest(searchParameters.*, opened)'
       ],
 
@@ -734,8 +945,9 @@ A Polymer Element showing search fields in a modal dialog.
               }
 
               if(isImage) {
-                item.hovering = [];
+                item.excluded = [];
                 item.images = [];
+                item.required = [];
                 item.selected = [];
               }
 
@@ -762,6 +974,18 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
+       * Updates the images using the links input if ENTER was pressed.
+       *
+       * @param {Object} event
+       * @private
+       */
+      _didUserHitEnterKeyOnLinksInput: function(event) {
+        if(event.keyCode === 13) {
+          this._handleLinksInput();
+        }
+      },
+
+      /**
        * Returns the style class for the button with the given toggle status.
        *
        * @param {Boolean} on
@@ -781,54 +1005,6 @@ A Polymer Element showing search fields in a modal dialog.
        */
       _getButtonText: function(on) {
         return on ? 'On' : 'Off';
-      },
-
-      /**
-       * Returns the style class of an image button.
-       *
-       * @param {Array} list
-       * @param {Number|String} id
-       * @param {String} search
-       * @param {String} type
-       * @return {String}
-       * @private
-       */
-      _getImageButtonStyleClass: function(list, id, search, type) {
-        return (list.indexOf(id) >= 0 && (_.isUndefined(type) ? true : search === type)) ? 'on' : '';
-      },
-
-      /**
-       * Returns the text of the "excluded" image button.
-       *
-       * @param {String} search
-       * @return {String}
-       * @private
-       */
-      _getImageExcludedButtonText: function(search) {
-        return (search === 'excluded' ? 'Click to Not Exclude Image from Search Results' : 'Click to Exclude Image from Search Results');
-      },
-
-      /**
-       * Returns the text of the "required" image button.
-       *
-       * @param {String} search
-       * @return {String}
-       * @private
-       */
-      _getImageRequiredButtonText: function(search) {
-        return (search === 'required' ? 'Click to Not Require Image in Search Results' : 'Click to Require Image in Search Results');
-      },
-
-      /**
-       * Returns the text of the "search" image button.
-       *
-       * @param {Array} list
-       * @param {Number|String} id
-       * @return {String}
-       * @private
-       */
-      _getImageSearchButtonText: function(list, id) {
-        return (list.indexOf(id) >= 0 ? 'Click to Remove Image from Search' : 'Click to Add Image to Search');
       },
 
       /**
@@ -855,122 +1031,181 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Begins hovering over an image using the search config object and image ID in the model of the given event.
+       * Adds the uploaded file in the given upload response event object to the global list of images and opens the images dialog.
        *
+       * @event upload-success
        * @param {Event} event
        * @private
        */
-      _hoverImageBegin: function(event) {
-        event.model.set('searchConfig.hovering', [event.model.image.id]);
+      _handleImageFileUploadSuccess: function(event) {
+        if(event.detail && event.detail.xhr && event.detail.xhr.response) {
+          var response = JSON.parse(event.detail.xhr.response);
+          if(response.mimeType.indexOf('image') !== 0) {
+            return;
+          }
+
+          // Use the map function to create a new array.
+          this.set('images', this.images.map(function(object) {
+            return object;
+          }).concat({
+            id: event.detail.file.name,
+            source: 'data:' + response.mimeType + ';base64,' + response.base64,
+            type: 'DATA'
+          }));
+
+          this.set('_openedDialogImages', true);
+        }
       },
 
       /**
-       * Ends hovering over an image using the search config object and image ID in the model of the given event.
+       * Sets the _imageResults using the given selected image ID and the hits in the global list of images corresponding to the given ID.
        *
-       * @param {Event} event
+       * @param {Array} selectedImageIds
        * @private
        */
-      _hoverImageEnd: function(event) {
-        event.model.set('searchConfig.hovering', []);
+      _handleImagesSelected: function(selectedImageIds) {
+        if(!selectedImageIds.length) {
+          this.set('_imageResults', {
+            images: [],
+            selected: []
+          });
+          return;
+        }
+
+        if(selectedImageIds.length > 1) {
+          // Use the map function to create a new array.
+          this.set('_imagesSelected', selectedImageIds.slice(selectedImageIds.length - 1).map(function(id) {
+            return id;
+          }));
+          return;
+        }
+
+        var imageId = selectedImageIds[0];
+        var imageIndex = _.findIndex(this.images.map(function(object) {
+          return object.id;
+        }), function(id) {
+          return id === imageId;
+        });
+
+        if(imageIndex >= 0) {
+          this.set('_imageResults', {
+            id: imageId,
+            images: this.images[imageIndex].hits || [],
+            selected: []
+          });
+        }
+      },
+
+      /**
+       * Sets the hits in the global list of images corresponding to the given ID to the given list.
+       *
+       * @param {Number|String} id
+       * @param {Array} modifiedImages
+       * @private
+       */
+      _handleImageResultsModified: function(id, modifiedImages) {
+        var self = this;
+        this.images.forEach(function(image, imageIndex) {
+          if(image.id === id && image.hits.length !== modifiedImages.length) {
+            self.set(['images', imageIndex, 'hits'], modifiedImages);
+          }
+        });
+      },
+
+      /**
+       * Adds the images from the _imageResults using the given list of select image IDs to the selected images in the search fields.
+       *
+       * @param {Array} selectedImageIds
+       * @private
+       */
+      _handleImageResultsSelected: function(selectedImageIds) {
+        if(!selectedImageIds.length) {
+          return;
+        }
+
+        var self = this;
+        this._searchFields.forEach(function(dialogConfig, dialogIndex) {
+          if(dialogConfig.isImage) {
+            dialogConfig.data.forEach(function(searchConfig, searchIndex) {
+              var imageIdsFromConfig = searchConfig.images.map(function(object) {
+                return object.id;
+              });
+
+              var imageIdsNeededInConfig = selectedImageIds.filter(function(id) {
+                return imageIdsFromConfig.indexOf(id) < 0;
+              });
+
+              var imagesNeededInConfig = self._imageResults.images.filter(function(object) {
+                return imageIdsNeededInConfig.indexOf(object.id) >= 0;
+              });
+
+              if(imagesNeededInConfig.length) {
+                // Use the map function to create a new array.
+                self.set(['_searchFields', dialogIndex, 'data', searchIndex, 'images'], searchConfig.images.map(function(object) {
+                  return object;
+                }).concat(imagesNeededInConfig));
+              }
+
+              var imageIdsToSelectInConfig = selectedImageIds.filter(function(id) {
+                return searchConfig.selected.indexOf(id) < 0;
+              });
+
+              if(imageIdsToSelectInConfig.length) {
+                // Use the map function to create a new array.
+                self.set(['_searchFields', dialogIndex, 'data', searchIndex, 'selected'], searchConfig.selected.map(function(id) {
+                  return id;
+                }).concat(imageIdsToSelectInConfig));
+              }
+            });
+          }
+        });
+      },
+
+      /**
+       * Adds the link(s) in the _linksInput (if non-empty) to the global list of images and opens the images dialog.
+       *
+       * @private
+       */
+      _handleLinksInput: function() {
+        var links = this._linksInput.replace(/\s/g, ' ').split(' ').filter(function(link) {
+          return !!link;
+        });
+
+        if(!links.length) {
+          return;
+        }
+
+        // Use the map function to create a new array.
+        this.set('images', this.images.map(function(object) {
+          return object;
+        }).concat(links.map(function(link) {
+          return {
+            id: link,
+            source: link,
+            type: 'LINK'
+          };
+        })));
+
+        this.set('_linksInput', '');
+        this.set('_openedDialogImages', true);
       },
 
       /**
        * Returns the backdrop style class.
        *
-       * @param {Boolean} helpOpened
+       * @param {Boolean} helpDialogOpened
+       * @param {Boolean} imagesDialogOpened
        * @return {String}
        * @private
        */
-      _isBackdrop: function(helpOpened) {
-        return helpOpened ? 'backdrop' : '';
-      },
-
-      /**
-       * Returns the given object if the given ID is in the given list.
-       *
-       * @param {Array} list
-       * @param {Number|String} id
-       * @param {Object} object
-       * @return {Object}
-       * @private
-       */
-      _isInList: function(list, id, object) {
-        return list.indexOf(id) >= 0 ? object : '';
-      },
-
-      /**
-       * Selects an image and toggles its excluded status using the search config object and image ID/search status in the model of the given event.
-       *
-       * @param {Event} event
-       * @private
-       */
-      _toggleImageExcluded: function(event) {
-        var search = event.model.image.search === 'excluded' ? 'optional' : 'excluded';
-        event.model.set('image.search', search);
-
-        // Add image ID to list of selected image IDs (if not there already).
-        var index = event.model.searchConfig.selected.indexOf(event.model.image.id);
-        if(index < 0) {
-          // Use the map function to create a new array.
-          var selected = event.model.searchConfig.selected.map(function(id) {
-            return id;
-          });
-          selected.push(event.model.image.id);
-          event.model.set('searchConfig.selected', selected);
-        }
-      },
-
-      /**
-       * Selects an image and toggles its required status using the search config object and image ID/search status in the model of the given event.
-       *
-       * @param {Event} event
-       * @private
-       */
-      _toggleImageRequired: function(event) {
-        var search = event.model.image.search === 'required' ? 'optional' : 'required';
-        event.model.set('image.search', search);
-
-        // Add image ID to list of selected image IDs (if not there already).
-        var index = event.model.searchConfig.selected.indexOf(event.model.image.id);
-        if(index < 0) {
-          // Use the map function to create a new array.
-          var selected = event.model.searchConfig.selected.map(function(id) {
-            return id;
-          });
-          selected.push(event.model.image.id);
-          event.model.set('searchConfig.selected', selected);
-        }
-      },
-
-      /**
-       * Toggles the selected status of an image using the search config object and image ID/search status in the model of the given event.
-       *
-       * @param {Event} event
-       * @private
-       */
-      _toggleImageSearch: function(event) {
-        event.model.set('image.search', 'optional');
-
-        var index = event.model.searchConfig.selected.indexOf(event.model.image.id);
-
-        // Use the map function to create a new array.
-        var selected = event.model.searchConfig.selected.map(function(id) {
-          return id;
-        });
-
-        if(index < 0) {
-          selected.push(event.model.image.id);
-        } else {
-          selected.splice(index, 1);
-        }
-
-        event.model.set('searchConfig.selected', selected);
+      _isBackdrop: function(helpDialogOpened, imagesDialogOpened) {
+        return helpDialogOpened || imagesDialogOpened ? 'backdrop' : '';
       },
 
       /**
        * Toggles the activateNetworkExpansion property of the searchConfig in the model of the given event.
        *
-       * @param {Event} event
+       * @event tap
        * @private
        */
       _toggleNetworkExpansion: function(event) {
@@ -981,7 +1216,7 @@ A Polymer Element showing search fields in a modal dialog.
       /**
        * Toggles the requireOne property of the searchConfig in the model of the given event.
        *
-       * @param {Event} event
+       * @event tap
        * @private
        */
       _toggleRequireOne: function(event) {
@@ -1036,8 +1271,7 @@ A Polymer Element showing search fields in a modal dialog.
 
         this.searchParameters[parameterKey][key] = this.buildSearchParameter(category, enabled, key, text, 'required', date);
 
-        // TODO Do we really need to create a new object for the second argument?  Do we need to use an object at all?
-        this.notifyPath(['searchParameters', parameterKey, key], this.buildSearchParameter(category, enabled, key, text, 'required', date));
+        this.notifyPath(['searchParameters', parameterKey, key], this.searchParameters[parameterKey][key]);
       },
 
       /**
@@ -1079,7 +1313,18 @@ A Polymer Element showing search fields in a modal dialog.
         });
 
         this.set(updatePath.concat('images'), images);
+        // Use the map function to create a new array.
         this.set(updatePath.concat('selected'), images.map(function(object) {
+          return object.id;
+        }));
+        this.set(updatePath.concat('required'), images.filter(function(object) {
+          return object.search === 'required';
+        }).map(function(object) {
+          return object.id;
+        }));
+        this.set(updatePath.concat('excluded'), images.filter(function(object) {
+          return object.search === 'excluded';
+        }).map(function(object) {
           return object.id;
         }));
       },
@@ -1091,9 +1336,16 @@ A Polymer Element showing search fields in a modal dialog.
        * @private
        */
       _updateImageParameterFromGallery: function(searchConfig) {
-        var searchTermToSearchStatus = searchConfig.images.reduce(function(searchTermToSearchStatus, image) {
-          if(searchConfig.selected.indexOf(image.id) >= 0) {
-            searchTermToSearchStatus[image.id] = image.search;
+        var self = this;
+        var searchTermToSearchStatus = searchConfig.images.filter(function(object) {
+          return searchConfig.selected.indexOf(object.id) >= 0;
+        }).reduce(function(searchTermToSearchStatus, selected) {
+          if(searchConfig.excluded.indexOf(selected.id) >= 0) {
+            searchTermToSearchStatus[selected.id] = 'excluded';
+          } else if(searchConfig.required.indexOf(selected.id) >= 0) {
+            searchTermToSearchStatus[selected.id] = 'required';
+          } else {
+            searchTermToSearchStatus[selected.id] = 'optional';
           }
           return searchTermToSearchStatus;
         }, {});
@@ -1177,8 +1429,7 @@ A Polymer Element showing search fields in a modal dialog.
       _updateSearchParameterAndNotify: function(type, term, name, enabled, search) {
         this.searchParameters[type][term] = this.buildSearchParameter(name, enabled, term, term, search);
 
-        // TODO Do we really need to create a new object for the second argument?  Do we need to use an object at all?
-        this.notifyPath(['searchParameters', type, '*'], this.buildSearchParameter(name, enabled, term, term, search));
+        this.notifyPath(['searchParameters', type, '*'], this.searchParameters[type][term]);
       },
 
       /**
@@ -1262,22 +1513,25 @@ A Polymer Element showing search fields in a modal dialog.
         _.keys(self.searchParameters[searchConfig.key]).forEach(function(term) {
           // Disable deleted terms.
           if(self.searchParameters[searchConfig.key][term].enabled && _.keys(searchTermToSearchStatus).indexOf(term) < 0) {
-            self._updateSearchParameterAndNotify(searchConfig.key, term, searchConfig.title, false);
+            self.searchParameters[searchConfig.key][term] = self.buildSearchParameter(searchConfig.title, false, term, term);
           }
         });
 
         _.keys(searchTermToSearchStatus).forEach(function(term) {
           // Add new terms.
           if(term) {
-            self._updateSearchParameterAndNotify(searchConfig.key, term, searchConfig.title, true, searchTermToSearchStatus[term]);
+            self.searchParameters[searchConfig.key][term] = self.buildSearchParameter(searchConfig.title, true, term, term, searchTermToSearchStatus[term]);
           }
         });
+
+        this.notifyPath(['searchParameters', searchConfig.key], this.searchParameters[searchConfig.key]);
       },
 
       /**
        * Cancels the changes to the search fields and closes the dialog.
        */
       cancelSearch: function() {
+        this._uploadedFiles = [];
         this._searchFields.forEach(function(dialogConfig) {
           dialogConfig.data.forEach(function(searchConfig) {
             searchConfig.activateNetworkExpansion = searchConfig.activateNetworkExpansionPrevious;
@@ -1293,6 +1547,7 @@ A Polymer Element showing search fields in a modal dialog.
        * Updates the searchParameters using the search fields and closes the dialog so that new queries can run.
        */
       handleSearch: function() {
+        this._uploadedFiles = [];
         this._searchFields.forEach(function(dialogConfig) {
           dialogConfig.data.forEach(function(searchConfig) {
             searchConfig.activateNetworkExpansionPrevious = searchConfig.activateNetworkExpansion;
@@ -1314,16 +1569,23 @@ A Polymer Element showing search fields in a modal dialog.
        * Opens the help dialog.
        */
       openHelp: function() {
-        this.set('_helpOpened', true);
+        this.set('_openedDialogHelp', true);
+      },
+
+      /**
+       * Opens the images dialog.
+       */
+      openImages: function() {
+        this.set('_openedDialogImages', true);
       },
 
       /**
        * Clears all of the search fields in the dialog.
        */
       resetAllSearchFields: function() {
-        var self = this;
-
+        this._uploadedFiles = [];
         if(this._searchFields) {
+          var self = this;
           this._searchFields.forEach(function(dialogConfig, dialogIndex) {
             if(dialogConfig.data) {
               dialogConfig.data.forEach(function(searchConfig, searchIndex) {
@@ -1331,7 +1593,6 @@ A Polymer Element showing search fields in a modal dialog.
                   self.set(['_searchFields', dialogIndex, 'data', searchIndex, 'value'], {});
                 } else if(dialogConfig.isImage) {
                   self.set(['_searchFields', dialogIndex, 'data', searchIndex, 'selected'], []);
-                  self.set(['_searchFields', dialogIndex, 'data', searchIndex, 'images'], []);
                 } else {
                   self.$$('#input_' + searchConfig.key).value = '';
                 }

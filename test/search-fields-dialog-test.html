@@ -105,14 +105,14 @@ limitations under the License.
           name: 'Identifiers',
           data: [phoneConfig, emailConfig]
         }, {
-          name: 'Location',
+          name: 'Locations',
           data: [cityConfig, countryConfig]
         }, {
-          name: 'Ad',
+          name: 'Ads',
           data: [websiteConfig, titleConfig, descriptionConfig, urlConfig]
         }, {
           type: 'image',
-          name: 'Image',
+          name: 'Images',
           data: [imageConfig]
         }];
         element.searchParameters = {
@@ -132,18 +132,24 @@ limitations under the License.
 
       test('properties are set as expected', function() {
         assert.equal(element.dataProperty, 'data');
-        assert.equal(element.nameProperty, 'name');
-        assert.equal(element.typeProperty, 'type');
         assert.equal(element.dataKeyProperty, 'key');
         assert.equal(element.dataTitleProperty, 'title');
         assert.equal(element.imageUrlPrefix, '');
-        assert.isFalse(element.opened);
+        assert.equal(element.imageUploadUrl, '/uploadImage');
+        assert.equal(element.nameProperty, 'name');
+        assert.equal(element.typeProperty, 'type');
+
         assert.isTrue(element.processRequest);
+        assert.isFalse(element.hideImages);
+        assert.isFalse(element.opened);
         assert.isFalse(element.userCanceled);
+
         assert.deepEqual(element.dateConfig, {
           dateStart: 'postingDate',
           dateEnd: 'postingDate'
         });
+        assert.deepEqual(element.images, []);
+        assert.deepEqual(element.imagesProcessing, []);
         assert.deepEqual(element.networkExpansionParameters, {
           city: false
         });
@@ -159,21 +165,166 @@ limitations under the License.
           url: {},
           website: {}
         });
+
+        assert.equal(element._linksInput, '');
+
+        assert.isFalse(element._openedDialogHelp);
+        assert.isFalse(element._openedDialogImages);
+
+        assert.deepEqual(element._imageResults, {
+          images: [],
+          selected: []
+        });
+        assert.deepEqual(element._imagesSelected, []);
+        assert.deepEqual(element._uploadedFiles, []);
       });
 
-      test('template does have the dialogs and the button to open the search dialog', function() {
-        var button = element.$$('paper-button[title="Click to Enter Search Terms"]');
-        assert.isNotNull(button);
-        assert.equal(button.active, element.opened);
-        assert.isNotNull(element.$$('iron-icon[icon="fa:search"]'));
-        assert.isNotNull(element.$$('styled-dialog.search-dialog'));
-        assert.equal(element.$$('styled-dialog.search-dialog').opened, false);
-        assert.isNotNull(element.$$('styled-dialog.help-dialog'));
-        assert.equal(element.$$('styled-dialog.help-dialog').opened, false);
+      test('does have the button to open the search dialog', function() {
+        assert.isNotNull(element.$$('paper-button.open-dialog-button'));
+        assert.isFalse(element.$$('paper-button.open-dialog-button').active);
+        assert.isNotNull(element.$$('paper-button.open-dialog-button iron-icon[icon="fa:search"]'));
+        assert.isNotNull(element.$$('paper-button.open-dialog-button div'));
       });
 
-      test('template does have date pickers', function() {
-        var datePickers = Polymer.dom(element.root).querySelectorAll('vaadin-date-picker-display');
+      test('does have the search dialog', function() {
+        assert.isNotNull(element.$$('.search-dialog'));
+        assert.isTrue(element.$$('.search-dialog').fill);
+        assert.isTrue(element.$$('.search-dialog').modal);
+        assert.isFalse(element.$$('.search-dialog').opened);
+        assert.isFalse(element.$$('.search-dialog').classList.contains('backdrop'));
+      });
+
+      test('does have the help dialog', function() {
+        assert.isNotNull(element.$$('.help-dialog'));
+        assert.isFalse(element.$$('.help-dialog').fill);
+        assert.isFalse(element.$$('.help-dialog').modal);
+        assert.isFalse(element.$$('.help-dialog').opened);
+      });
+
+      test('does have the images dialog and elements', function() {
+        assert.isNotNull(element.$$('.images-dialog'));
+        assert.isTrue(element.$$('.images-dialog').fill);
+        assert.isFalse(element.$$('.images-dialog').modal);
+        assert.isFalse(element.$$('.images-dialog').opened);
+      });
+
+      test('images dialog does an image gallery', function() {
+        var galleries = Polymer.dom(element.root).querySelectorAll('.images-dialog image-gallery');
+        assert.equal(galleries.length, 1);
+
+        assert.equal(galleries[0].imageNameProperty, 'id');
+        assert.isTrue(galleries[0].classList.contains('input-gallery'));
+        assert.isTrue(galleries[0].showDelete);
+        assert.isTrue(galleries[0].showLabels);
+        assert.isTrue(galleries[0].showSelect);
+        assert.deepEqual(galleries[0].images, []);
+        assert.deepEqual(galleries[0].processing, []);
+        assert.deepEqual(galleries[0].selected, []);
+      });
+
+      test('images dialog does have two image galleries if _imageResults.id is defined', function(done) {
+        element.set('_imageResults.id', 'id1');
+
+        flush(function() {
+          var galleries = Polymer.dom(element.root).querySelectorAll('.images-dialog image-gallery');
+          assert.equal(galleries.length, 2);
+
+          assert.equal(galleries[0].imageNameProperty, 'id');
+          assert.isTrue(galleries[0].classList.contains('input-gallery'));
+          assert.isTrue(galleries[0].showDelete);
+          assert.isTrue(galleries[0].showLabels);
+          assert.isTrue(galleries[0].showSelect);
+          assert.deepEqual(galleries[0].images, []);
+          assert.deepEqual(galleries[0].processing, []);
+          assert.deepEqual(galleries[0].selected, []);
+
+          assert.isTrue(galleries[1].classList.contains('results-gallery'));
+          assert.isTrue(galleries[1].newTab);
+          assert.isTrue(galleries[1].showDelete);
+          assert.isTrue(galleries[1].showDeleteFollowing);
+          assert.isTrue(galleries[1].showLabels);
+          assert.isTrue(galleries[1].showSelect);
+          assert.isTrue(galleries[1].showSelectPreceding);
+          assert.deepEqual(galleries[1].images, []);
+          assert.deepEqual(galleries[1].selected, []);
+
+          done();
+        });
+      });
+
+      test('image galleries do have expected images', function(done) {
+        element.images = [{
+          hits: [],
+          id: 'image1',
+          source: 'source1'
+        }, {
+          hits: [],
+          id: 'image2',
+          source: 'source2'
+        }];
+        element.imagesProcessing = ['image1'];
+        element._imagesSelected = ['image2'];
+        element._imageResults = {
+          id: 'id1',
+          images: [{
+            id: 'image3',
+            source: 'source3'
+          }, {
+            id: 'image4',
+            source: 'source4'
+          }],
+          selected: ['image3']
+        };
+
+        flush(function() {
+          var galleries = Polymer.dom(element.root).querySelectorAll('.images-dialog image-gallery');
+          assert.equal(galleries.length, 2);
+
+          assert.equal(galleries[0].imageNameProperty, 'id');
+          assert.isTrue(galleries[0].classList.contains('input-gallery'));
+          assert.isTrue(galleries[0].showDelete);
+          assert.isTrue(galleries[0].showLabels);
+          assert.isTrue(galleries[0].showSelect);
+          assert.deepEqual(galleries[0].images, [{
+            hits: [],
+            id: 'image1',
+            source: 'source1'
+          }, {
+            hits: [],
+            id: 'image2',
+            source: 'source2'
+          }]);
+          assert.deepEqual(galleries[0].processing, ['image1']);
+          assert.deepEqual(galleries[0].selected, ['image2']);
+
+          assert.isTrue(galleries[1].classList.contains('results-gallery'));
+          assert.isTrue(galleries[1].newTab);
+          assert.isTrue(galleries[1].showDelete);
+          assert.isTrue(galleries[1].showDeleteFollowing);
+          assert.isTrue(galleries[1].showLabels);
+          assert.isTrue(galleries[1].showSelect);
+          assert.isTrue(galleries[1].showSelectPreceding);
+          assert.deepEqual(galleries[1].images, [{
+            id: 'image3',
+            source: 'source3'
+          }, {
+            id: 'image4',
+            source: 'source4'
+          }]);
+          assert.deepEqual(galleries[1].selected, ['image3']);
+
+          done();
+        });
+      });
+
+      test('images dialog does have image input elements', function() {
+        assert.isNotNull(element.$$('.images-dialog div[slot="bottom"] .link-data paper-input'));
+        assert.isNotNull(element.$$('.images-dialog div[slot="bottom"] .link-data paper-icon-button'));
+        assert.isNotNull(element.$$('.images-dialog div[slot="bottom"] vaadin-upload'));
+      });
+
+      test('search dialog does have date pickers', function() {
+        var datePickers = Polymer.dom(element.root).querySelectorAll('.search-dialog vaadin-date-picker-display');
         assert.equal(datePickers.length, 2);
         assert.deepEqual(datePickers[0].facetKey, 'value');
         assert.equal(datePickers[0].facets, element._searchFields[0].data[0]);
@@ -195,9 +346,8 @@ limitations under the License.
         assert.deepEqual(datePickers[1].category, 'To');
       });
 
-      test('template does have paper inputs', function() {
-        var paperInputs = Polymer.dom(element.root).querySelectorAll('paper-input');
-        assert.isNotNull(paperInputs);
+      test('search dialog does have paper inputs for the search fields', function() {
+        var paperInputs = Polymer.dom(element.root).querySelectorAll('.search-dialog .search-data paper-input');
         assert.equal(paperInputs.length, 8);
         assert.equal(paperInputs[0].id, 'input_phone');
         assert.equal(paperInputs[0].label, 'Telephone Number');
@@ -225,28 +375,103 @@ limitations under the License.
         assert.equal(paperInputs[7].value, '');
       });
 
-      test('template does have paper icon buttons', function() {
-        var buttons = Polymer.dom(element.root).querySelectorAll('.toggle-buttons paper-icon-button');
-        assert.isNotNull(buttons);
+      test('paper inputs for the search fields do have expected values', function() {
+        element.set(['_searchFields', 1, 'data', 0, 'value'], 'testPhone');
+        element.set(['_searchFields', 1, 'data', 1, 'value'], 'testEmail');
+        element.set(['_searchFields', 2, 'data', 0, 'value'], 'testCity');
+        element.set(['_searchFields', 2, 'data', 1, 'value'], 'testCountry');
+        element.set(['_searchFields', 3, 'data', 0, 'value'], 'testWebsite');
+        element.set(['_searchFields', 3, 'data', 1, 'value'], 'testTitle');
+        element.set(['_searchFields', 3, 'data', 2, 'value'], 'testDescription');
+        element.set(['_searchFields', 3, 'data', 3, 'value'], 'testURL');
+
+        var paperInputs = Polymer.dom(element.root).querySelectorAll('.search-dialog .search-data paper-input');
+        assert.equal(paperInputs.length, 8);
+        assert.equal(paperInputs[0].value, 'testPhone');
+        assert.equal(paperInputs[1].value, 'testEmail');
+        assert.equal(paperInputs[2].value, 'testCity');
+        assert.equal(paperInputs[3].value, 'testCountry');
+        assert.equal(paperInputs[4].value, 'testWebsite');
+        assert.equal(paperInputs[5].value, 'testTitle');
+        assert.equal(paperInputs[6].value, 'testDescription');
+        assert.equal(paperInputs[7].value, 'testURL');
+      });
+
+      test('search dialog does have paper icon buttons for the search fields', function() {
+        var buttons = Polymer.dom(element.root).querySelectorAll('.search-dialog .search-data paper-icon-button');
         assert.equal(buttons.length, 12);
       });
 
-      test('template does have image elements', function() {
-        assert.isNotNull(element.$$('.image-list'));
-        assert.isNotNull(element.$$('image-gallery'));
-        assert.deepEqual(element.$$('image-gallery').hovering, []);
-        assert.deepEqual(element.$$('image-gallery').images, []);
-        assert.deepEqual(element.$$('image-gallery').selected, []);
+      test('search dialog does have image gallery for the image field', function() {
+        var galleries = Polymer.dom(element.root).querySelectorAll('.search-dialog search-image-gallery');
+        assert.equal(galleries.length, 1);
+        assert.deepEqual(galleries[0].excluded, []);
+        assert.deepEqual(galleries[0].images, []);
+        assert.deepEqual(galleries[0].required, []);
+        assert.deepEqual(galleries[0].selected, []);
       });
 
-      test('template does have expected buttons', function() {
-        var buttons = Polymer.dom(element.root).querySelectorAll('button-action');
+      test('search image gallery does have expected images', function() {
+        element.set(['_searchFields', 4, 'data', 0, 'images'], [{
+          hits: [],
+          id: 'image1',
+          source: 'source1'
+        }, {
+          hits: [],
+          id: 'image2',
+          source: 'source2'
+        }, {
+          hits: [],
+          id: 'image3',
+          source: 'source3'
+        }, {
+          hits: [],
+          id: 'image4',
+          source: 'source4'
+        }]);
+        element.set(['_searchFields', 4, 'data', 0, 'selected'], ['image2', 'image3', 'image4']);
+        element.set(['_searchFields', 4, 'data', 0, 'required'], ['image3']);
+        element.set(['_searchFields', 4, 'data', 0, 'excluded'], ['image4']);
+
+        var galleries = Polymer.dom(element.root).querySelectorAll('.search-dialog search-image-gallery');
+        assert.equal(galleries.length, 1);
+        assert.deepEqual(galleries[0].excluded, ['image4']);
+        assert.deepEqual(galleries[0].images, [{
+          hits: [],
+          id: 'image1',
+          source: 'source1'
+        }, {
+          hits: [],
+          id: 'image2',
+          source: 'source2'
+        }, {
+          hits: [],
+          id: 'image3',
+          source: 'source3'
+        }, {
+          hits: [],
+          id: 'image4',
+          source: 'source4'
+        }]);
+        assert.deepEqual(galleries[0].required, ['image3']);
+        assert.deepEqual(galleries[0].selected, ['image2', 'image3', 'image4']);
+      });
+
+      test('search dialog does have expected header buttons', function() {
+        var buttons = Polymer.dom(element.root).querySelectorAll('.search-dialog div[slot="top"].header button-action');
         assert.isNotNull(buttons);
-        assert.equal(buttons.length, 4);
+        assert.equal(buttons.length, 5);
         assert.equal(buttons[0].text, 'Search');
         assert.equal(buttons[1].text, 'Reset');
         assert.equal(buttons[2].text, 'Cancel');
         assert.equal(buttons[3].text, 'Help');
+        assert.equal(buttons[4].text, 'Images');
+      });
+
+      test('search dialog does have image input elements', function() {
+        assert.isNotNull(element.$$('.search-dialog div[slot="bottom"] .link-data paper-input'));
+        assert.isNotNull(element.$$('.search-dialog div[slot="bottom"] .link-data paper-icon-button'));
+        assert.isNotNull(element.$$('.search-dialog div[slot="bottom"] vaadin-upload'));
       });
 
       test('_searchFields is as expected', function() {
@@ -287,7 +512,7 @@ limitations under the License.
             requireOnePrevious: true
           }]
         }, {
-          name: 'Location',
+          name: 'Locations',
           isImage: false,
           isDate: false,
           data: [{
@@ -310,7 +535,7 @@ limitations under the License.
             requireOnePrevious: true
           }]
         }, {
-          name: 'Ad',
+          name: 'Ads',
           isImage: false,
           isDate: false,
           data: [{
@@ -351,14 +576,15 @@ limitations under the License.
             requireOnePrevious: true
           }]
         }, {
-          name: 'Image',
+          name: 'Images',
           isImage: true,
           isDate: false,
           data: [{
             key: 'image',
             title: 'Image',
-            hovering: [],
             images: [],
+            excluded: [],
+            required: [],
             selected: []
           }]
         }]);
@@ -400,7 +626,738 @@ limitations under the License.
         });
       });
 
-      test('_updateSearchFieldFromParameter does have expected behavior for most common cases', function() {
+      test('_didUserHitEnterKey does not call handleSearch if search parameters are undefined', function() {
+        element.opened = true;
+        element._didUserHitEnterKey({keyCode: 13});
+
+        assert.isTrue(element.opened);
+      });
+
+      test('_didUserHitEnterKey does call handleSearch if search parameters are enabled and enter key is used', function() {
+        element.opened = true;
+        element._searchFields[2].data[0].value = 'nyc';
+        element._didUserHitEnterKey({keyCode: 13});
+
+        assert.isFalse(element.opened);
+      });
+
+      test('_didUserHitEnterKey does not call handleSearch if something besides the enter key is clicked', function() {
+        element.opened = true;
+        element._didUserHitEnterKey({keyCode: 10});
+
+        assert.isTrue(element.opened);
+      });
+
+      test('_didUserHitEnterKeyOnLinksInput does update images', function() {
+        element._linksInput = 'testLink';
+        element._didUserHitEnterKeyOnLinksInput({
+          keyCode: 13
+        });
+
+        assert.deepEqual(element.images, [{
+          id: 'testLink',
+          source: 'testLink',
+          type: 'LINK'
+        }]);
+        assert.isTrue(element._openedDialogImages);
+        assert.equal(element._linksInput, '');
+      });
+
+      test('_didUserHitEnterKeyOnLinksInput does not update images if keyCode is not ENTER (13)', function() {
+        element._linksInput = 'testLink';
+        element._didUserHitEnterKeyOnLinksInput({
+          keyCode: 1
+        });
+
+        assert.deepEqual(element.images, []);
+        assert.isFalse(element._openedDialogImages);
+        assert.equal(element._linksInput, 'testLink');
+      });
+
+      test('_didUserHitEnterKeyOnLinksInput does not update images if _linksInput is empty', function() {
+        element._didUserHitEnterKeyOnLinksInput({
+          keyCode: 13
+        });
+
+        assert.deepEqual(element.images, []);
+        assert.isFalse(element._openedDialogImages);
+      });
+
+      test('_getButtonStyleClass does return as expected', function() {
+        assert.equal(element._getButtonStyleClass(true), 'on');
+        assert.equal(element._getButtonStyleClass(false), '');
+      });
+
+      test('_getButtonText does return as expected', function() {
+        assert.equal(element._getButtonText(true), 'On');
+        assert.equal(element._getButtonText(false), 'Off');
+      });
+
+      test('_getInputWidthStyleClass does return as expected', function() {
+        assert.equal(element._getInputWidthStyleClass(true), '');
+        assert.equal(element._getInputWidthStyleClass(false), 'add-width');
+      });
+
+      test('_getNetworkExpansionStyleClass does return as expected', function() {
+        assert.equal(element._getNetworkExpansionStyleClass(false, false), ' inactive');
+        assert.equal(element._getNetworkExpansionStyleClass(false, true), '');
+        assert.equal(element._getNetworkExpansionStyleClass(true, false), 'on inactive');
+        assert.equal(element._getNetworkExpansionStyleClass(true, true), 'on');
+      });
+
+      test('_handleImageFileUploadSuccess does not update images or _openedDialogImages if mimeType is not image', function() {
+        element._handleImageFileUploadSuccess({
+          detail: {
+            file: {
+              name: 'testName'
+            },
+            xhr: {
+              response: '{"base64": "testData", "mimeType": "notimage"}'
+            }
+          }
+        });
+
+        assert.deepEqual(element.images, []);
+        assert.isFalse(element._openedDialogImages);
+      });
+
+      test('_handleImageFileUploadSuccess does update images and _openedDialogImages', function() {
+        element._handleImageFileUploadSuccess({
+          detail: {
+            file: {
+              name: 'testName'
+            },
+            xhr: {
+              response: '{"base64": "testData", "mimeType": "image"}'
+            }
+          }
+        });
+
+        assert.deepEqual(element.images, [{
+          id: 'testName',
+          source: 'data:image;base64,testData',
+          type: 'DATA'
+        }]);
+        assert.isTrue(element._openedDialogImages);
+      });
+
+      test('_handleImageFileUploadSuccess does keep existing images', function() {
+        element.images = [{
+          id: 'existingId',
+          source: 'existingSource'
+        }];
+
+        element._handleImageFileUploadSuccess({
+          detail: {
+            file: {
+              name: 'testName'
+            },
+            xhr: {
+              response: '{"base64": "testData", "mimeType": "image"}'
+            }
+          }
+        });
+
+        assert.deepEqual(element.images, [{
+          id: 'existingId',
+          source: 'existingSource'
+        }, {
+          id: 'testName',
+          source: 'data:image;base64,testData',
+          type: 'DATA'
+        }]);
+        assert.isTrue(element._openedDialogImages);
+      });
+
+      test('_handleImagesSelected does update _imageResults', function() {
+        element.images = [{
+          id: 'image1',
+          hits: [{
+            id: 'hit1',
+            source: 'source1'
+          }, {
+            id: 'hit2',
+            source: 'source2'
+          }]
+        }];
+
+        element._handleImagesSelected(['image1']);
+
+        assert.deepEqual(element._imageResults, {
+          id: 'image1',
+          images: [{
+            id: 'hit1',
+            source: 'source1'
+          }, {
+            id: 'hit2',
+            source: 'source2'
+          }],
+          selected: []
+        });
+      });
+
+      test('_handleImagesSelected does update _imageResults if given no selected images', function() {
+        element._imageResults = {
+          id: 'image1',
+          hits: [{
+            id: 'hit1',
+            source: 'source1'
+          }, {
+            id: 'hit2',
+            source: 'source2'
+          }],
+          selected: []
+        };
+
+        element._handleImagesSelected([]);
+
+        assert.deepEqual(element._imageResults, {
+          images: [],
+          selected: []
+        });
+      });
+
+      test('_handleImagesSelected does update _imagesSelected and _imageResults if given multiple selected images', function() {
+        element.images = [{
+          id: 'image1',
+          hits: [{
+            id: 'hit1',
+            source: 'source1'
+          }, {
+            id: 'hit2',
+            source: 'source2'
+          }]
+        }, {
+          id: 'image2',
+          hits: [{
+            id: 'hit3',
+            source: 'source3'
+          }, {
+            id: 'hit4',
+            source: 'source4'
+          }]
+        }];
+
+        element._handleImagesSelected(['image1', 'image2']);
+
+        assert.deepEqual(element._imagesSelected, ['image2']);
+        assert.deepEqual(element._imageResults, {
+          id: 'image2',
+          images: [{
+            id: 'hit3',
+            source: 'source3'
+          }, {
+            id: 'hit4',
+            source: 'source4'
+          }],
+          selected: []
+        });
+      });
+
+      test('_handleImageResultsModified does update _imageResults', function() {
+        element.images = [{
+          id: 'image1',
+          hits: [{
+            id: 'hit1',
+            source: 'source1'
+          }, {
+            id: 'hit2',
+            source: 'source2'
+          }]
+        }];
+
+        element._handleImageResultsModified('image1', [{
+          id: 'hit2',
+          source: 'source2'
+        }]);
+
+        assert.deepEqual(element.images, [{
+          id: 'image1',
+          hits: [{
+            id: 'hit2',
+            source: 'source2'
+          }]
+        }]);
+      });
+
+      test('_handleImageResultsSelected does update both images and selected properties in _searchFields', function() {
+        element._searchFields[4].data[0] = {
+          key: 'image',
+          images: [],
+          selected: []
+        };
+
+        element._imageResults.images = [{
+          id: 'image1',
+          source: 'source1'
+        }];
+
+        element._handleImageResultsSelected(['image1']);
+
+        assert.deepEqual(element._searchFields[4].data[0], {
+          key: 'image',
+          images: [{
+            id: 'image1',
+            source: 'source1'
+          }],
+          selected: ['image1']
+        });
+      });
+
+      test('_handleImageResultsSelected does work with multiple selected images', function() {
+        element._searchFields[4].data[0] = {
+          key: 'image',
+          images: [],
+          selected: []
+        };
+
+        element._imageResults.images = [{
+          id: 'image1',
+          source: 'source1'
+        }, {
+          id: 'image2',
+          source: 'source2'
+        }];
+
+        element._handleImageResultsSelected(['image1', 'image2']);
+
+        assert.deepEqual(element._searchFields[4].data[0], {
+          key: 'image',
+          images: [{
+            id: 'image1',
+            source: 'source1'
+          }, {
+            id: 'image2',
+            source: 'source2'
+          }],
+          selected: ['image1', 'image2']
+        });
+      });
+
+      test('_handleImageResultsSelected does work with existing images', function() {
+        element._searchFields[4].data[0] = {
+          key: 'image',
+          images: [{
+            id: 'image1',
+            source: 'source1'
+          }, {
+            id: 'image2',
+            source: 'source2'
+          }],
+          selected: []
+        };
+
+        element._imageResults.images = [{
+          id: 'image2',
+          source: 'source2'
+        }, {
+          id: 'image3',
+          source: 'source3'
+        }, {
+          id: 'image4',
+          source: 'source4'
+        }];
+
+        element._handleImageResultsSelected(['image2', 'image3']);
+
+        assert.deepEqual(element._searchFields[4].data[0], {
+          key: 'image',
+          images: [{
+            id: 'image1',
+            source: 'source1'
+          }, {
+            id: 'image2',
+            source: 'source2'
+          }, {
+            id: 'image3',
+            source: 'source3'
+          }],
+          selected: ['image2', 'image3']
+        });
+      });
+
+      test('_handleImageResultsSelected does work with existing selected images', function() {
+        element._searchFields[4].data[0] = {
+          key: 'image',
+          images: [{
+            id: 'image1',
+            source: 'source1'
+          }, {
+            id: 'image2',
+            source: 'source2'
+          }, {
+            id: 'image3',
+            source: 'source3'
+          }, {
+            id: 'image4',
+            source: 'source4'
+          }],
+          selected: ['image2', 'image3']
+        };
+
+        element._imageResults.images = [{
+          id: 'image3',
+          source: 'source3'
+        }, {
+          id: 'image4',
+          source: 'source4'
+        }, {
+          id: 'image5',
+          source: 'source5'
+        }, {
+          id: 'image6',
+          source: 'source6'
+        }];
+
+        element._handleImageResultsSelected(['image3', 'image4', 'image5']);
+
+        assert.deepEqual(element._searchFields[4].data[0], {
+          key: 'image',
+          images: [{
+            id: 'image1',
+            source: 'source1'
+          }, {
+            id: 'image2',
+            source: 'source2'
+          }, {
+            id: 'image3',
+            source: 'source3'
+          }, {
+            id: 'image4',
+            source: 'source4'
+          }, {
+            id: 'image5',
+            source: 'source5'
+          }],
+          selected: ['image2', 'image3', 'image4', 'image5']
+        });
+      });
+
+      test('_handleLinksInput does not update images or _openedDialogImages if _linksInput is empty', function() {
+        element._handleLinksInput();
+
+        assert.deepEqual(element.images, []);
+        assert.isFalse(element._openedDialogImages);
+      });
+
+      test('_handleLinksInput does update images, _linksInput, and _openedDialogImages', function() {
+        element._linksInput = ' testLink1 testLink2\ttestLink3\ntestLink4\n\n';
+        element._handleLinksInput();
+
+        assert.deepEqual(element.images, [{
+          id: 'testLink1',
+          source: 'testLink1',
+          type: 'LINK'
+        }, {
+          id: 'testLink2',
+          source: 'testLink2',
+          type: 'LINK'
+        }, {
+          id: 'testLink3',
+          source: 'testLink3',
+          type: 'LINK'
+        }, {
+          id: 'testLink4',
+          source: 'testLink4',
+          type: 'LINK'
+        }]);
+        assert.isTrue(element._openedDialogImages);
+        assert.equal(element._linksInput, '');
+      });
+
+      test('_handleLinksInput does keep existing images', function() {
+        element.images = [{
+          id: 'existingId',
+          source: 'existingSource'
+        }];
+        element._linksInput = 'testLink';
+        element._handleLinksInput();
+
+        assert.deepEqual(element.images, [{
+          id: 'existingId',
+          source: 'existingSource'
+        }, {
+          id: 'testLink',
+          source: 'testLink',
+          type: 'LINK'
+        }]);
+        assert.isTrue(element._openedDialogImages);
+        assert.equal(element._linksInput, '');
+      });
+
+      test('_isBackdrop does return as expected', function() {
+        assert.equal(element._isBackdrop(false, false), '');
+        assert.equal(element._isBackdrop(false, true), 'backdrop');
+        assert.equal(element._isBackdrop(true, true), 'backdrop');
+        assert.equal(element._isBackdrop(true, true), 'backdrop');
+      });
+
+      test('_updateDateFieldFromParameter does update _searchFields as expcted', function() {
+        element.searchParameters.postingDate = {
+          dateStart: {
+            category: 'From',
+            date: '2017-03-01T00:00:00',
+            enabled: false,
+            key: 'dateStart',
+            search: 'required',
+            text: '03/01/2017'
+          }
+        };
+
+        element._updateDateFieldFromParameter(element._searchFields[0].data[0], ['_searchFields', 0, 'data', 0]);
+
+        assert.deepEqual(element._searchFields[0].data[0].value, {
+          dateStart: {
+            category: 'From',
+            date: '2017-03-01T00:00:00',
+            enabled: false,
+            key: 'dateStart',
+            search: 'required',
+            text: '03/01/2017'
+          }
+        });
+      });
+
+      test('_updateDateParameterAndNotify does update searchParameters and notify listeners', function(done) {
+        element.onSearchParametersChange = function() {
+          assert.deepEqual(element.searchParameters.postingDate, {
+            dateStart: {
+              category: 'From',
+              date: '2017-03-01T00:00:00',
+              enabled: true,
+              key: 'dateStart',
+              search: 'required',
+              text: '03/01/2017'
+            }
+          });
+          done();
+        };
+
+        element.listen(element, 'search-parameters-changed', 'onSearchParametersChange');
+
+        assert.deepEqual(element.searchParameters.postingDate, {});
+
+        element._updateDateParameterAndNotify('dateStart', '2017-03-01T00:00:00', '03/01/2017', 'From', true);
+      });
+
+      test('_updateDateParameterFromField does update date parameter', function() {
+        element._searchFields[0].data[1].value = {
+          dateEnd: {
+            category: 'To',
+            date: '2017-03-01T00:00:00',
+            enabled: false,
+            key: 'dateEnd',
+            text: '03/01/2017'
+          }
+        };
+
+        element._updateDateParameterFromField(element._searchFields[0].data[1]);
+
+        assert.deepEqual(element.searchParameters.postingDate, {
+          dateEnd: {
+            category: 'To',
+            date: '2017-03-01T00:00:00',
+            enabled: false,
+            key: 'dateEnd',
+            search: 'required',
+            text: '03/01/2017'
+          }
+        });
+      });
+
+      test('_updateDateParameterFromField does clear date parameter', function() {
+        element.searchParameters.postingDate = {
+          dateEnd: {
+            category: 'To',
+            date: '2017-03-01T00:00:00',
+            enabled: true,
+            key: 'dateEnd',
+            text: '03/01/2017'
+          }
+        };
+
+        element._searchFields[0].data[1].value = {};
+        element._updateDateParameterFromField(element._searchFields[0].data[1]);
+
+        assert.deepEqual(element.searchParameters.postingDate.dateEnd, {});
+      });
+
+      test('_updateImageGalleryFromParameter does add enabled images to the search config', function() {
+        element.imageUrlPrefix = 'testPrefix/';
+
+        element.searchParameters.image = {
+          image1: {
+            category: 'Image',
+            date: undefined,
+            enabled: true,
+            key: 'image1',
+            search: 'optional',
+            text: 'image1'
+          },
+          image2: {
+            category: 'Image',
+            date: undefined,
+            enabled: true,
+            key: 'image2',
+            search: 'required',
+            text: 'image2'
+          },
+          image3: {
+            category: 'Image',
+            date: undefined,
+            enabled: true,
+            key: 'image3',
+            search: 'excluded',
+            text: 'image3'
+          },
+          image4: {
+            category: 'Image',
+            date: undefined,
+            enabled: false,
+            key: 'image4',
+            search: 'optional',
+            text: 'image4'
+          }
+        };
+
+        element._searchFields[4].data[0] = {
+          key: 'image',
+          images: [{
+            id: 'image1',
+          }, {
+            id: 'image5'
+          }],
+          selected: ['image5']
+        };
+
+        element._updateImageGalleryFromParameter(element._searchFields[4].data[0], ['_searchFields', 4, 'data', 0]);
+
+        assert.deepEqual(element._searchFields[4].data[0], {
+          key: 'image',
+          excluded: ['image3'],
+          images: [{
+            id: 'image1',
+            search: 'optional',
+            source: 'testPrefix/image1'
+          }, {
+            id: 'image2',
+            search: 'required',
+            source: 'testPrefix/image2'
+          }, {
+            id: 'image3',
+            search: 'excluded',
+            source: 'testPrefix/image3'
+          }],
+          required: ['image2'],
+          selected: ['image1', 'image2', 'image3']
+        });
+      });
+
+      test('_updateImageParameterFromGallery does add selected images to searchParameters', function() {
+        element.searchParameters.image = {
+          image1: {
+            category: 'Image',
+            date: undefined,
+            enabled: true,
+            key: 'image1',
+            search: 'optional',
+            text: 'image1'
+          },
+          image2: {
+            category: 'Image',
+            date: undefined,
+            enabled: true,
+            key: 'image2',
+            search: 'optional',
+            text: 'image2'
+          },
+          image3: {
+            category: 'Image',
+            date: undefined,
+            enabled: false,
+            key: 'image3',
+            search: 'optional',
+            text: 'image3'
+          },
+          image4: {
+            category: 'Image',
+            date: undefined,
+            enabled: false,
+            key: 'image4',
+            search: 'optional',
+            text: 'image4'
+          }
+        };
+
+        element._updateImageParameterFromGallery({
+          key: 'image',
+          title: 'Image',
+          excluded: ['image4'],
+          images: [{
+            id: 'image1',
+            search: 'optional'
+          }, {
+            id: 'image2',
+            search: 'optional'
+          }, {
+            id: 'image3',
+            search: 'optional'
+          }, {
+            id: 'image4',
+            search: 'excluded'
+          }, {
+            id: 'image5',
+            search: 'required'
+          }],
+          required: ['image5'],
+          selected: ['image1', 'image4', 'image5']
+        });
+
+        assert.deepEqual(element.searchParameters.image, {
+          image1: {
+            category: 'Image',
+            date: undefined,
+            enabled: true,
+            key: 'image1',
+            search: 'optional',
+            text: 'image1'
+          },
+          image2: {
+            category: 'Image',
+            date: undefined,
+            enabled: false,
+            key: 'image2',
+            search: undefined,
+            text: 'image2'
+          },
+          image3: {
+            category: 'Image',
+            date: undefined,
+            enabled: false,
+            key: 'image3',
+            search: 'optional',
+            text: 'image3'
+          },
+          image4: {
+            category: 'Image',
+            date: undefined,
+            enabled: true,
+            key: 'image4',
+            search: 'excluded',
+            text: 'image4'
+          },
+          image5: {
+            category: 'Image',
+            date: undefined,
+            enabled: true,
+            key: 'image5',
+            search: 'required',
+            text: 'image5'
+          }
+        });
+      });
+
+      test('_updateSearchFieldFromParameter does update _searchFields as expected', function() {
         element.searchParameters.city = {
           nyc: {
             key: 'nyc',
@@ -452,7 +1409,7 @@ limitations under the License.
         assert.equal(element.$$('#input_city').value, 'nyc, chicago');
       });
 
-      test('_updateSearchFieldFromParameter does work as expected if a term is required', function() {
+      test('_updateSearchFieldFromParameter does update _searchFields as expected if a term is required', function() {
         element.searchParameters.city = {
           nyc: {
             key: 'nyc',
@@ -493,7 +1450,7 @@ limitations under the License.
         assert.equal(element.$$('#input_city').value, '+nyc, chicago');
       });
 
-      test('_updateSearchFieldFromParameter does work as expected if a term is excluded', function() {
+      test('_updateSearchFieldFromParameter does update _searchFields as expected if a term is excluded', function() {
         element.searchParameters.city = {
           nyc: {
             key: 'nyc',
@@ -534,30 +1491,431 @@ limitations under the License.
         assert.equal(element.$$('#input_city').value, '-nyc, chicago');
       });
 
-      test('_updateDateFieldFromParameter does have expected behavior', function() {
-        element.searchParameters.postingDate = {
-          dateStart: {
-            category: 'From',
+      test('_updateSearchParameterAndNotify does update searchParameters and notify listeners', function(done) {
+        element.onSearchParametersChange = function() {
+          assert.deepEqual(element.searchParameters.city, {
+            chicago: {
+              key: 'chicago',
+              date: undefined,
+              category: 'City',
+              enabled: true,
+              search: 'optional',
+              text: 'chicago'
+            }
+          });
+          done();
+        };
+
+        element.listen(element, 'search-parameters-changed', 'onSearchParametersChange');
+
+        assert.deepEqual(element.searchParameters.city, {});
+
+        element._updateSearchParameterAndNotify('city', 'chicago', 'City', true, 'optional');
+      });
+
+      test('_updateSearchParameterFromField does update searchParameters and networkExpansionParameters as expected', function() {
+        element.$$('#input_city').value = 'nyc, chicago';
+
+        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
+
+        assert.deepEqual(element.searchParameters.city, {
+          nyc: {
+            key: 'nyc',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'union',
+            text: 'nyc'
+          },
+          chicago: {
+            key: 'chicago',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'union',
+            text: 'chicago'
+          }
+        });
+
+        assert.deepEqual(element.networkExpansionParameters, {
+          city: false
+        });
+      });
+
+      test('_updateSearchParameterFromField does update searchParameters and networkExpansionParameters as expected if network expasion is on and _isNetworkExpansionViable is true', function() {
+        element.$$('#input_city').value = 'nyc, chicago';
+
+        // cityConfig is first in data array for location
+        element._searchFields[2].data[0].activateNetworkExpansion = true;
+
+        element._isNetworkExpansionViable = true;
+
+        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
+
+        assert.deepEqual(element.searchParameters.city, {
+          nyc: {
+            key: 'nyc',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'union',
+            text: 'nyc'
+          },
+          chicago: {
+            key: 'chicago',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'union',
+            text: 'chicago'
+          }
+        });
+
+        assert.deepEqual(element.networkExpansionParameters, {
+          city: true
+        });
+      });
+
+      test('_updateSearchParameterFromField does update searchParameters and networkExpansionParameters as expected if network expansion is on and _isNetworkExpansionViable is false', function() {
+        element.$$('#input_city').value = 'nyc, chicago';
+
+        // cityConfig is first in data array for location
+        element._searchFields[2].data[0].activateNetworkExpansion = true;
+
+        element._isNetworkExpansionViable = false;
+
+        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
+
+        assert.deepEqual(element.searchParameters.city, {
+          nyc: {
+            key: 'nyc',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'union',
+            text: 'nyc'
+          },
+          chicago: {
+            key: 'chicago',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'union',
+            text: 'chicago'
+          }
+        });
+
+        assert.deepEqual(element.networkExpansionParameters, {
+          city: false
+        });
+      });
+
+      test('_updateSearchParameterFromField does remove formatting from phone numbers', function() {
+        element.$$('#input_phone').value = '111-222-3333';
+
+        // phoneConfig is first in data array for identifiers
+        element._updateSearchParameterFromField(element._searchFields[1].data[0]);
+
+        assert.deepEqual(element.searchParameters.phone, {
+          '1112223333': {
+            key: '1112223333',
+            date: undefined,
+            category: 'Telephone Number',
+            enabled: true,
+            search: 'union',
+            text: '1112223333'
+          }
+        });
+      });
+
+      test('_updateSearchParameterFromField does update searchParameters as expected if a term is a minus sign', function() {
+        element.$$('#input_city').value = '-nyc, chicago';
+
+        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
+
+        assert.deepEqual(element.searchParameters.city, {
+          nyc: {
+            key: 'nyc',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'excluded',
+            text: 'nyc'
+          },
+          chicago: {
+            key: 'chicago',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'union',
+            text: 'chicago'
+          }
+        });
+      });
+
+      test('_updateSearchParameterFromField does update searchParameters as expected if requireOne is false', function() {
+        element.$$('#input_city').value = 'nyc, chicago';
+
+        // cityConfig is first in data array for location
+        element._searchFields[2].data[0].requireOne = false;
+
+        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
+
+        assert.deepEqual(element.searchParameters.city, {
+          nyc: {
+            key: 'nyc',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'optional',
+            text: 'nyc'
+          },
+          chicago: {
+            key: 'chicago',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'optional',
+            text: 'chicago'
+          }
+        });
+      });
+
+      test('_updateSearchParameterFromField does update searchParameters as expected if requireOne is false and a term is a plus sign', function() {
+        element.$$('#input_city').value = '+nyc, chicago';
+
+        // cityConfig is first in data array for location
+        element._searchFields[2].data[0].requireOne = false;
+
+        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
+
+        assert.deepEqual(element.searchParameters.city, {
+          nyc: {
+            key: 'nyc',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'required',
+            text: 'nyc'
+          },
+          chicago: {
+            key: 'chicago',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'optional',
+            text: 'chicago'
+          }
+        });
+      });
+
+      test('_updateSearchParameterFromField does update searchParameters as expected if requireOne is false and a term is a minus sign', function() {
+        element.$$('#input_city').value = '-nyc, chicago';
+
+        // cityConfig is first in data array for location
+        element._searchFields[2].data[0].requireOne = false;
+
+        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
+
+        assert.deepEqual(element.searchParameters.city, {
+          nyc: {
+            key: 'nyc',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'excluded',
+            text: 'nyc'
+          },
+          chicago: {
+            key: 'chicago',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'optional',
+            text: 'chicago'
+          }
+        });
+      });
+
+      test('_updateSearchParametersFromFields does update searchParameters as expected', function() {
+        element.$$('#input_city').value = 'nyc, chicago';
+        element._searchFields[0].data[0].value = {};
+        element._searchFields[0].data[1].value = {
+          dateEnd: {
+            category: 'To',
             date: '2017-03-01T00:00:00',
             enabled: false,
-            key: 'dateStart',
+            key: 'dateEnd',
             search: 'required',
             text: '03/01/2017'
           }
         };
 
-        element._updateDateFieldFromParameter(element._searchFields[0].data[0], ['_searchFields', 0, 'data', 0]);
+        element._updateSearchParametersFromFields();
 
-        assert.deepEqual(element._searchFields[0].data[0].value, {
-          dateStart: {
-            category: 'From',
+        assert.deepEqual(element.searchParameters.city, {
+          nyc: {
+            key: 'nyc',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'union',
+            text: 'nyc'
+          },
+          chicago: {
+            key: 'chicago',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'union',
+            text: 'chicago'
+          }
+        });
+
+        assert.deepEqual(element.searchParameters.postingDate, {
+          dateEnd: {
+            category: 'To',
             date: '2017-03-01T00:00:00',
             enabled: false,
-            key: 'dateStart',
+            key: 'dateEnd',
             search: 'required',
             text: '03/01/2017'
           }
         });
+      });
+
+      test('cancelSearch closes dialog and does not update searchParameters', function() {
+        element.$$('#input_city').value = 'nyc, chicago';
+        element.opened = true;
+        element.cancelSearch();
+
+        assert.isFalse(element.opened);
+        assert.equal(element.$$('#input_city').value, 'nyc, chicago');
+        assert.deepEqual(element.searchParameters.city, {});
+      });
+
+      test('cancelSearch does update toggle values with previous values', function() {
+        element.$$('#input_city').value = 'nyc, chicago';
+        element.opened = true;
+
+        element.cancelSearch();
+
+        assert.isFalse(element.opened);
+        assert.isFalse(element._searchFields[2].data[0].activateNetworkExpansion);
+        assert.isTrue(element._searchFields[2].data[0].requireOne);
+      });
+
+      test('handleSearch does nothing if no fields are specified', function() {
+        element.opened = true;
+        element.resetAllSearchFields();
+        element.handleSearch();
+
+        assert.isTrue(element.opened);
+      });
+
+      test('handleSearch does update previous toggle values', function() {
+        element.$$('#input_city').value = 'nyc, chicago';
+        element.opened = true;
+        element._searchFields[2].data[0].activateNetworkExpansion = true;
+        element._searchFields[2].data[0].requireOne = false;
+
+        element.handleSearch();
+
+        assert.isFalse(element.opened);
+        assert.isTrue(element._searchFields[2].data[0].activateNetworkExpansionPrevious);
+        assert.isFalse(element._searchFields[2].data[0].requireOnePrevious);
+      });
+
+      test('handleSearch updates searchParameters and closes dialog', function() {
+        element.opened = true;
+
+        element.$$('#input_city').value = 'nyc, chicago';
+        element.$$('#input_phone').value = '1112223333';
+
+        element.handleSearch();
+
+        assert.isFalse(element.opened);
+        assert.deepEqual(element.searchParameters, {
+          city: {
+            nyc: {
+              key: 'nyc',
+              date: undefined,
+              category: 'City',
+              enabled: true,
+              search: 'union',
+              text: 'nyc'
+            },
+            chicago: {
+              key: 'chicago',
+              date: undefined,
+              category: 'City',
+              enabled: true,
+              search: 'union',
+              text: 'chicago'
+            }
+          },
+          country: {},
+          description: {},
+          email: {},
+          image: {},
+          phone: {
+            '1112223333': {
+              key: '1112223333',
+              date: undefined,
+              category: 'Telephone Number',
+              enabled: true,
+              search: 'union',
+              text: '1112223333'
+            }
+          },
+          postingDate: {},
+          title: {},
+          url: {},
+          website: {}
+        });
+      });
+
+      test('openHelp does open the help dialog', function() {
+        element.openHelp();
+        assert.isTrue(element._openedDialogHelp);
+        assert.isTrue(element.$$('.help-dialog').opened);
+        assert.isTrue(element.$$('.search-dialog').classList.contains('backdrop'));
+      });
+
+      test('openImages does open the images dialog', function() {
+        element.openImages();
+        assert.isTrue(element._openedDialogImages);
+        assert.isTrue(element.$$('.images-dialog').opened);
+        assert.isTrue(element.$$('.search-dialog').classList.contains('backdrop'));
+      });
+
+      test('resetAllSearchFields does have expected behavior', function() {
+        element.$$('#input_city').value = 'nyc, chicago';
+        element._searchFields[0].data[0].value = {};
+        element._searchFields[0].data[1].value = {
+          dateEnd: {
+            category: 'To',
+            date: '2017-03-01T00:00:00',
+            enabled: false,
+            key: 'dateEnd',
+            search: 'required',
+            text: '03/01/2017'
+          }
+        };
+        element._searchFields[4].data[0].images = [{
+          id: 'image1'
+        }];
+        element._searchFields[4].data[0].selected = ['image1'];
+
+        element.resetAllSearchFields();
+
+        assert.deepEqual(element._searchFields[0].data[0].value, {});
+        assert.deepEqual(element._searchFields[0].data[1].value, {});
+        assert.deepEqual(element._searchFields[2].data[0].value, '');
+        assert.deepEqual(element._searchFields[4].data[0].images, [{
+          id: 'image1'
+        }]);
+        assert.deepEqual(element._searchFields[4].data[0].selected, []);
       });
 
       test('toggleSearchFieldsDialog does have expected behavior when toggling dialog open', function() {
@@ -648,925 +2006,131 @@ limitations under the License.
         });
       });
 
-      test('_updateSearchParameterAndNotify works correctly', function(done) {
-        element.onSearchParametersChange = function() {
-          assert.deepEqual(element.searchParameters.city, {
-            chicago: {
-              key: 'chicago',
-              date: undefined,
-              category: 'City',
-              enabled: true,
-              search: 'optional',
-              text: 'chicago'
-            }
-          });
-          done();
-        };
-
-        element.listen(element, 'search-parameters-changed', 'onSearchParametersChange');
-
-        assert.deepEqual(element.searchParameters.city, {});
-
-        element._updateSearchParameterAndNotify('city', 'chicago', 'City', true, 'optional');
-      });
-
-      test('_updateDateParameterAndNotify works correctly', function(done) {
-        element.onSearchParametersChange = function() {
-          assert.deepEqual(element.searchParameters.postingDate, {
-            dateStart: {
-              category: 'From',
-              date: '2017-03-01T00:00:00',
-              enabled: true,
-              key: 'dateStart',
-              search: 'required',
-              text: '03/01/2017'
-            }
-          });
-          done();
-        };
-
-        element.listen(element, 'search-parameters-changed', 'onSearchParametersChange');
-
-        assert.deepEqual(element.searchParameters.postingDate, {});
-
-        element._updateDateParameterAndNotify('dateStart', '2017-03-01T00:00:00', '03/01/2017', 'From', true);
-      });
-
-      test('_updateSearchParameterFromField does work as expected', function() {
-        element.$$('#input_city').value = 'nyc, chicago';
-
-        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
-
-        assert.deepEqual(element.searchParameters.city, {
-          nyc: {
-            key: 'nyc',
-            date: undefined,
-            category: 'City',
-            enabled: true,
-            search: 'union',
-            text: 'nyc'
-          },
-          chicago: {
-            key: 'chicago',
-            date: undefined,
-            category: 'City',
-            enabled: true,
-            search: 'union',
-            text: 'chicago'
-          }
-        });
-
-        assert.deepEqual(element.networkExpansionParameters, {
-          city: false
-        });
-      });
-
-      test('_updateSearchParameterFromField does work as expected if network expasion is on and _isNetworkExpansionViable is true', function() {
-        element.$$('#input_city').value = 'nyc, chicago';
-
-        // cityConfig is first in data array for location
-        element._searchFields[2].data[0].activateNetworkExpansion = true;
-
-        element._isNetworkExpansionViable = true;
-
-        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
-
-        assert.deepEqual(element.searchParameters.city, {
-          nyc: {
-            key: 'nyc',
-            date: undefined,
-            category: 'City',
-            enabled: true,
-            search: 'union',
-            text: 'nyc'
-          },
-          chicago: {
-            key: 'chicago',
-            date: undefined,
-            category: 'City',
-            enabled: true,
-            search: 'union',
-            text: 'chicago'
-          }
-        });
-
-        assert.deepEqual(element.networkExpansionParameters, {
-          city: true
-        });
-      });
-
-      test('_updateSearchParameterFromField does work as expected if network expansion is on and _isNetworkExpansionViable is false', function() {
-        element.$$('#input_city').value = 'nyc, chicago';
-
-        // cityConfig is first in data array for location
-        element._searchFields[2].data[0].activateNetworkExpansion = true;
-
-        element._isNetworkExpansionViable = false;
-
-        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
-
-        assert.deepEqual(element.searchParameters.city, {
-          nyc: {
-            key: 'nyc',
-            date: undefined,
-            category: 'City',
-            enabled: true,
-            search: 'union',
-            text: 'nyc'
-          },
-          chicago: {
-            key: 'chicago',
-            date: undefined,
-            category: 'City',
-            enabled: true,
-            search: 'union',
-            text: 'chicago'
-          }
-        });
-
-        assert.deepEqual(element.networkExpansionParameters, {
-          city: false
-        });
-      });
-
-      test('_updateSearchParameterFromField will remove formatting from phone numbers', function() {
-        element.$$('#input_phone').value = '111-222-3333';
-
-        // phoneConfig is first in data array for identifiers
-        element._updateSearchParameterFromField(element._searchFields[1].data[0]);
-
-        assert.deepEqual(element.searchParameters.phone, {
-          '1112223333': {
-            key: '1112223333',
-            date: undefined,
-            category: 'Telephone Number',
-            enabled: true,
-            search: 'union',
-            text: '1112223333'
-          }
-        });
-      });
-
-      test('_updateSearchParameterFromField does work as expected if a term is a minus sign', function() {
-        element.$$('#input_city').value = '-nyc, chicago';
-
-        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
-
-        assert.deepEqual(element.searchParameters.city, {
-          nyc: {
-            key: 'nyc',
-            date: undefined,
-            category: 'City',
-            enabled: true,
-            search: 'excluded',
-            text: 'nyc'
-          },
-          chicago: {
-            key: 'chicago',
-            date: undefined,
-            category: 'City',
-            enabled: true,
-            search: 'union',
-            text: 'chicago'
-          }
-        });
-      });
-
-      test('_updateSearchParameterFromField does work as expected if requireOne is false', function() {
-        element.$$('#input_city').value = 'nyc, chicago';
-
-        // cityConfig is first in data array for location
-        element._searchFields[2].data[0].requireOne = false;
-
-        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
-
-        assert.deepEqual(element.searchParameters.city, {
-          nyc: {
-            key: 'nyc',
-            date: undefined,
-            category: 'City',
-            enabled: true,
-            search: 'optional',
-            text: 'nyc'
-          },
-          chicago: {
-            key: 'chicago',
-            date: undefined,
-            category: 'City',
-            enabled: true,
-            search: 'optional',
-            text: 'chicago'
-          }
-        });
-      });
-
-      test('_updateSearchParameterFromField does work as expected if requireOne is false and a term is a plus sign', function() {
-        element.$$('#input_city').value = '+nyc, chicago';
-
-        // cityConfig is first in data array for location
-        element._searchFields[2].data[0].requireOne = false;
-
-        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
-
-        assert.deepEqual(element.searchParameters.city, {
-          nyc: {
-            key: 'nyc',
-            date: undefined,
-            category: 'City',
-            enabled: true,
-            search: 'required',
-            text: 'nyc'
-          },
-          chicago: {
-            key: 'chicago',
-            date: undefined,
-            category: 'City',
-            enabled: true,
-            search: 'optional',
-            text: 'chicago'
-          }
-        });
-      });
-
-      test('_updateSearchParameterFromField does work as expected if requireOne is false and a term is a minus sign', function() {
-        element.$$('#input_city').value = '-nyc, chicago';
-
-        // cityConfig is first in data array for location
-        element._searchFields[2].data[0].requireOne = false;
-
-        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
-
-        assert.deepEqual(element.searchParameters.city, {
-          nyc: {
-            key: 'nyc',
-            date: undefined,
-            category: 'City',
-            enabled: true,
-            search: 'excluded',
-            text: 'nyc'
-          },
-          chicago: {
-            key: 'chicago',
-            date: undefined,
-            category: 'City',
-            enabled: true,
-            search: 'optional',
-            text: 'chicago'
-          }
-        });
-      });
-
-      test('_updateDateParameterFromField will properly set date parameter', function() {
-        element._searchFields[0].data[1].value = {
-          dateEnd: {
-            category: 'To',
-            date: '2017-03-01T00:00:00',
-            enabled: false,
-            key: 'dateEnd',
-            text: '03/01/2017'
-          }
-        };
-
-        element._updateDateParameterFromField(element._searchFields[0].data[1]);
-
-        assert.deepEqual(element.searchParameters.postingDate, {
-          dateEnd: {
-            category: 'To',
-            date: '2017-03-01T00:00:00',
-            enabled: false,
-            key: 'dateEnd',
-            search: 'required',
-            text: '03/01/2017'
-          }
-        });
-      });
-
-      test('_updateDateParameterFromField will properly clear date parameter', function() {
-        element.searchParameters.postingDate = {
-          dateEnd: {
-            category: 'To',
-            date: '2017-03-01T00:00:00',
-            enabled: true,
-            key: 'dateEnd',
-            text: '03/01/2017'
-          }
-        };
-
-        element._searchFields[0].data[1].value = {};
-        element._updateDateParameterFromField(element._searchFields[0].data[1]);
-
-        assert.deepEqual(element.searchParameters.postingDate.dateEnd, {});
-      });
-
-      test('_updateSearchParametersFromFields does have expected behavior', function() {
-        element.$$('#input_city').value = 'nyc, chicago';
-        element._searchFields[0].data[0].value = {};
-        element._searchFields[0].data[1].value = {
-          dateEnd: {
-            category: 'To',
-            date: '2017-03-01T00:00:00',
-            enabled: false,
-            key: 'dateEnd',
-            search: 'required',
-            text: '03/01/2017'
-          }
-        };
-
-        element._updateSearchParametersFromFields();
-
-        assert.deepEqual(element.searchParameters.city, {
-          nyc: {
-            key: 'nyc',
-            date: undefined,
-            category: 'City',
-            enabled: true,
-            search: 'union',
-            text: 'nyc'
-          },
-          chicago: {
-            key: 'chicago',
-            date: undefined,
-            category: 'City',
-            enabled: true,
-            search: 'union',
-            text: 'chicago'
-          }
-        });
-
-        assert.deepEqual(element.searchParameters.postingDate, {
-          dateEnd: {
-            category: 'To',
-            date: '2017-03-01T00:00:00',
-            enabled: false,
-            key: 'dateEnd',
-            search: 'required',
-            text: '03/01/2017'
-          }
-        });
-      });
-
-      test('resetAllSearchFields does have expected behavior', function() {
-        element.$$('#input_city').value = 'nyc, chicago';
-        element._searchFields[0].data[0].value = {};
-        element._searchFields[0].data[1].value = {
-          dateEnd: {
-            category: 'To',
-            date: '2017-03-01T00:00:00',
-            enabled: false,
-            key: 'dateEnd',
-            search: 'required',
-            text: '03/01/2017'
-          }
-        };
-        element._searchFields[4].data[0].images = [{
-          id: 'image1'
+      test('setting _imagesSelected does update _imageResults', function() {
+        element.images = [{
+          id: 'image1',
+          hits: [{
+            id: 'hit1',
+            source: 'source1'
+          }, {
+            id: 'hit2',
+            source: 'source2'
+          }]
+        }, {
+          id: 'image2',
+          hits: [{
+            id: 'hit3',
+            source: 'source3'
+          }, {
+            id: 'hit4',
+            source: 'source4'
+          }]
         }];
-        element._searchFields[4].data[0].selected = ['image1'];
 
-        element.resetAllSearchFields();
+        element._imagesSelected = ['image2'];
 
-        assert.deepEqual(element._searchFields[0].data[0].value, {});
-        assert.deepEqual(element._searchFields[0].data[1].value, {});
-        assert.deepEqual(element._searchFields[2].data[0].value, '');
-        assert.deepEqual(element._searchFields[4].data[0].images, []);
-        assert.deepEqual(element._searchFields[4].data[0].selected, []);
-      });
-
-      test('handleSearch updates searchParameters and closes dialog', function() {
-        element.opened = true;
-
-        element.$$('#input_city').value = 'nyc, chicago';
-        element.$$('#input_phone').value = '1112223333';
-
-        element.handleSearch();
-
-        assert.isFalse(element.opened);
-        assert.deepEqual(element.searchParameters, {
-          city: {
-            nyc: {
-              key: 'nyc',
-              date: undefined,
-              category: 'City',
-              enabled: true,
-              search: 'union',
-              text: 'nyc'
-            },
-            chicago: {
-              key: 'chicago',
-              date: undefined,
-              category: 'City',
-              enabled: true,
-              search: 'union',
-              text: 'chicago'
-            }
-          },
-          country: {},
-          description: {},
-          email: {},
-          image: {},
-          phone: {
-            '1112223333': {
-              key: '1112223333',
-              date: undefined,
-              category: 'Telephone Number',
-              enabled: true,
-              search: 'union',
-              text: '1112223333'
-            }
-          },
-          postingDate: {},
-          title: {},
-          url: {},
-          website: {}
+        assert.deepEqual(element._imageResults, {
+          id: 'image2',
+          images: [{
+            id: 'hit3',
+            source: 'source3'
+          }, {
+            id: 'hit4',
+            source: 'source4'
+          }],
+          selected: []
         });
       });
 
-      test('handleSearch does nothing if no fields are specified', function() {
-        element.opened = true;
-        element.resetAllSearchFields();
-        element.handleSearch();
+      test('setting _imagesSelected with multiple images does update _imageResults', function() {
+        element.images = [{
+          id: 'image1',
+          hits: [{
+            id: 'hit1',
+            source: 'source1'
+          }, {
+            id: 'hit2',
+            source: 'source2'
+          }]
+        }, {
+          id: 'image2',
+          hits: [{
+            id: 'hit3',
+            source: 'source3'
+          }, {
+            id: 'hit4',
+            source: 'source4'
+          }]
+        }];
 
-        assert.isTrue(element.opened);
+        element._imagesSelected = ['image1', 'image2'];
+
+        assert.deepEqual(element._imageResults, {
+          id: 'image2',
+          images: [{
+            id: 'hit3',
+            source: 'source3'
+          }, {
+            id: 'hit4',
+            source: 'source4'
+          }],
+          selected: []
+        });
       });
 
-      test('handleSearch does update previous toggle values', function() {
-        element.$$('#input_city').value = 'nyc, chicago';
-        element.opened = true;
-        element._searchFields[2].data[0].activateNetworkExpansion = true;
-        element._searchFields[2].data[0].requireOne = false;
+      test('setting _imageResults.images does update images', function() {
+        element.images = [{
+          id: 'image1',
+          hits: [{
+            id: 'hit1',
+            source: 'source1'
+          }, {
+            id: 'hit2',
+            source: 'source2'
+          }]
+        }];
 
-        element.handleSearch();
+        element._imageResults.images = [{
+          id: 'hit2',
+          source: 'source2'
+        }];
 
-        assert.isFalse(element.opened);
-        assert.isTrue(element._searchFields[2].data[0].activateNetworkExpansionPrevious);
-        assert.isFalse(element._searchFields[2].data[0].requireOnePrevious);
+        assert.deepEqual(element._imageResults, {
+          images: [{
+            id: 'hit2',
+            source: 'source2'
+          }],
+          selected: []
+        });
       });
 
-      test('cancelSearch closes dialog and does not update searchParameters', function() {
-        element.$$('#input_city').value = 'nyc, chicago';
-        element.opened = true;
-        element.cancelSearch();
-
-        assert.isFalse(element.opened);
-        assert.equal(element.$$('#input_city').value, 'nyc, chicago');
-        assert.deepEqual(element.searchParameters.city, {});
-      });
-
-      test('cancelSearch does update toggle values with previous values', function() {
-        element.$$('#input_city').value = 'nyc, chicago';
-        element.opened = true;
-
-        element.cancelSearch();
-
-        assert.isFalse(element.opened);
-        assert.isFalse(element._searchFields[2].data[0].activateNetworkExpansion);
-        assert.isTrue(element._searchFields[2].data[0].requireOne);
-      });
-
-      test('_didUserHitEnterKey does not call handleSearch if search parameters are undefined', function() {
-        element.opened = true;
-        element._didUserHitEnterKey({keyCode: 13});
-
-        assert.isTrue(element.opened);
-      });
-
-      test('_didUserHitEnterKey does call handleSearch if search parameters are enabled and enter key is used', function() {
-        element.opened = true;
-        element._searchFields[2].data[0].value = 'nyc';
-        element._didUserHitEnterKey({keyCode: 13});
-
-        assert.isFalse(element.opened);
-      });
-
-      test('_didUserHitEnterKey will not call handleSearch if something besides the enter key is clicked', function() {
-        element.opened = true;
-        element._didUserHitEnterKey({keyCode: 10});
-
-        assert.isTrue(element.opened);
-      });
-
-      test('_getImageButtonStyleClass does return as expected', function() {
-        assert.equal(element._getImageButtonStyleClass([], '5678'), '');
-        assert.equal(element._getImageButtonStyleClass(['1234'], '5678'), '');
-        assert.equal(element._getImageButtonStyleClass(['5678'], '5678'), 'on');
-        assert.equal(element._getImageButtonStyleClass(['1234', '5678'], '5678'), 'on');
-        assert.equal(element._getImageButtonStyleClass(['5678'], '5678', 'required', 'required'), 'on');
-        assert.equal(element._getImageButtonStyleClass(['1234', '5678'], '5678', 'required', 'required'), 'on');
-        assert.equal(element._getImageButtonStyleClass(['5678'], '5678', 'optional', 'required'), '');
-        assert.equal(element._getImageButtonStyleClass(['1234', '5678'], '5678', 'optional', 'required'), '');
-        assert.equal(element._getImageButtonStyleClass(['5678'], '5678', 'required', 'optional'), '');
-        assert.equal(element._getImageButtonStyleClass(['1234', '5678'], '5678', 'required', 'optional'), '');
-      });
-
-      test('_getImageExcludedButtonText does return as expected', function() {
-        var string1 = element._getImageExcludedButtonText('optional');
-        var string2 = element._getImageExcludedButtonText('required');
-        var string3 = element._getImageExcludedButtonText('excluded');
-        assert.isString(string1);
-        assert.isString(string2);
-        assert.isString(string3);
-        assert.equal(string1, string2);
-        assert.notEqual(string1, string3);
-      });
-
-      test('_getImageRequiredButtonText does return as expected', function() {
-        var string1 = element._getImageRequiredButtonText('optional');
-        var string2 = element._getImageRequiredButtonText('excluded');
-        var string3 = element._getImageRequiredButtonText('required');
-        assert.isString(string1);
-        assert.isString(string2);
-        assert.isString(string3);
-        assert.equal(string1, string2);
-        assert.notEqual(string1, string3);
-      });
-
-      test('_getImageSearchButtonText does return as expected', function() {
-        var string1 = element._getImageSearchButtonText([], '5678');
-        var string2 = element._getImageSearchButtonText(['1234'], '5678');
-        var string3 = element._getImageSearchButtonText(['5678'], '5678');
-        var string4 = element._getImageSearchButtonText(['1234', '5678'], '5678');
-        assert.isString(string1);
-        assert.isString(string2);
-        assert.isString(string3);
-        assert.isString(string4);
-        assert.equal(string1, string2);
-        assert.equal(string3, string4);
-        assert.notEqual(string1, string3);
-      });
-
-      test('_getInputWidthStyleClass does return as expected', function() {
-        assert.equal(element._getInputWidthStyleClass(true), '');
-        assert.equal(element._getInputWidthStyleClass(false), 'add-width');
-      });
-
-      test('_hoverImageBegin does set hovering', function() {
-        var testEvent = {
-          model: {
-            image: {
-              id: '1234'
-            },
-            searchConfig: {
-              hovering: []
-            },
-            set: function(path, item) {
-              if(path === 'searchConfig.hovering') {
-                testEvent.model.searchConfig.hovering = item;
-              }
-            }
-          }
-        };
-
-        element._hoverImageBegin(testEvent);
-        assert.deepEqual(testEvent.model.searchConfig.hovering, ['1234']);
-      });
-
-      test('_hoverImageEnd does unset hovering', function() {
-        var testEvent = {
-          model: {
-            searchConfig: {
-              hovering: ['1234']
-            },
-            set: function(path, item) {
-              if(path === 'searchConfig.hovering') {
-                testEvent.model.searchConfig.hovering = item;
-              }
-            }
-          }
-        };
-
-        element._hoverImageEnd(testEvent);
-        assert.deepEqual(testEvent.model.searchConfig.hovering, []);
-      });
-
-      test('_isInList does return as expected', function() {
-        assert.equal(element._isInList([], '5678', 'testString'), '');
-        assert.equal(element._isInList(['1234'], '5678', 'testString'), '');
-        assert.equal(element._isInList(['5678'], '5678', 'testString'), 'testString');
-        assert.equal(element._isInList(['1234', '5678'], '5678', 'testString'), 'testString');
-      });
-
-      test('_toggleImageExcluded does set image search status and add image ID to selected', function() {
-        var testEvent = {
-          model: {
-            image: {
-              id: '1234',
-              search: 'optional'
-            },
-            searchConfig: {
-              selected: ['5678']
-            },
-            set: function(path, item) {
-              if(path === 'image.search') {
-                testEvent.model.image.search = item;
-              }
-              if(path === 'searchConfig.selected') {
-                testEvent.model.searchConfig.selected = item;
-              }
-            }
-          }
-        };
-
-        element._toggleImageExcluded(testEvent);
-        assert.equal(testEvent.model.image.search, 'excluded');
-        assert.deepEqual(testEvent.model.searchConfig.selected, ['5678', '1234']);
-      });
-
-      test('_toggleImageExcluded does not add image ID to selected if it is in the list', function() {
-        var testEvent = {
-          model: {
-            image: {
-              id: '1234',
-              search: 'optional'
-            },
-            searchConfig: {
-              selected: ['1234']
-            },
-            set: function(path, item) {
-              if(path === 'image.search') {
-                testEvent.model.image.search = item;
-              }
-              if(path === 'searchConfig.selected') {
-                testEvent.model.searchConfig.selected = item;
-              }
-            }
-          }
-        };
-
-        element._toggleImageExcluded(testEvent);
-        assert.equal(testEvent.model.image.search, 'excluded');
-        assert.deepEqual(testEvent.model.searchConfig.selected, ['1234']);
-      });
-
-      test('_toggleImageRequired does set image search status and add image ID to selected', function() {
-        var testEvent = {
-          model: {
-            image: {
-              id: '1234',
-              search: 'optional'
-            },
-            searchConfig: {
-              selected: ['5678']
-            },
-            set: function(path, item) {
-              if(path === 'image.search') {
-                testEvent.model.image.search = item;
-              }
-              if(path === 'searchConfig.selected') {
-                testEvent.model.searchConfig.selected = item;
-              }
-            }
-          }
-        };
-
-        element._toggleImageRequired(testEvent);
-        assert.equal(testEvent.model.image.search, 'required');
-        assert.deepEqual(testEvent.model.searchConfig.selected, ['5678', '1234']);
-      });
-
-      test('_toggleImageRequired does not add image ID to selected if it is in the list', function() {
-        var testEvent = {
-          model: {
-            image: {
-              id: '1234',
-              search: 'optional'
-            },
-            searchConfig: {
-              selected: ['1234']
-            },
-            set: function(path, item) {
-              if(path === 'image.search') {
-                testEvent.model.image.search = item;
-              }
-              if(path === 'searchConfig.selected') {
-                testEvent.model.searchConfig.selected = item;
-              }
-            }
-          }
-        };
-
-        element._toggleImageRequired(testEvent);
-        assert.equal(testEvent.model.image.search, 'required');
-        assert.deepEqual(testEvent.model.searchConfig.selected, ['1234']);
-      });
-
-      test('_toggleImageSearch does set image search status and add image ID to selected if it is not in the list', function() {
-        var testEvent = {
-          model: {
-            image: {
-              id: '1234',
-              search: 'required'
-            },
-            searchConfig: {
-              selected: ['5678']
-            },
-            set: function(path, item) {
-              if(path === 'image.search') {
-                testEvent.model.image.search = item;
-              }
-              if(path === 'searchConfig.selected') {
-                testEvent.model.searchConfig.selected = item;
-              }
-            }
-          }
-        };
-
-        element._toggleImageSearch(testEvent);
-        assert.equal(testEvent.model.image.search, 'optional');
-        assert.deepEqual(testEvent.model.searchConfig.selected, ['5678', '1234']);
-      });
-
-      test('_toggleImageSearch does remove image ID from selected if it is in the list', function() {
-        var testEvent = {
-          model: {
-            image: {
-              id: '1234',
-              search: 'required'
-            },
-            searchConfig: {
-              selected: ['1234', '5678']
-            },
-            set: function(path, item) {
-              if(path === 'image.search') {
-                testEvent.model.image.search = item;
-              }
-              if(path === 'searchConfig.selected') {
-                testEvent.model.searchConfig.selected = item;
-              }
-            }
-          }
-        };
-
-        element._toggleImageSearch(testEvent);
-        assert.equal(testEvent.model.image.search, 'optional');
-        assert.deepEqual(testEvent.model.searchConfig.selected, ['5678']);
-      });
-
-      test('_updateImageGalleryFromParameter does add enabled images to the search config', function() {
-        element.imageUrlPrefix = 'testPrefix/';
-
-        element.searchParameters.image = {
-          image1: {
-            category: 'Image',
-            date: undefined,
-            enabled: true,
-            key: 'image1',
-            search: 'optional',
-            text: 'image1'
-          },
-          image2: {
-            category: 'Image',
-            date: undefined,
-            enabled: true,
-            key: 'image2',
-            search: 'required',
-            text: 'image2'
-          },
-          image3: {
-            category: 'Image',
-            date: undefined,
-            enabled: true,
-            key: 'image3',
-            search: 'excluded',
-            text: 'image3'
-          },
-          image4: {
-            category: 'Image',
-            date: undefined,
-            enabled: false,
-            key: 'image4',
-            search: 'optional',
-            text: 'image4'
-          }
-        };
-
+      test('setting _imageResults.selected does update _searchFields', function() {
         element._searchFields[4].data[0] = {
           key: 'image',
-          images: [{
-            id: 'image5'
-          }],
-          selected: ['image5']
+          images: [],
+          selected: []
         };
 
-        element._updateImageGalleryFromParameter(element._searchFields[4].data[0], ['_searchFields', 4, 'data', 0]);
+        element._imageResults.images = [{
+          id: 'image1',
+          source: 'source1'
+        }];
+
+        assert.deepEqual(element._searchFields[4].data[0], {
+          key: 'image',
+          images: [],
+          selected: []
+        });
+
+        element.set('_imageResults.selected', ['image1']);
 
         assert.deepEqual(element._searchFields[4].data[0], {
           key: 'image',
           images: [{
             id: 'image1',
-            search: 'optional',
-            source: 'testPrefix/image1'
-          }, {
-            id: 'image2',
-            search: 'required',
-            source: 'testPrefix/image2'
-          }, {
-            id: 'image3',
-            search: 'excluded',
-            source: 'testPrefix/image3'
+            source: 'source1'
           }],
-          selected: ['image1', 'image2', 'image3']
-        });
-      });
-
-      test('_updateImageParameterFromGallery does add selected images to searchParameters', function() {
-        element.searchParameters.image = {
-          image1: {
-            category: 'Image',
-            date: undefined,
-            enabled: true,
-            key: 'image1',
-            search: 'optional',
-            text: 'image1'
-          },
-          image2: {
-            category: 'Image',
-            date: undefined,
-            enabled: true,
-            key: 'image2',
-            search: 'optional',
-            text: 'image2'
-          },
-          image3: {
-            category: 'Image',
-            date: undefined,
-            enabled: false,
-            key: 'image3',
-            search: 'optional',
-            text: 'image3'
-          },
-          image4: {
-            category: 'Image',
-            date: undefined,
-            enabled: false,
-            key: 'image4',
-            search: 'optional',
-            text: 'image4'
-          }
-        };
-
-        element._updateImageParameterFromGallery({
-          key: 'image',
-          title: 'Image',
-          images: [{
-            id: 'image1',
-            search: 'required'
-          }, {
-            id: 'image2',
-            search: 'required'
-          }, {
-            id: 'image3',
-            search: 'required'
-          }, {
-            id: 'image4',
-            search: 'required'
-          }, {
-            id: 'image5',
-            search: 'required'
-          }],
-          selected: ['image1', 'image4', 'image5']
-        });
-
-        assert.deepEqual(element.searchParameters.image, {
-          image1: {
-            category: 'Image',
-            date: undefined,
-            enabled: true,
-            key: 'image1',
-            search: 'required',
-            text: 'image1'
-          },
-          image2: {
-            category: 'Image',
-            date: undefined,
-            enabled: false,
-            key: 'image2',
-            search: undefined,
-            text: 'image2'
-          },
-          image3: {
-            category: 'Image',
-            date: undefined,
-            enabled: false,
-            key: 'image3',
-            search: 'optional',
-            text: 'image3'
-          },
-          image4: {
-            category: 'Image',
-            date: undefined,
-            enabled: true,
-            key: 'image4',
-            search: 'required',
-            text: 'image4'
-          },
-          image5: {
-            category: 'Image',
-            date: undefined,
-            enabled: true,
-            key: 'image5',
-            search: 'required',
-            text: 'image5'
-          }
+          selected: ['image1']
         });
       });
     });
