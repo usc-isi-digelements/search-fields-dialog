@@ -75,7 +75,7 @@ A Polymer Element showing search fields in a modal dialog.
         text-transform: none;
       }
 
-      .header {
+      [slot="top"] {
         margin-bottom: 10px;
       }
 
@@ -147,7 +147,7 @@ A Polymer Element showing search fields in a modal dialog.
         --paper-input-container-input-color: var(--primary-text-color);
         --paper-input-container-focus-color: var(--primary-text-color);
         --paper-input-container: {
-          padding: 2px 0 2px 20px;
+          padding: 2px 0;
         }
         --paper-input-container-input: {
           font-weight: 500;
@@ -188,7 +188,8 @@ A Polymer Element showing search fields in a modal dialog.
 
       image-gallery.input-gallery {
         margin-right: 10px;
-        max-height: 310px;
+        /* Max Height = 1 Row of Images */
+        max-height: 160px;
         overflow: auto;
       }
 
@@ -196,14 +197,18 @@ A Polymer Element showing search fields in a modal dialog.
         margin: 10px;
       }
 
-      .link-data paper-icon-button,
-      .search-data paper-icon-button {
+      paper-icon-button {
         border-radius: 50%;
-        color: var(--disabled-text-color);
         cursor: pointer;
         height: 30px;
         width: 30px;
         min-width: 30px;
+        padding: 0;
+      }
+
+      .link-data paper-icon-button,
+      .search-data paper-icon-button {
+        color: var(--disabled-text-color);
         padding: 5px;
       }
 
@@ -261,7 +266,7 @@ A Polymer Element showing search fields in a modal dialog.
     </paper-button>
 
     <styled-dialog class$="search-dialog [[_isBackdrop(_openedDialogHelp, _openedDialogImages)]]" fill modal opened="{{opened}}">
-      <div slot="top" class="layout horizontal center-justified header">
+      <div slot="top" class="layout horizontal center center-justified header">
         <button-action icon="fa:search" text="Search" on-tap="handleSearch"></button-action>
         <button-action icon="fa:undo" text="Reset" on-tap="resetAllSearchFields"></button-action>
         <button-action icon="fa:times" text="Cancel" on-tap="cancelSearch"></button-action>
@@ -425,12 +430,16 @@ A Polymer Element showing search fields in a modal dialog.
       </div>
     </styled-dialog>
 
-    <styled-dialog class="images-dialog" fill header="Images" opened="{{_openedDialogImages}}">
-      <div class="styled-dialog-bold styled-dialog-tall">Your Links and Uploaded Files</div>
+    <styled-dialog class="images-dialog" fill opened="{{_openedDialogImages}}">
+      <div slot="top" class="layout horizontal center">
+        <div class="flex styled-dialog-bold">Your Image Links and Uploaded Image Files</div>
+        <paper-icon-button icon="fa:times" dialog-confirm title="Close"></paper-icon-button>
+      </div>
 
-      <div class="styled-dialog-text">Click the check icon next to an image to see the image matches from the DIG data.</div>
+      <div slot="top" class="styled-dialog-text">Click the check icon next to an image to see the image matches from the DIG data.</div>
 
       <image-gallery
+        slot="top"
         class="input-gallery"
         show-delete
         show-labels
@@ -441,17 +450,17 @@ A Polymer Element showing search fields in a modal dialog.
         selected="{{_imagesSelected}}">
       </image-gallery>
 
-      <div class="styled-dialog-note">
+      <div slot="top" class="styled-dialog-note">
         <strong>How does it work?</strong>
         Image matches are found by looking at the features in the image like physical characteristics, hairstyle, dress, environment, and pose.  Better matches are shown first in the gallery.  To learn more, please visit <a href="http://www.ee.columbia.edu/ln/dvmm/memex/" target="_blank">here</a>.
       </div>
 
-      <div class="styled-dialog-divider"></div>
+      <div slot="top" class="styled-dialog-divider"></div>
 
       <template is="dom-if" if="[[_imageResults.id]]">
-        <div class="styled-dialog-bold styled-dialog-tall">DIG Images Matching [[_imageResults.id]]</div>
+        <div slot="top" class="styled-dialog-bold">[[_imageResults.images.length]] DIG Image Matches</div>
 
-        <div class="styled-dialog-text">Click the check icon next to an image match to add it to your search.</div>
+        <div slot="top" class="styled-dialog-text">Click the check icon next to an image match to add it to your search.</div>
 
         <image-gallery
           class="results-gallery"
