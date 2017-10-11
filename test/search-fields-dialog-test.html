@@ -134,9 +134,12 @@ limitations under the License.
         assert.equal(element.dataProperty, 'data');
         assert.equal(element.dataKeyProperty, 'key');
         assert.equal(element.dataTitleProperty, 'title');
-        assert.equal(element.imageUrlPrefix, '');
         assert.equal(element.imageUploadUrl, '/uploadImage');
+        assert.equal(element.imageUrlPrefix, '');
+        assert.equal(element.imageUrlSuffix, '');
+        assert.equal(element.largeImageStyleClass, '');
         assert.equal(element.nameProperty, 'name');
+        assert.equal(element.smallImageStyleClass, '');
         assert.equal(element.typeProperty, 'type');
 
         assert.isTrue(element.processRequest);
@@ -208,45 +211,46 @@ limitations under the License.
         assert.isFalse(element.$$('.images-dialog').opened);
       });
 
-      test('images dialog does an image gallery', function() {
-        var galleries = Polymer.dom(element.root).querySelectorAll('.images-dialog image-gallery');
-        assert.equal(galleries.length, 1);
+      test('images dialog does have an image gallery', function() {
+        var inputGallery = Polymer.dom(element.root).querySelectorAll('.images-dialog image-gallery');
+        assert.equal(inputGallery.length, 1);
 
-        assert.equal(galleries[0].imageNameProperty, 'id');
-        assert.isTrue(galleries[0].classList.contains('input-gallery'));
-        assert.isTrue(galleries[0].showDelete);
-        assert.isTrue(galleries[0].showLabels);
-        assert.isTrue(galleries[0].showSelect);
-        assert.deepEqual(galleries[0].images, []);
-        assert.deepEqual(galleries[0].processing, []);
-        assert.deepEqual(galleries[0].selected, []);
+        assert.equal(inputGallery[0].imageNameProperty, 'id');
+        assert.isTrue(inputGallery[0].classList.contains('input-gallery'));
+        assert.isTrue(inputGallery[0].showDelete);
+        assert.isTrue(inputGallery[0].showLabels);
+        assert.isTrue(inputGallery[0].showSelect);
+        assert.deepEqual(inputGallery[0].images, []);
+        assert.deepEqual(inputGallery[0].processing, []);
+        assert.deepEqual(inputGallery[0].selected, []);
       });
 
       test('images dialog does have two image galleries if _imageResults.id is defined', function(done) {
         element.set('_imageResults.id', 'id1');
 
         flush(function() {
-          var galleries = Polymer.dom(element.root).querySelectorAll('.images-dialog image-gallery');
-          assert.equal(galleries.length, 2);
+          var inputGallery = Polymer.dom(element.root).querySelectorAll('.images-dialog image-gallery');
+          assert.equal(inputGallery.length, 1);
 
-          assert.equal(galleries[0].imageNameProperty, 'id');
-          assert.isTrue(galleries[0].classList.contains('input-gallery'));
-          assert.isTrue(galleries[0].showDelete);
-          assert.isTrue(galleries[0].showLabels);
-          assert.isTrue(galleries[0].showSelect);
-          assert.deepEqual(galleries[0].images, []);
-          assert.deepEqual(galleries[0].processing, []);
-          assert.deepEqual(galleries[0].selected, []);
+          assert.equal(inputGallery[0].imageNameProperty, 'id');
+          assert.isTrue(inputGallery[0].classList.contains('input-gallery'));
+          assert.isTrue(inputGallery[0].showDelete);
+          assert.isTrue(inputGallery[0].showLabels);
+          assert.isTrue(inputGallery[0].showSelect);
+          assert.deepEqual(inputGallery[0].images, []);
+          assert.deepEqual(inputGallery[0].processing, []);
+          assert.deepEqual(inputGallery[0].selected, []);
 
-          assert.isTrue(galleries[1].classList.contains('results-gallery'));
-          assert.isTrue(galleries[1].newTab);
-          assert.isTrue(galleries[1].showDelete);
-          assert.isTrue(galleries[1].showDeleteFollowing);
-          assert.isTrue(galleries[1].showLabels);
-          assert.isTrue(galleries[1].showSelect);
-          assert.isTrue(galleries[1].showSelectPreceding);
-          assert.deepEqual(galleries[1].images, []);
-          assert.deepEqual(galleries[1].selected, []);
+          var resultsGallery = Polymer.dom(element.root).querySelectorAll('.images-dialog auto-paginated-image-gallery');
+          assert.equal(resultsGallery.length, 1);
+
+          assert.isTrue(resultsGallery[0].classList.contains('results-gallery'));
+          assert.isTrue(resultsGallery[0].newTab);
+          assert.isTrue(resultsGallery[0].showLabels);
+          assert.isTrue(resultsGallery[0].showSelect);
+          assert.isTrue(resultsGallery[0].showSelectPreceding);
+          assert.deepEqual(resultsGallery[0].images, []);
+          assert.deepEqual(resultsGallery[0].selected, []);
 
           done();
         });
@@ -277,15 +281,15 @@ limitations under the License.
         };
 
         flush(function() {
-          var galleries = Polymer.dom(element.root).querySelectorAll('.images-dialog image-gallery');
-          assert.equal(galleries.length, 2);
+          var inputGallery = Polymer.dom(element.root).querySelectorAll('.images-dialog image-gallery');
+          assert.equal(inputGallery.length, 1);
 
-          assert.equal(galleries[0].imageNameProperty, 'id');
-          assert.isTrue(galleries[0].classList.contains('input-gallery'));
-          assert.isTrue(galleries[0].showDelete);
-          assert.isTrue(galleries[0].showLabels);
-          assert.isTrue(galleries[0].showSelect);
-          assert.deepEqual(galleries[0].images, [{
+          assert.equal(inputGallery[0].imageNameProperty, 'id');
+          assert.isTrue(inputGallery[0].classList.contains('input-gallery'));
+          assert.isTrue(inputGallery[0].showDelete);
+          assert.isTrue(inputGallery[0].showLabels);
+          assert.isTrue(inputGallery[0].showSelect);
+          assert.deepEqual(inputGallery[0].images, [{
             hits: [],
             id: 'image1',
             source: 'source1'
@@ -294,24 +298,25 @@ limitations under the License.
             id: 'image2',
             source: 'source2'
           }]);
-          assert.deepEqual(galleries[0].processing, ['image1']);
-          assert.deepEqual(galleries[0].selected, ['image2']);
+          assert.deepEqual(inputGallery[0].processing, ['image1']);
+          assert.deepEqual(inputGallery[0].selected, ['image2']);
 
-          assert.isTrue(galleries[1].classList.contains('results-gallery'));
-          assert.isTrue(galleries[1].newTab);
-          assert.isTrue(galleries[1].showDelete);
-          assert.isTrue(galleries[1].showDeleteFollowing);
-          assert.isTrue(galleries[1].showLabels);
-          assert.isTrue(galleries[1].showSelect);
-          assert.isTrue(galleries[1].showSelectPreceding);
-          assert.deepEqual(galleries[1].images, [{
+          var resultsGallery = Polymer.dom(element.root).querySelectorAll('.images-dialog auto-paginated-image-gallery');
+          assert.equal(resultsGallery.length, 1);
+
+          assert.isTrue(resultsGallery[0].classList.contains('results-gallery'));
+          assert.isTrue(resultsGallery[0].newTab);
+          assert.isTrue(resultsGallery[0].showLabels);
+          assert.isTrue(resultsGallery[0].showSelect);
+          assert.isTrue(resultsGallery[0].showSelectPreceding);
+          assert.deepEqual(resultsGallery[0].images, [{
             id: 'image3',
             source: 'source3'
           }, {
             id: 'image4',
             source: 'source4'
           }]);
-          assert.deepEqual(galleries[1].selected, ['image3']);
+          assert.deepEqual(resultsGallery[0].selected, ['image3']);
 
           done();
         });
@@ -403,12 +408,13 @@ limitations under the License.
       });
 
       test('search dialog does have image gallery for the image field', function() {
-        var galleries = Polymer.dom(element.root).querySelectorAll('.search-dialog search-image-gallery');
-        assert.equal(galleries.length, 1);
-        assert.deepEqual(galleries[0].excluded, []);
-        assert.deepEqual(galleries[0].images, []);
-        assert.deepEqual(galleries[0].required, []);
-        assert.deepEqual(galleries[0].selected, []);
+        var gallery = Polymer.dom(element.root).querySelectorAll('.search-dialog search-image-gallery');
+        assert.equal(gallery.length, 1);
+        assert.deepEqual(gallery[0].excluded, []);
+        assert.deepEqual(gallery[0].images, []);
+        assert.deepEqual(gallery[0].required, []);
+        assert.deepEqual(gallery[0].selected, []);
+        assert.deepEqual(gallery[0].union, []);
       });
 
       test('search image gallery does have expected images', function() {
@@ -428,15 +434,20 @@ limitations under the License.
           hits: [],
           id: 'image4',
           source: 'source4'
+        }, {
+          hits: [],
+          id: 'image5',
+          source: 'source5'
         }]);
-        element.set(['_searchFields', 4, 'data', 0, 'selected'], ['image2', 'image3', 'image4']);
+        element.set(['_searchFields', 4, 'data', 0, 'selected'], ['image2', 'image3', 'image4', 'image5']);
         element.set(['_searchFields', 4, 'data', 0, 'required'], ['image3']);
         element.set(['_searchFields', 4, 'data', 0, 'excluded'], ['image4']);
+        element.set(['_searchFields', 4, 'data', 0, 'union'], ['image5']);
 
-        var galleries = Polymer.dom(element.root).querySelectorAll('.search-dialog search-image-gallery');
-        assert.equal(galleries.length, 1);
-        assert.deepEqual(galleries[0].excluded, ['image4']);
-        assert.deepEqual(galleries[0].images, [{
+        var gallery = Polymer.dom(element.root).querySelectorAll('.search-dialog search-image-gallery');
+        assert.equal(gallery.length, 1);
+        assert.deepEqual(gallery[0].excluded, ['image4']);
+        assert.deepEqual(gallery[0].images, [{
           hits: [],
           id: 'image1',
           source: 'source1'
@@ -452,9 +463,14 @@ limitations under the License.
           hits: [],
           id: 'image4',
           source: 'source4'
+        }, {
+          hits: [],
+          id: 'image5',
+          source: 'source5'
         }]);
-        assert.deepEqual(galleries[0].required, ['image3']);
-        assert.deepEqual(galleries[0].selected, ['image2', 'image3', 'image4']);
+        assert.deepEqual(gallery[0].required, ['image3']);
+        assert.deepEqual(gallery[0].selected, ['image2', 'image3', 'image4', 'image5']);
+        assert.deepEqual(gallery[0].union, ['image5']);
       });
 
       test('search dialog does have expected header buttons', function() {
@@ -585,7 +601,8 @@ limitations under the License.
             images: [],
             excluded: [],
             required: [],
-            selected: []
+            selected: [],
+            union: []
           }]
         }]);
       });
@@ -1184,6 +1201,7 @@ limitations under the License.
 
       test('_updateImageGalleryFromParameter does add enabled images to the search config', function() {
         element.imageUrlPrefix = 'testPrefix/';
+        element.imageUrlSuffix = '.xyz';
 
         element.searchParameters.image = {
           image1: {
@@ -1217,6 +1235,14 @@ limitations under the License.
             key: 'image4',
             search: 'optional',
             text: 'image4'
+          },
+          image5: {
+            category: 'Image',
+            date: undefined,
+            enabled: true,
+            key: 'image5',
+            search: 'union',
+            text: 'image5'
           }
         };
 
@@ -1225,9 +1251,9 @@ limitations under the License.
           images: [{
             id: 'image1',
           }, {
-            id: 'image5'
+            id: 'image6'
           }],
-          selected: ['image5']
+          selected: ['image6']
         };
 
         element._updateImageGalleryFromParameter(element._searchFields[4].data[0], ['_searchFields', 4, 'data', 0]);
@@ -1238,18 +1264,23 @@ limitations under the License.
           images: [{
             id: 'image1',
             search: 'optional',
-            source: 'testPrefix/image1'
+            source: 'testPrefix/image1.xyz'
           }, {
             id: 'image2',
             search: 'required',
-            source: 'testPrefix/image2'
+            source: 'testPrefix/image2.xyz'
           }, {
             id: 'image3',
             search: 'excluded',
-            source: 'testPrefix/image3'
+            source: 'testPrefix/image3.xyz'
+          }, {
+            id: 'image5',
+            search: 'union',
+            source: 'testPrefix/image5.xyz'
           }],
           required: ['image2'],
-          selected: ['image1', 'image2', 'image3']
+          selected: ['image1', 'image2', 'image3', 'image5'],
+          union: ['image5']
         });
       });
 
@@ -1286,6 +1317,14 @@ limitations under the License.
             key: 'image4',
             search: 'optional',
             text: 'image4'
+          },
+          image5: {
+            category: 'Image',
+            date: undefined,
+            enabled: true,
+            key: 'image5',
+            search: 'union',
+            text: 'image5'
           }
         };
 
@@ -1307,10 +1346,14 @@ limitations under the License.
             search: 'excluded'
           }, {
             id: 'image5',
+            search: 'union'
+          }, {
+            id: 'image6',
             search: 'required'
           }],
-          required: ['image5'],
-          selected: ['image1', 'image4', 'image5']
+          required: ['image6'],
+          selected: ['image1', 'image4', 'image5', 'image6'],
+          union: ['image5']
         });
 
         assert.deepEqual(element.searchParameters.image, {
@@ -1351,8 +1394,16 @@ limitations under the License.
             date: undefined,
             enabled: true,
             key: 'image5',
-            search: 'required',
+            search: 'union',
             text: 'image5'
+          },
+          image6: {
+            category: 'Image',
+            date: undefined,
+            enabled: true,
+            key: 'image6',
+            search: 'required',
+            text: 'image6'
           }
         });
       });

@@ -15,14 +15,16 @@ limitations under the License.
 -->
 
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../auto-paginated-image-gallery/auto-paginated-image-gallery.html">
 <link rel="import" href="../button-action/button-action.html">
+<link rel="import" href="../fontawesome-iconset/fa-all.html">
 <link rel="import" href="../image-gallery/image-gallery.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../iron-icon/iron-icon.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
-<link rel="import" href="../fontawesome-iconset/fa-all.html">
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-styles/color.html">
 <link rel="import" href="../search-image-gallery/search-image-gallery.html">
 <link rel="import" href="../styled-dialog/styled-dialog.html">
 <link rel="import" href="../styled-dialog/styled-dialog-styles.html">
@@ -66,7 +68,7 @@ A Polymer Element showing search fields in a modal dialog.
 
       .open-dialog-button[active],
       .open-dialog-button:hover {
-        color: yellowgreen;
+        color: greenyellow;
       }
 
       .open-dialog-button > div {
@@ -176,6 +178,15 @@ A Polymer Element showing search fields in a modal dialog.
         background-color: yellow;
       }
 
+      auto-paginated-image-gallery {
+        --auto-paginated-image-gallery-hovering-color: yellow;
+        --auto-paginated-image-gallery-selected-color: var(--primary-background-color);
+        --auto-paginated-image-gallery-max-height: none;
+        --auto-paginated-image-gallery-show-more-button: {
+          margin-top: 10px;
+        };
+      }
+
       image-gallery,
       search-image-gallery {
         --image-gallery-hovering-color: yellow;
@@ -231,16 +242,16 @@ A Polymer Element showing search fields in a modal dialog.
 
       .network-expansion-icon:hover,
       .network-expansion-icon.on {
-        color: yellowgreen;
+        color: var(--paper-green-600, green);
       }
 
       .network-expansion-icon.on.inactive {
-        color: orangered;
+        color: var(--paper-red-600, red);
       }
 
       .require-one-icon:hover,
       .require-one-icon.on {
-        color: gold;
+        color: var(--paper-blue-600, blue);
       }
 
       .help-dialog {
@@ -302,10 +313,13 @@ A Polymer Element showing search fields in a modal dialog.
                   </template>
 
                   <search-image-gallery
+                    large-image-style-class="[[largeImageStyleClass]]"
+                    small-image-style-class="[[smallImageStyleClass]]"
                     excluded="{{searchConfig.excluded}}"
                     images="{{searchConfig.images}}"
                     required="{{searchConfig.required}}"
-                    selected="{{searchConfig.selected}}">
+                    selected="{{searchConfig.selected}}"
+                    union="{{searchConfig.union}}">
                   </search-image-gallery>
                 </template>
               </div>
@@ -404,10 +418,12 @@ A Polymer Element showing search fields in a modal dialog.
       <div class="help-text layout horizontal center">
         <iron-icon class="require-one-icon on" icon="fa:asterisk"></iron-icon>
         <div>
-          Click the <strong>asterisk</strong> button to <strong>require at least one term from a field</strong> to match every search result.
-          (Terms may still be marked as excluded.)
-          This is helpful if you want results that match one term but don't need results that match all terms simultaneously.
-          Example:  <strong>New York, Bronx, Brooklyn, Manhattan, Queens</strong>
+          Click the <strong>asterisk</strong> button to activate a <strong>required grouping</strong> on all the search terms of a field.
+          Search results must match <strong>at least one term from all required groupings</strong>.
+          Terms marked as required (+) or excluded (-) are not included in the required grouping.
+          This is helpful if you don't need to match multiple search terms simultaneously.
+          For example, to find matches for any of the suburbs of New York City, you can activate a required grouping on the
+          <strong>City</strong> field with the search terms <strong>New York, Bronx, Brooklyn, Manhattan, Queens</strong>.
         </div>
       </div>
 
@@ -432,7 +448,7 @@ A Polymer Element showing search fields in a modal dialog.
 
     <styled-dialog class="images-dialog" fill opened="{{_openedDialogImages}}">
       <div slot="top" class="layout horizontal center">
-        <div class="flex styled-dialog-bold">Your Image Links and Uploaded Image Files</div>
+        <div class="flex styled-dialog-bold styled-dialog-tall">Your Image Links and Uploaded Image Files</div>
         <paper-icon-button icon="fa:times" dialog-confirm title="Close"></paper-icon-button>
       </div>
 
@@ -441,9 +457,11 @@ A Polymer Element showing search fields in a modal dialog.
       <image-gallery
         slot="top"
         class="input-gallery"
+        large-image-style-class="[[largeImageStyleClass]]"
         show-delete
         show-labels
         show-select
+        small-image-style-class="[[smallImageStyleClass]]"
         image-name-property="id"
         images="{{images}}"
         processing="[[imagesProcessing]]"
@@ -458,21 +476,24 @@ A Polymer Element showing search fields in a modal dialog.
       <div slot="top" class="styled-dialog-divider"></div>
 
       <template is="dom-if" if="[[_imageResults.id]]">
-        <div slot="top" class="styled-dialog-bold">[[_imageResults.images.length]] DIG Image Matches</div>
+        <div slot="top" class="styled-dialog-bold styled-dialog-tall">[[_imageResults.images.length]] DIG Image Matches</div>
 
         <div slot="top" class="styled-dialog-text">Click the check icon next to an image match to add it to your search.</div>
 
-        <image-gallery
+        <auto-paginated-image-gallery
           class="results-gallery"
+          large-image-style-class="[[largeImageStyleClass]]"
           new-tab
+          page-size="100"
           show-delete
           show-delete-following
           show-labels
           show-select
           show-select-preceding
+          small-image-style-class="[[smallImageStyleClass]]"
           images="{{_imageResults.images}}"
           selected="{{_imageResults.selected}}">
-        </image-gallery>
+        </auto-paginated-image-gallery>
       </template>
 
       <div slot="bottom" class="footer">
@@ -709,6 +730,32 @@ A Polymer Element showing search fields in a modal dialog.
         /**
          * (Optional)
          *
+         * The suffix for the image URL for image field data.
+         *
+         * @type {String}
+         * @default ''
+         */
+        imageUrlSuffix: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Optional)
+         *
+         * The style class for any image in a popup.
+         *
+         * @type {String}
+         * @default ''
+         */
+        largeImageStyleClass: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Optional)
+         *
          * The name property in the searchFieldsConfig.
          *
          * @type {String}
@@ -780,6 +827,19 @@ A Polymer Element showing search fields in a modal dialog.
         searchParameters: {
           notify: true,
           type: Object
+        },
+
+        /**
+         * (Optional)
+         *
+         * The style class for all the images in the galleries.
+         *
+         * @type {String}
+         * @default ''
+         */
+        smallImageStyleClass: {
+          type: String,
+          value: ''
         },
 
         /**
@@ -958,6 +1018,7 @@ A Polymer Element showing search fields in a modal dialog.
                 item.images = [];
                 item.required = [];
                 item.selected = [];
+                item.union = [];
               }
 
               return item;
@@ -1317,13 +1378,18 @@ A Polymer Element showing search fields in a modal dialog.
           return {
             id: term,
             search: search || 'optional',
-            source: self.imageUrlPrefix + term
+            source: self.imageUrlPrefix + term + self.imageUrlSuffix
           };
         });
 
         this.set(updatePath.concat('images'), images);
         // Use the map function to create a new array.
         this.set(updatePath.concat('selected'), images.map(function(object) {
+          return object.id;
+        }));
+        this.set(updatePath.concat('union'), images.filter(function(object) {
+          return object.search === 'union';
+        }).map(function(object) {
           return object.id;
         }));
         this.set(updatePath.concat('required'), images.filter(function(object) {
@@ -1349,10 +1415,12 @@ A Polymer Element showing search fields in a modal dialog.
         var searchTermToSearchStatus = searchConfig.images.filter(function(object) {
           return searchConfig.selected.indexOf(object.id) >= 0;
         }).reduce(function(searchTermToSearchStatus, selected) {
-          if(searchConfig.excluded.indexOf(selected.id) >= 0) {
-            searchTermToSearchStatus[selected.id] = 'excluded';
+          if(searchConfig.union.indexOf(selected.id) >= 0) {
+            searchTermToSearchStatus[selected.id] = 'union';
           } else if(searchConfig.required.indexOf(selected.id) >= 0) {
             searchTermToSearchStatus[selected.id] = 'required';
+          } else if(searchConfig.excluded.indexOf(selected.id) >= 0) {
+            searchTermToSearchStatus[selected.id] = 'excluded';
           } else {
             searchTermToSearchStatus[selected.id] = 'optional';
           }
