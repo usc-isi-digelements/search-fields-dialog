@@ -1544,7 +1544,7 @@ A Polymer Element showing search fields in a modal dialog.
 
         this._updateSearchParameterTerms(searchConfig, searchTermToSearchStatus);
 
-        var activateNetworkExpansion = (this._isNetworkExpansionViable && searchConfig.activateNetworkExpansion);
+        var activateNetworkExpansion = !!(this._isNetworkExpansionViable && searchConfig.activateNetworkExpansion);
 
         if(this.networkExpansionParameters[searchConfig.key] !== activateNetworkExpansion) {
           this.networkExpansionParameters[searchConfig.key] = activateNetworkExpansion;
@@ -1709,6 +1709,7 @@ A Polymer Element showing search fields in a modal dialog.
               });
             }
           });
+          this._updateNetworkExpansion();
         }
 
         this.opened = !this.opened;
