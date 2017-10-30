@@ -702,7 +702,7 @@ limitations under the License.
 
       test('_getButtonStyleClass does return as expected', function() {
         assert.equal(element._getButtonStyleClass(true), 'on');
-        assert.equal(element._getButtonStyleClass(false), '');
+        assert.equal(element._getButtonStyleClass(false), 'off');
       });
 
       test('_getButtonText does return as expected', function() {
@@ -716,8 +716,8 @@ limitations under the License.
       });
 
       test('_getNetworkExpansionStyleClass does return as expected', function() {
-        assert.equal(element._getNetworkExpansionStyleClass(false, false), ' inactive');
-        assert.equal(element._getNetworkExpansionStyleClass(false, true), '');
+        assert.equal(element._getNetworkExpansionStyleClass(false, false), 'off inactive');
+        assert.equal(element._getNetworkExpansionStyleClass(false, true), 'off');
         assert.equal(element._getNetworkExpansionStyleClass(true, false), 'on inactive');
         assert.equal(element._getNetworkExpansionStyleClass(true, true), 'on');
       });

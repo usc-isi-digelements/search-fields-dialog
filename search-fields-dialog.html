@@ -217,14 +217,15 @@ A Polymer Element showing search fields in a modal dialog.
         padding: 0;
       }
 
-      .link-data paper-icon-button,
-      .search-data paper-icon-button {
+      paper-icon-button.off {
         color: var(--disabled-text-color);
         padding: 5px;
       }
 
+      paper-icon-button:hover,
       paper-icon-button.on {
         color: var(--primary-text-color);
+        padding: 5px;
       }
 
       vaadin-upload {
@@ -247,11 +248,6 @@ A Polymer Element showing search fields in a modal dialog.
 
       .network-expansion-icon.on.inactive {
         color: var(--paper-red-600, red);
-      }
-
-      .require-one-icon:hover,
-      .require-one-icon.on {
-        color: var(--paper-blue-600, blue);
       }
 
       .help-dialog {
@@ -374,7 +370,7 @@ A Polymer Element showing search fields in a modal dialog.
             </paper-input>
 
             <paper-icon-button
-              class="on"
+              class$="[[_getButtonStyleClass(_linksInput)]]"
               icon="fa:plus-circle"
               title="Add Image Links"
               disabled="[[!_linksInput]]"
@@ -506,7 +502,7 @@ A Polymer Element showing search fields in a modal dialog.
           </paper-input>
 
           <paper-icon-button
-            class="on"
+            class$="[[_getButtonStyleClass(_linksInput)]]"
             icon="fa:plus-circle"
             title="Add Image Links"
             disabled="[[!_linksInput]]"
@@ -1063,7 +1059,7 @@ A Polymer Element showing search fields in a modal dialog.
        * @private
        */
       _getButtonStyleClass: function(on) {
-        return on ? 'on' : '';
+        return on ? 'on' : 'off';
       },
 
       /**
