@@ -66,6 +66,21 @@ A Polymer Element showing search fields in a modal dialog.
         }
       }
 
+      .little {
+        --iron-icon-height: 20px;
+        --iron-icon-width: 20px;
+        --iron-icon: {
+          margin: 0 5px;
+          min-width: 20px;
+          padding: 5px;
+        }
+      }
+
+      .open-dialog-button {
+        margin: 0;
+        padding: 0;
+      }
+
       .open-dialog-button[active],
       .open-dialog-button:hover {
         color: greenyellow;
@@ -121,7 +136,7 @@ A Polymer Element showing search fields in a modal dialog.
       .search-name {
         text-align: end;
         /* Vertically align the label with their paper-input-containers. */
-        padding-top: 24px;
+        padding-top: 26px;
       }
 
       .images-name {
@@ -134,10 +149,14 @@ A Polymer Element showing search fields in a modal dialog.
         padding-top: 5px;
       }
 
+      .search-data {
+        padding-left: 10px;
+      }
+
       vaadin-date-picker-display {
         display: inline-block;
-        padding: 2px 10px 2px 20px;
-        width: 370px;
+        padding: 4px 10px 0 0;
+        width: 340px;
         --date-picker-style-mixin: {
           padding-bottom: 0;
         };
@@ -149,7 +168,7 @@ A Polymer Element showing search fields in a modal dialog.
         --paper-input-container-input-color: var(--primary-text-color);
         --paper-input-container-focus-color: var(--primary-text-color);
         --paper-input-container: {
-          padding: 2px 0;
+          padding: 4px 0 0;
         }
         --paper-input-container-input: {
           font-weight: 500;
@@ -158,15 +177,15 @@ A Polymer Element showing search fields in a modal dialog.
 
       .search-data paper-input {
         --paper-input-container: {
-          padding: 2px 0 2px 20px;
-          width: 320px;
+          padding: 4px 0 0;
+          width: 290px;
         }
       }
 
       .search-data paper-input.add-width {
         --paper-input-container: {
-          padding: 2px 0 2px 20px;
-          width: 350px;
+          padding: 4px 0 0;
+          width: 320px;
         }
       }
 
@@ -194,7 +213,7 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       search-image-gallery {
-        margin: 0 10px 0 20px;
+        margin: 5px 10px 5px 20px;
       }
 
       image-gallery.input-gallery {
@@ -236,18 +255,14 @@ A Polymer Element showing search fields in a modal dialog.
         };
       }
 
+      .search-data iron-icon,
       .search-data paper-icon-button {
-        /* Vertically align the buttons with their label & paper-input-containers. */
+        /* Vertically align the icons with their label & paper-input-containers. */
         margin-top: 20px;
       }
 
-      .network-expansion-icon:hover,
-      .network-expansion-icon.on {
-        color: var(--paper-green-600, green);
-      }
-
       .network-expansion-icon.on.inactive {
-        color: var(--paper-red-600, red);
+        color: var(--secondary-text-color);
       }
 
       .help-dialog {
@@ -263,7 +278,91 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       .help-text > div {
-        margin-left: 15px;
+        margin-left: 10px;
+      }
+
+      iron-icon.amber {
+        color: var(--paper-amber-600);
+      }
+
+      iron-icon.black {
+        color: #111;
+      }
+
+      iron-icon.blue {
+        color: var(--paper-blue-600);
+      }
+
+      iron-icon.blue-grey {
+        color: var(--paper-blue-grey-600);
+      }
+
+      iron-icon.brown {
+        color: var(--paper-brown-600);
+      }
+
+      iron-icon.cyan {
+        color: var(--paper-cyan-600);
+      }
+
+      iron-icon.deep-orange {
+        color: var(--paper-deep-orange-600);
+      }
+
+      iron-icon.deep-purple {
+        color: var(--paper-deep-purple-600);
+      }
+
+      iron-icon.green {
+        color: var(--paper-green-600);
+      }
+
+      iron-icon.grey {
+        color: var(--paper-grey-600);
+      }
+
+      iron-icon.indigo {
+        color: var(--paper-indigo-600);
+      }
+
+      iron-icon.light-blue {
+        color: var(--paper-light-blue-600);
+      }
+
+      iron-icon.light-green {
+        color: var(--paper-light-green-600);
+      }
+
+      iron-icon.lime {
+        color: var(--paper-lime-600);
+      }
+
+      iron-icon.orange {
+        color: var(--paper-orange-600);
+      }
+
+      iron-icon.pink {
+        color: var(--paper-pink-600);
+      }
+
+      iron-icon.purple {
+        color: var(--paper-purple-600);
+      }
+
+      iron-icon.red {
+        color: var(--paper-red-600);
+      }
+
+      iron-icon.teal {
+        color: var(--paper-teal-600);
+      }
+
+      iron-icon.white {
+        color: #fff;
+      }
+
+      iron-icon.yellow {
+        color: var(--paper-yellow-600);
       }
     </style>
 
@@ -288,7 +387,9 @@ A Polymer Element showing search fields in a modal dialog.
           <template is="dom-if" if="[[dialogConfig.isDate]]">
             <div class="styled-dialog-name search-name">[[dialogConfig.name]]</div>
             <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
-              <div class="layout horizontal date-fields-container nowrap">
+              <div class="layout horizontal search-data nowrap">
+                <iron-icon class$="little [[searchConfig.styleClass]]" icon="[[searchConfig.icon]]"></iron-icon>
+
                 <vaadin-date-picker-display
                   facet-key="value"
                   facets="{{searchConfig}}"
@@ -326,6 +427,8 @@ A Polymer Element showing search fields in a modal dialog.
               <div class="layout horizontal wrap">
                 <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
                   <div class="layout horizontal nowrap search-data">
+                    <iron-icon class$="little [[searchConfig.styleClass]]" icon="[[searchConfig.icon]]"></iron-icon>
+
                     <paper-input
                       class$="[[_getInputWidthStyleClass(searchConfig.enableNetworkExpansion)]]"
                       id$="input_[[searchConfig.key]]"
@@ -594,6 +697,19 @@ A Polymer Element showing search fields in a modal dialog.
         /**
          * (Optional)
          *
+         * The icon property in the data in the searchFieldsConfig.
+         *
+         * @type {String}
+         * @default 'title'
+         */
+        dataIconProperty: {
+          type: String,
+          value: 'icon'
+        },
+
+        /**
+         * (Optional)
+         *
          * The key property in the data in the searchFieldsConfig.
          *
          * @type {String}
@@ -602,6 +718,19 @@ A Polymer Element showing search fields in a modal dialog.
         dataKeyProperty: {
           type: String,
           value: 'key'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The style class property in the data in the searchFieldsConfig.
+         *
+         * @type {String}
+         * @default 'title'
+         */
+        dataStyleClassProperty: {
+          type: String,
+          value: 'styleClass'
         },
 
         /**
@@ -951,7 +1080,7 @@ A Polymer Element showing search fields in a modal dialog.
          * @private
          */
         _searchFields: {
-          computed: '_createSearchFields(searchFieldsConfig, dataProperty, nameProperty, typeProperty, dataKeyProperty, dataTitleProperty)',
+          computed: '_createSearchFields(searchFieldsConfig, dataProperty, nameProperty, typeProperty, dataIconProperty, dataKeyProperty, dataStyleClassProperty, dataTitleProperty)',
           type: Array
         },
 
@@ -980,12 +1109,14 @@ A Polymer Element showing search fields in a modal dialog.
        * @param {String} dataProperty
        * @param {String} nameProperty
        * @param {String} typeProperty
+       * @param {String} dataIconProperty
        * @param {String} dataKeyProperty
+       * @param {String} dataStyleClassProperty
        * @param {String} dataTitleProperty
        * @return {Array}
        * @private
        */
-      _createSearchFields: function(config, dataProperty, nameProperty, typeProperty, dataKeyProperty, dataTitleProperty) {
+      _createSearchFields: function(config, dataProperty, nameProperty, typeProperty, dataIconProperty, dataKeyProperty, dataStyleClassProperty, dataTitleProperty) {
         var self = this;
         return (config || []).map(function(dialogConfig) {
           var isDate = dialogConfig[typeProperty] === 'date';
@@ -993,7 +1124,9 @@ A Polymer Element showing search fields in a modal dialog.
           return {
             data: dialogConfig[dataProperty].map(function(searchConfig) {
               var item = {
+                icon: searchConfig[dataIconProperty],
                 key: searchConfig[dataKeyProperty],
+                styleClass: searchConfig[dataStyleClassProperty],
                 title: searchConfig[dataTitleProperty]
               };
 
