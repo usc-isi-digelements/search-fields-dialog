@@ -1,7 +1,7 @@
 {
   "name": "search-fields-dialog",
   "description": "A Polymer Element showing search fields in a modal dialog.",
-  "version": "2.3.7",
+  "version": "2.3.8",
   "authors": [
     "Next Century Corporation"
   ],
@@ -18,7 +18,7 @@
   ],
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.2",
-    "auto-paginated-image-gallery": "DigElements/auto-paginated-image-gallery#2.2.4",
+    "auto-paginated-image-gallery": "DigElements/auto-paginated-image-gallery#2.2.5",
     "button-action": "DigElements/button-action#2.0.1",
     "fontawesome-iconset": "https://github.com/vangware/fontawesome-iconset.git#09ac70f619bb44d73fefc5f9524ae29ab217ed15",
     "image-gallery": "DigElements/image-gallery#2.1.4",
