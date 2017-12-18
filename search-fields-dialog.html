@@ -141,22 +141,17 @@ A Polymer Element showing search fields in a modal dialog.
 
       .images-name {
         text-align: end;
-        padding-top: 5px;
-      }
-
-      .no-images {
-        margin-left: 20px;
-        padding-top: 5px;
+        padding-top: 15px;
       }
 
       .search-data {
-        padding-left: 10px;
+        margin-left: 10px;
       }
 
       vaadin-date-picker-display {
         display: inline-block;
-        padding: 4px 10px 0 0;
-        width: 340px;
+        padding: 4px 5px 0 0;
+        width: 345px;
         --date-picker-style-mixin: {
           padding-bottom: 0;
         };
@@ -178,14 +173,14 @@ A Polymer Element showing search fields in a modal dialog.
       .search-data paper-input {
         --paper-input-container: {
           padding: 4px 0 0;
-          width: 290px;
+          width: 260px;
         }
       }
 
       .search-data paper-input.add-width {
         --paper-input-container: {
           padding: 4px 0 0;
-          width: 320px;
+          width: 290px;
         }
       }
 
@@ -213,7 +208,7 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       search-image-gallery {
-        margin: 5px 10px 5px 20px;
+        margin: 10px 10px 5px 20px;
       }
 
       image-gallery.input-gallery {
@@ -233,18 +228,16 @@ A Polymer Element showing search fields in a modal dialog.
         height: 30px;
         width: 30px;
         min-width: 30px;
-        padding: 0;
+        padding: 5px;
       }
 
       paper-icon-button.off {
         color: var(--disabled-text-color);
-        padding: 5px;
       }
 
       paper-icon-button:hover,
       paper-icon-button.on {
         color: var(--primary-text-color);
-        padding: 5px;
       }
 
       vaadin-upload {
@@ -383,7 +376,7 @@ A Polymer Element showing search fields in a modal dialog.
       </div>
 
       <template is="dom-repeat" items="[[_searchFields]]" as="dialogConfig">
-        <div class="layout horizontal">
+        <div class="layout horizontal" style="margin-bottom: 0;">
           <template is="dom-if" if="[[dialogConfig.isDate]]">
             <div class="styled-dialog-name search-name">[[dialogConfig.name]]</div>
             <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
@@ -405,10 +398,6 @@ A Polymer Element showing search fields in a modal dialog.
               <div class="styled-dialog-name images-name">[[dialogConfig.name]]</div>
               <div class="layout vertical flex">
                 <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
-                  <template is="dom-if" if="[[!searchConfig.images.length]]">
-                    <div class="styled-dialog-name no-images">None</div>
-                  </template>
-
                   <search-image-gallery
                     large-image-style-class="[[largeImageStyleClass]]"
                     small-image-style-class="[[smallImageStyleClass]]"
@@ -452,6 +441,14 @@ A Polymer Element showing search fields in a modal dialog.
                         icon="fa:asterisk"
                         title="Require at Least One Term from [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.requireOne)]])"
                         on-tap="_toggleRequireOne">
+                      </paper-icon-button>
+
+                      <paper-icon-button
+                        class$="reset-value-icon [[_getButtonStyleClass(searchConfig.value)]]"
+                        disabled="[[!searchConfig.value]]"
+                        icon="fa:times"
+                        title="Reset [[searchConfig.title]]"
+                        on-tap="_resetValue">
                       </paper-icon-button>
                     </div>
                   </div>
@@ -545,12 +542,7 @@ A Polymer Element showing search fields in a modal dialog.
       </div>
     </styled-dialog>
 
-    <styled-dialog class="images-dialog" fill opened="{{_openedDialogImages}}">
-      <div slot="top" class="layout horizontal center">
-        <div class="flex styled-dialog-bold styled-dialog-tall">Your Image Links and Uploaded Image Files</div>
-        <paper-icon-button icon="fa:times" dialog-confirm title="Close"></paper-icon-button>
-      </div>
-
+    <styled-dialog class="images-dialog" fill header="Your Image Links and Uploaded Image Files" opened="{{_openedDialogImages}}">
       <div slot="top" class="styled-dialog-text">Click the check icon next to an image to see the image matches from the DIG data.</div>
 
       <image-gallery
@@ -1207,7 +1199,7 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Returns the style class of an input element.
+       * Returns the width style class of an input element.
        *
        * @param {Boolean} enableNetworkExpansion
        * @return {String}
@@ -1399,6 +1391,16 @@ A Polymer Element showing search fields in a modal dialog.
        */
       _isBackdrop: function(helpDialogOpened, imagesDialogOpened) {
         return helpDialogOpened || imagesDialogOpened ? 'backdrop' : '';
+      },
+
+      /**
+       * Resets the value property of the searchConfig in the model of the given event.
+       *
+       * @event tap
+       * @private
+       */
+      _resetValue: function(event) {
+        this.$$('#input_' + event.model.searchConfig.key).value = '';
       },
 
       /**
@@ -1797,10 +1799,15 @@ A Polymer Element showing search fields in a modal dialog.
               dialogConfig.data.forEach(function(searchConfig, searchIndex) {
                 if(dialogConfig.isDate) {
                   self.set(['_searchFields', dialogIndex, 'data', searchIndex, 'value'], {});
+                  self.set('searchConfig.activateNetworkExpansion', false);
                 } else if(dialogConfig.isImage) {
                   self.set(['_searchFields', dialogIndex, 'data', searchIndex, 'selected'], []);
                 } else {
                   self.$$('#input_' + searchConfig.key).value = '';
+                  self.set(['_searchFields', dialogIndex, 'data', searchIndex, 'requireOne'], true);
+                  if(searchConfig.enableNetworkExpansion) {
+                    self.set(['_searchFields', dialogIndex, 'data', searchIndex, 'activateNetworkExpansion'], false);
+                  }
                 }
               });
             }
