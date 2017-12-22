@@ -119,6 +119,7 @@ limitations under the License.
         element.networkExpansionParameters = {
           city: false
         };
+        element.processRequest = true;
         element.searchFieldsConfig = [{
           type: 'date',
           name: 'Dates',
@@ -169,7 +170,6 @@ limitations under the License.
         assert.isTrue(element.processRequest);
         assert.isFalse(element.hideImages);
         assert.isFalse(element.opened);
-        assert.isFalse(element.userCanceled);
 
         assert.deepEqual(element.dateConfig, {
           dateStart: 'postingDate',
@@ -2082,37 +2082,6 @@ limitations under the License.
         // only happen when dialog is being opened).
         assert.isFalse(element.opened);
         assert.notEqual(element.$$('#input_city').value, 'la');
-      });
-
-      test('toggleProcessRequest updates correct properties', function() {
-        element.processRequest = true;
-        element.userCanceled = true;
-
-        element.toggleProcessRequest();
-
-        assert.isFalse(element.processRequest);
-        assert.isFalse(element.userCanceled);
-      });
-
-      test('toggleProcessRequest is called when searchParameters is updated', function(done) {
-        element.processRequest = true;
-        element.userCanceled = true;
-
-        element.set('searchParameters.city', {
-          nyc: {
-            key: 'nyc',
-            category: 'City',
-            enabled: true,
-            search: 'optional',
-            text: 'nyc'
-          }
-        });
-
-        flush(function() {
-          assert.isFalse(element.processRequest);
-          assert.isFalse(element.userCanceled);
-          done();
-        });
       });
 
       test('setting _imagesSelected does update _imageResults', function() {

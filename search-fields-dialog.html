@@ -444,11 +444,10 @@ A Polymer Element showing search fields in a modal dialog.
                       </paper-icon-button>
 
                       <paper-icon-button
-                        class$="reset-value-icon [[_getButtonStyleClass(searchConfig.value)]]"
-                        disabled="[[!searchConfig.value]]"
+                        class$="reset-field-icon [[_getButtonStyleClass(searchConfig.value)]]"
                         icon="fa:times"
                         title="Reset [[searchConfig.title]]"
-                        on-tap="_resetValue">
+                        on-tap="_resetFieldInputValue">
                       </paper-icon-button>
                     </div>
                   </div>
@@ -973,20 +972,6 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
-         * (Optional|Output)
-         *
-         * Whether the user canceled the changes.
-         *
-         * @type {Boolean}
-         * @default false
-         */
-        userCanceled: {
-          notify: true,
-          type: Boolean,
-          value: false
-        },
-
-        /**
          * An object containing the list of image results and the list of selected image IDs to be shown in the images dialog.
          *
          * @type {Object}
@@ -1090,8 +1075,7 @@ A Polymer Element showing search fields in a modal dialog.
       observers: [
         '_handleImagesSelected(_imagesSelected)',
         '_handleImageResultsModified(_imageResults.id, _imageResults.images)',
-        '_handleImageResultsSelected(_imageResults.selected)',
-        'toggleProcessRequest(searchParameters.*, opened)'
+        '_handleImageResultsSelected(_imageResults.selected)'
       ],
 
       /**
@@ -1399,7 +1383,7 @@ A Polymer Element showing search fields in a modal dialog.
        * @event tap
        * @private
        */
-      _resetValue: function(event) {
+      _resetFieldInputValue: function(event) {
         this.$$('#input_' + event.model.searchConfig.key).value = '';
       },
 
@@ -1691,6 +1675,7 @@ A Polymer Element showing search fields in a modal dialog.
       _updateSearchParametersFromFields: function() {
         var self = this;
 
+        this.processRequest = false;
         if(this._searchFields) {
           this._searchFields.forEach(function(dialogConfig) {
             if(dialogConfig.data) {
@@ -1706,6 +1691,7 @@ A Polymer Element showing search fields in a modal dialog.
             }
           });
         }
+        this.processRequest = true;
       },
 
       /**
@@ -1747,7 +1733,6 @@ A Polymer Element showing search fields in a modal dialog.
           });
         });
 
-        this.userCanceled = true;
         this.toggleSearchFieldsDialog();
       },
 
@@ -1813,15 +1798,6 @@ A Polymer Element showing search fields in a modal dialog.
             }
           });
         }
-      },
-
-      /**
-       * Toggles whether to let queries run whenever the search parameters change or the dialog is opened or closed.
-       */
-      toggleProcessRequest: function() {
-        this.processRequest = !this.opened && !this.userCanceled;
-        // reset user canceled variable
-        this.userCanceled = false;
       },
 
       /**
