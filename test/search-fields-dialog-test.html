@@ -1496,7 +1496,7 @@ limitations under the License.
             requireOnePrevious: false
           }
         };
-        // cityConfig is in index 0 of data array for location
+
         element._updateSearchFieldFromParameter(element._searchFields[2].data[0], ['_searchFields', 2, 'data', 0]);
 
         assert.deepEqual(element._searchFields[2].data[0], {
@@ -1600,6 +1600,50 @@ limitations under the License.
         assert.equal(element.$$('#input_city').value, '-nyc, chicago');
       });
 
+      test('_updateSearchFieldFromParameter does update _searchFields as expected if a term is lessthan or morethan', function() {
+        element.searchParameters.description = {
+          123: {
+            key: '123',
+            category: 'Description',
+            enabled: true,
+            search: 'morethan',
+            text: '123',
+            activateNetworkExpansion: false,
+            activateNetworkExpansionPrevious: false,
+            enableNetworkExpansion: false,
+            requireOne: false,
+            requireOnePrevious: false
+          },
+          456: {
+            key: '456',
+            category: 'Description',
+            enabled: true,
+            search: 'lessthan',
+            text: '456',
+            activateNetworkExpansion: false,
+            activateNetworkExpansionPrevious: false,
+            enableNetworkExpansion: false,
+            requireOne: false,
+            requireOnePrevious: false
+          }
+        };
+        element._updateSearchFieldFromParameter(element._searchFields[3].data[2], ['_searchFields', 3, 'data', 2]);
+
+        assert.deepEqual(element._searchFields[3].data[2], {
+          icon: 'description-icon',
+          key: 'description',
+          styleClass: 'description-style',
+          title: 'Description',
+          value: '>123, <456',
+          activateNetworkExpansion: false,
+          activateNetworkExpansionPrevious: false,
+          enableNetworkExpansion: false,
+          requireOne: false,
+          requireOnePrevious: true
+        });
+        assert.equal(element.$$('#input_description').value, '>123, <456');
+      });
+
       test('_updateSearchParameterAndNotify does update searchParameters and notify listeners', function(done) {
         element.onSearchParametersChange = function() {
           assert.deepEqual(element.searchParameters.city, {
@@ -1654,7 +1698,6 @@ limitations under the License.
       test('_updateSearchParameterFromField does update searchParameters and networkExpansionParameters as expected if network expasion is on and _isNetworkExpansionViable is true', function() {
         element.$$('#input_city').value = 'nyc, chicago';
 
-        // cityConfig is first in data array for location
         element._searchFields[2].data[0].activateNetworkExpansion = true;
 
         element._isNetworkExpansionViable = true;
@@ -1688,7 +1731,6 @@ limitations under the License.
       test('_updateSearchParameterFromField does update searchParameters and networkExpansionParameters as expected if network expansion is on and _isNetworkExpansionViable is false', function() {
         element.$$('#input_city').value = 'nyc, chicago';
 
-        // cityConfig is first in data array for location
         element._searchFields[2].data[0].activateNetworkExpansion = true;
 
         element._isNetworkExpansionViable = false;
@@ -1737,6 +1779,31 @@ limitations under the License.
         });
       });
 
+      test('_updateSearchParameterFromField does update searchParameters as expected if a term is a plus sign', function() {
+        element.$$('#input_city').value = '+nyc, chicago';
+
+        element._updateSearchParameterFromField(element._searchFields[2].data[0]);
+
+        assert.deepEqual(element.searchParameters.city, {
+          nyc: {
+            key: 'nyc',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'required',
+            text: 'nyc'
+          },
+          chicago: {
+            key: 'chicago',
+            date: undefined,
+            category: 'City',
+            enabled: true,
+            search: 'union',
+            text: 'chicago'
+          }
+        });
+      });
+
       test('_updateSearchParameterFromField does update searchParameters as expected if a term is a minus sign', function() {
         element.$$('#input_city').value = '-nyc, chicago';
 
@@ -1762,10 +1829,34 @@ limitations under the License.
         });
       });
 
+      test('_updateSearchParameterFromField does update searchParameters as expected if a term is a greater than or less than sign', function() {
+        element.$$('#input_description').value = '>123, <456';
+
+        element._updateSearchParameterFromField(element._searchFields[3].data[2]);
+
+        assert.deepEqual(element.searchParameters.description, {
+          123: {
+            key: '123',
+            date: undefined,
+            category: 'Description',
+            enabled: true,
+            search: 'morethan',
+            text: '123'
+          },
+          456: {
+            key: '456',
+            date: undefined,
+            category: 'Description',
+            enabled: true,
+            search: 'lessthan',
+            text: '456'
+          }
+        });
+      });
+
       test('_updateSearchParameterFromField does update searchParameters as expected if requireOne is false', function() {
         element.$$('#input_city').value = 'nyc, chicago';
 
-        // cityConfig is first in data array for location
         element._searchFields[2].data[0].requireOne = false;
 
         element._updateSearchParameterFromField(element._searchFields[2].data[0]);
@@ -1793,7 +1884,6 @@ limitations under the License.
       test('_updateSearchParameterFromField does update searchParameters as expected if requireOne is false and a term is a plus sign', function() {
         element.$$('#input_city').value = '+nyc, chicago';
 
-        // cityConfig is first in data array for location
         element._searchFields[2].data[0].requireOne = false;
 
         element._updateSearchParameterFromField(element._searchFields[2].data[0]);
@@ -1821,7 +1911,6 @@ limitations under the License.
       test('_updateSearchParameterFromField does update searchParameters as expected if requireOne is false and a term is a minus sign', function() {
         element.$$('#input_city').value = '-nyc, chicago';
 
-        // cityConfig is first in data array for location
         element._searchFields[2].data[0].requireOne = false;
 
         element._updateSearchParameterFromField(element._searchFields[2].data[0]);
@@ -1842,6 +1931,33 @@ limitations under the License.
             enabled: true,
             search: 'optional',
             text: 'chicago'
+          }
+        });
+      });
+
+      test('_updateSearchParameterFromField does update searchParameters as expected if requireOne is false and a term is a greater than or less than sign', function() {
+        element.$$('#input_description').value = '>123, <456';
+
+        element._searchFields[3].data[2].requireOne = false;
+
+        element._updateSearchParameterFromField(element._searchFields[3].data[2]);
+
+        assert.deepEqual(element.searchParameters.description, {
+          123: {
+            key: '123',
+            date: undefined,
+            category: 'Description',
+            enabled: true,
+            search: 'morethan',
+            text: '123'
+          },
+          456: {
+            key: '456',
+            date: undefined,
+            category: 'Description',
+            enabled: true,
+            search: 'lessthan',
+            text: '456'
           }
         });
       });

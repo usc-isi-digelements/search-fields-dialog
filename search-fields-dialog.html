@@ -444,10 +444,10 @@ A Polymer Element showing search fields in a modal dialog.
                       </paper-icon-button>
 
                       <paper-icon-button
-                        class$="reset-field-icon [[_getButtonStyleClass(searchConfig.value)]]"
+                        class$="reset-value-icon [[_getButtonStyleClass(searchConfig.value)]]"
                         icon="fa:times"
                         title="Reset [[searchConfig.title]]"
-                        on-tap="_resetFieldInputValue">
+                        on-tap="_resetValue">
                       </paper-icon-button>
                     </div>
                   </div>
@@ -497,15 +497,25 @@ A Polymer Element showing search fields in a modal dialog.
         A phrase of multiple words (without commas) is treated as a <strong>single</strong> search term (no quotation marks needed).
       </div>
       <div class="help-text">
-        Use a <strong>plus sign</strong> (<strong>+</strong>) to mark a <strong>required</strong> search term and a
-        <strong>minus sign</strong> (<strong>-</strong>) to mark an <strong>excluded</strong> search term.
+        For any term, use a <strong>plus</strong> (<strong>+</strong>) to mark a <strong>required</strong> search term and a
+        <strong>minus</strong> (<strong>-</strong>) to mark an <strong>excluded</strong> search term.
+      </div>
+      <div class="help-text">
+        <span class="styled-dialog-right-space">Example:</span>
+        <strong>+New York, New Jersey, -New Hampshire</strong>
+      </div>
+      <div class="help-text">
+        For any number, use a <strong>greater than</strong> (<strong>&gt;</strong>) to mark a search term as a <strong>lower bound</strong>
+        and a <strong>less than</strong> (<strong>&lt;</strong>) to mark a search term as an <strong>upper bound</strong>.
+        All search results must match the bounds.
+      </div>
+      <div class="help-text">
+        <span class="styled-dialog-right-space">Example:</span>
+        <strong>&gt;18, &lt;21</strong>
       </div>
       <div class="help-text">
         Click the <strong>SEARCH</strong> button or press the <strong>ENTER</strong> key to run the search.
         Click the <strong>RESET</strong> button to clear all terms.
-      </div>
-      <div class="help-text">
-        Example:  <strong>+New York, New Jersey, -New Hampshire</strong>
       </div>
 
       <div class="styled-dialog-divider"></div>
@@ -1383,7 +1393,7 @@ A Polymer Element showing search fields in a modal dialog.
        * @event tap
        * @private
        */
-      _resetFieldInputValue: function(event) {
+      _resetValue: function(event) {
         this.$$('#input_' + event.model.searchConfig.key).value = '';
       },
 
@@ -1595,8 +1605,19 @@ A Polymer Element showing search fields in a modal dialog.
         });
 
         searchConfig.value = termData.map(function(data) {
-          var prefix = (data.search === 'required' ? '+' : (data.search === 'excluded' ? '-' : ''));
-          return prefix + data.text;
+          if(data.search === 'required') {
+            return '+' + data.text;
+          }
+          if(data.search === 'excluded') {
+            return '-' + data.text;
+          }
+          if(data.search === 'lessthan') {
+            return '<' + data.text;
+          }
+          if(data.search === 'morethan') {
+            return '>' + data.text;
+          }
+          return data.text;
         }).join(', ');
         this.$$('#input_' + searchConfig.key).value = searchConfig.value;
 
@@ -1639,9 +1660,24 @@ A Polymer Element showing search fields in a modal dialog.
           var search = searchConfig.requireOne ? 'union' : 'optional';
           var key = term;
 
-          // A required or excluded term overrides searchConfig.requireOne.
-          if(key.indexOf('+') === 0 || key.indexOf('-') === 0) {
-            search = key.indexOf('+') === 0 ? 'required' : 'excluded';
+          // A prefixed term overrides searchConfig.requireOne.
+          if(key.indexOf('+') === 0) {
+            search = 'required';
+            key = key.substring(1);
+          }
+
+          if(key.indexOf('-') === 0) {
+            search = 'excluded';
+            key = key.substring(1);
+          }
+
+          if(key.indexOf('<') === 0) {
+            search = 'lessthan';
+            key = key.substring(1);
+          }
+
+          if(key.indexOf('>') === 0) {
+            search = 'morethan';
             key = key.substring(1);
           }
 
