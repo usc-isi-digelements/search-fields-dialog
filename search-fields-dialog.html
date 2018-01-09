@@ -445,7 +445,7 @@ A Polymer Element showing search fields in a modal dialog.
 
                       <paper-icon-button
                         class$="reset-value-icon [[_getButtonStyleClass(searchConfig.value)]]"
-                        icon="fa:times"
+                        icon="fa:undo"
                         title="Reset [[searchConfig.title]]"
                         on-tap="_resetValue">
                       </paper-icon-button>
@@ -507,7 +507,7 @@ A Polymer Element showing search fields in a modal dialog.
       <div class="help-text">
         For any number, use a <strong>greater than</strong> (<strong>&gt;</strong>) to mark a search term as a <strong>lower bound</strong>
         and a <strong>less than</strong> (<strong>&lt;</strong>) to mark a search term as an <strong>upper bound</strong>.
-        All search results must match the bounds.
+        All search results must have a term within that bounds.
       </div>
       <div class="help-text">
         <span class="styled-dialog-right-space">Example:</span>
