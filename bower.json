@@ -1,7 +1,7 @@
 {
   "name": "search-fields-dialog",
   "description": "A Polymer Element showing search fields in a modal dialog.",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "authors": [
     "Next Century Corporation"
   ],
@@ -18,17 +18,17 @@
   ],
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.2",
-    "auto-paginated-image-gallery": "DigElements/auto-paginated-image-gallery#2.3.0",
+    "auto-paginated-image-gallery": "DigElements/auto-paginated-image-gallery#2.3.1",
     "button-action": "DigElements/button-action#2.0.1",
     "fontawesome-iconset": "https://github.com/vangware/fontawesome-iconset.git#09ac70f619bb44d73fefc5f9524ae29ab217ed15",
-    "image-gallery": "DigElements/image-gallery#2.1.4",
+    "image-gallery": "DigElements/image-gallery#2.1.5",
     "iron-flex-layout": "PolymerElements/iron-flex-layout#^2.0.0",
     "iron-icon": "PolymerElements/iron-icon#^2.0.0",
     "iron-icons": "PolymerElements/iron-icons#^2.0.0",
     "paper-button": "PolymerElements/paper-button#^2.0.0",
     "paper-input": "PolymerElements/paper-input#^2.0.0",
     "paper-styles": "PolymerElements/paper-styles#^2.0.0",
-    "search-image-gallery": "DigElements/search-image-gallery#2.0.4",
+    "search-image-gallery": "DigElements/search-image-gallery#2.0.5",
     "styled-dialog": "DigElements/styled-dialog#2.1.4",
     "vaadin-date-picker-display": "DigElements/vaadin-date-picker-display#2.0.3",
     "vaadin-upload": "vaadin/vaadin-upload#2.1.0"

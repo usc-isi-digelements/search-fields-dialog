@@ -947,11 +947,12 @@ limitations under the License.
         }]);
       });
 
-      test('_handleImageResultsSelected does update both images and selected properties in _searchFields', function() {
+      test('_handleImageResultsSelected does update images, selected, and union properties in _searchFields', function() {
         element._searchFields[4].data[0] = {
           key: 'image',
           images: [],
-          selected: []
+          selected: [],
+          union: []
         };
 
         element._imageResults.images = [{
@@ -967,7 +968,8 @@ limitations under the License.
             id: 'image1',
             source: 'source1'
           }],
-          selected: ['image1']
+          selected: ['image1'],
+          union: ['image1']
         });
       });
 
@@ -975,7 +977,8 @@ limitations under the License.
         element._searchFields[4].data[0] = {
           key: 'image',
           images: [],
-          selected: []
+          selected: [],
+          union: []
         };
 
         element._imageResults.images = [{
@@ -997,7 +1000,8 @@ limitations under the License.
             id: 'image2',
             source: 'source2'
           }],
-          selected: ['image1', 'image2']
+          selected: ['image1', 'image2'],
+          union: ['image1', 'image2']
         });
       });
 
@@ -1011,7 +1015,8 @@ limitations under the License.
             id: 'image2',
             source: 'source2'
           }],
-          selected: []
+          selected: [],
+          union: []
         };
 
         element._imageResults.images = [{
@@ -1039,7 +1044,8 @@ limitations under the License.
             id: 'image3',
             source: 'source3'
           }],
-          selected: ['image2', 'image3']
+          selected: ['image2', 'image3'],
+          union: ['image2', 'image3']
         });
       });
 
@@ -1059,7 +1065,8 @@ limitations under the License.
             id: 'image4',
             source: 'source4'
           }],
-          selected: ['image2', 'image3']
+          selected: ['image2', 'image3'],
+          union: ['image2', 'image3']
         };
 
         element._imageResults.images = [{
@@ -1096,7 +1103,8 @@ limitations under the License.
             id: 'image5',
             source: 'source5'
           }],
-          selected: ['image2', 'image3', 'image4', 'image5']
+          selected: ['image2', 'image3', 'image4', 'image5'],
+          union: ['image2', 'image3', 'image4', 'image5']
         });
       });
 
@@ -2302,7 +2310,8 @@ limitations under the License.
         element._searchFields[4].data[0] = {
           key: 'image',
           images: [],
-          selected: []
+          selected: [],
+          union: []
         };
 
         element._imageResults.images = [{
@@ -2313,7 +2322,8 @@ limitations under the License.
         assert.deepEqual(element._searchFields[4].data[0], {
           key: 'image',
           images: [],
-          selected: []
+          selected: [],
+          union: []
         });
 
         element.set('_imageResults.selected', ['image1']);
@@ -2324,7 +2334,8 @@ limitations under the License.
             id: 'image1',
             source: 'source1'
           }],
-          selected: ['image1']
+          selected: ['image1'],
+          union: ['image1']
         });
       });
     });

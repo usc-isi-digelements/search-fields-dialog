@@ -558,6 +558,7 @@ A Polymer Element showing search fields in a modal dialog.
         slot="top"
         class="input-gallery"
         large-image-style-class="[[largeImageStyleClass]]"
+        select-word="View"
         show-delete
         show-labels
         show-select
@@ -570,7 +571,7 @@ A Polymer Element showing search fields in a modal dialog.
 
       <div slot="top" class="styled-dialog-note">
         <strong>How does it work?</strong>
-        Image matches are found by looking at the features in the image like physical characteristics, hairstyle, dress, environment, and pose.  Better matches are shown first in the gallery.  To learn more, please visit <a href="http://www.ee.columbia.edu/ln/dvmm/memex/" target="_blank">here</a>.
+        Image matches are found by looking at the features in the image like faces, physical characteristics, hairstyle, dress, environment, and pose.  Better matches are shown first in the gallery.  To learn more, please visit <a href="http://www.ee.columbia.edu/ln/dvmm/memex/" target="_blank">here</a>.
       </div>
 
       <div slot="top" class="styled-dialog-divider"></div>
@@ -585,8 +586,7 @@ A Polymer Element showing search fields in a modal dialog.
           large-image-style-class="[[largeImageStyleClass]]"
           new-tab
           page-size="100"
-          show-delete
-          show-delete-following
+          select-word="Add to Search"
           show-labels
           show-select
           show-select-preceding
@@ -1338,6 +1338,9 @@ A Polymer Element showing search fields in a modal dialog.
               if(imageIdsToSelectInConfig.length) {
                 // Use the map function to create a new array.
                 self.set(['_searchFields', dialogIndex, 'data', searchIndex, 'selected'], searchConfig.selected.map(function(id) {
+                  return id;
+                }).concat(imageIdsToSelectInConfig));
+                self.set(['_searchFields', dialogIndex, 'data', searchIndex, 'union'], searchConfig.union.map(function(id) {
                   return id;
                 }).concat(imageIdsToSelectInConfig));
               }
