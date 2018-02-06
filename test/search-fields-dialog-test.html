@@ -197,6 +197,7 @@ limitations under the License.
 
         assert.isFalse(element._openedDialogHelp);
         assert.isFalse(element._openedDialogImages);
+        assert.isFalse(element._showAdvanced);
 
         assert.deepEqual(element._imageResults, {
           images: [],
@@ -430,9 +431,18 @@ limitations under the License.
         assert.equal(paperInputs[7].value, 'testURL');
       });
 
-      test('search dialog does have paper icon buttons for the search fields', function() {
+      test('search dialog does not have paper icon buttons for the search fields if _showAdvanced is false', function() {
         var buttons = Polymer.dom(element.root).querySelectorAll('.search-dialog .search-data paper-icon-button');
-        assert.equal(buttons.length, 20);
+        assert.equal(buttons.length, 0);
+      });
+
+      test('search dialog does have paper icon buttons for the search fields if _showAdvanced is true', function(done) {
+        element._showAdvanced = true;
+        flush(function() {
+          var buttons = Polymer.dom(element.root).querySelectorAll('.search-dialog .search-data paper-icon-button');
+          assert.equal(buttons.length, 12);
+          done();
+        });
       });
 
       test('search dialog does have image gallery for the image field', function() {
@@ -504,12 +514,13 @@ limitations under the License.
       test('search dialog does have expected header buttons', function() {
         var buttons = Polymer.dom(element.root).querySelectorAll('.search-dialog div[slot="top"].header button-action');
         assert.isNotNull(buttons);
-        assert.equal(buttons.length, 5);
+        assert.equal(buttons.length, 6);
         assert.equal(buttons[0].text, 'Search');
-        assert.equal(buttons[1].text, 'Reset');
-        assert.equal(buttons[2].text, 'Cancel');
-        assert.equal(buttons[3].text, 'Help');
-        assert.equal(buttons[4].text, 'Images');
+        assert.equal(buttons[1].text, 'Help');
+        assert.equal(buttons[2].text, 'Images');
+        assert.equal(buttons[3].text, 'Advanced');
+        assert.equal(buttons[4].text, 'Clear');
+        assert.equal(buttons[5].text, 'Cancel');
       });
 
       test('search dialog does have image input elements', function() {
@@ -761,8 +772,10 @@ limitations under the License.
       });
 
       test('_getInputWidthStyleClass does return as expected', function() {
-        assert.equal(element._getInputWidthStyleClass(true), '');
-        assert.equal(element._getInputWidthStyleClass(false), 'add-width');
+        assert.equal(element._getInputWidthStyleClass(false, false), '');
+        assert.equal(element._getInputWidthStyleClass(true, false), '');
+        assert.equal(element._getInputWidthStyleClass(false, true), 'one-icon');
+        assert.equal(element._getInputWidthStyleClass(true, true), 'two-icon');
       });
 
       test('_getNetworkExpansionStyleClass does return as expected', function() {
@@ -2040,7 +2053,7 @@ limitations under the License.
 
       test('handleSearch does nothing if no fields are specified', function() {
         element.opened = true;
-        element.resetAllSearchFields();
+        element.removeAllSearchTerms();
         element.handleSearch();
 
         assert.isTrue(element.opened);
@@ -2122,7 +2135,7 @@ limitations under the License.
         assert.isTrue(element.$$('.search-dialog').classList.contains('backdrop'));
       });
 
-      test('resetAllSearchFields does have expected behavior', function() {
+      test('removeAllSearchTerms does have expected behavior', function() {
         element.$$('#input_city').value = 'nyc, chicago';
         element._searchFields[0].data[0].value = {};
         element._searchFields[0].data[1].value = {
@@ -2140,7 +2153,7 @@ limitations under the License.
         }];
         element._searchFields[4].data[0].selected = ['image1'];
 
-        element.resetAllSearchFields();
+        element.removeAllSearchTerms();
 
         assert.deepEqual(element._searchFields[0].data[0].value, {});
         assert.deepEqual(element._searchFields[0].data[1].value, {});
@@ -2206,6 +2219,14 @@ limitations under the License.
         // only happen when dialog is being opened).
         assert.isFalse(element.opened);
         assert.notEqual(element.$$('#input_city').value, 'la');
+      });
+
+      test('toggleShowAdvanced does have expected behavior', function() {
+        element.toggleShowAdvanced();
+        assert.isTrue(element._showAdvanced);
+
+        element.toggleShowAdvanced();
+        assert.isFalse(element._showAdvanced);
       });
 
       test('setting _imagesSelected does update _imageResults', function() {
@@ -2337,6 +2358,35 @@ limitations under the License.
           selected: ['image1'],
           union: ['image1']
         });
+      });
+
+      test('does have _updateFocusedInput function', function() {
+        assert.isFunction(element._updateFocusedInput);
+      });
+
+      test('does call _updateFocusedInput on opened property change', function() {
+        var called = 0;
+        element._updateFocusedInput = function() {
+          ++called;
+        };
+
+        element.opened = true;
+        assert.equal(called, 1);
+
+        element.opened = false;
+        assert.equal(called, 2);
+
+        element._openedDialogHelp = true;
+        assert.equal(called, 3);
+
+        element._openedDialogHelp = false;
+        assert.equal(called, 4);
+
+        element._openedDialogImages = true;
+        assert.equal(called, 5);
+
+        element._openedDialogImages = false;
+        assert.equal(called, 6);
       });
     });
   </script>

@@ -61,18 +61,17 @@ A Polymer Element showing search fields in a modal dialog.
         --iron-icon-height: 30px;
         --iron-icon-width: 30px;
         --iron-icon: {
-          margin: 0 5px;
           min-width: 30px;
+          padding: 0 5px;
         }
       }
 
-      .little {
+      .config-icon {
         --iron-icon-height: 20px;
         --iron-icon-width: 20px;
         --iron-icon: {
-          margin: 0 5px;
           min-width: 20px;
-          padding: 5px;
+          padding: 5px 10px 0;
         }
       }
 
@@ -105,8 +104,8 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       .search-dialog {
-        --styled-dialog-min-width: 920px;
-        --styled-dialog-max-width: 920px;
+        --styled-dialog-min-width: 940px;
+        --styled-dialog-max-width: 940px;
         --styled-dialog-style-mixin: {
           max-width: 980px;
           min-width: 980px;
@@ -126,22 +125,24 @@ A Polymer Element showing search fields in a modal dialog.
         };
       }
 
-      .search-dialog .styled-dialog-name {
+      .images-name,
+      .search-name {
+        font-size: 14px;
+        font-weight: 500;
         max-width: var(--styled-dialog-label-width, 100px);
         min-width: var(--styled-dialog-label-width, 100px);
         overflow: hidden;
+        text-align: end;
         text-overflow: ellipsis;
       }
 
-      .search-name {
-        text-align: end;
-        /* Vertically align the label with their paper-input-containers. */
-        padding-top: 26px;
+      .images-name {
+        padding-top: 20px;
       }
 
-      .images-name {
-        text-align: end;
-        padding-top: 15px;
+      .search-name {
+        /* Vertically align the label with their paper-input-containers. */
+        padding-top: 20px;
       }
 
       .search-data {
@@ -150,37 +151,55 @@ A Polymer Element showing search fields in a modal dialog.
 
       vaadin-date-picker-display {
         display: inline-block;
-        padding: 4px 5px 0 0;
-        width: 345px;
+        width: 360px;
         --date-picker-style-mixin: {
           padding-bottom: 0;
         };
       }
 
       paper-input {
+        padding-bottom: 1px;
         width: 100%;
         --paper-input-container-color: var(--secondary-text-color);
         --paper-input-container-input-color: var(--primary-text-color);
         --paper-input-container-focus-color: var(--primary-text-color);
         --paper-input-container: {
-          padding: 4px 0 0;
-        }
+          padding: 0;
+        };
         --paper-input-container-input: {
+          display: block;
+          font-size: 14px;
           font-weight: 500;
-        }
+          height: 20px;
+          line-height: 20px;
+          padding: 1px 0;
+        };
+        --paper-input-container-label: {
+          font-size: 14px;
+          font-weight: 500;
+          height: 20px;
+          line-height: 20px;
+        };
       }
 
       .search-data paper-input {
         --paper-input-container: {
-          padding: 4px 0 0;
-          width: 260px;
+          padding: 0;
+          width: 360px;
         }
       }
 
-      .search-data paper-input.add-width {
+      .search-data paper-input.one-icon {
         --paper-input-container: {
-          padding: 4px 0 0;
-          width: 290px;
+          padding: 0;
+          width: 330px;
+        }
+      }
+
+      .search-data paper-input.two-icon {
+        --paper-input-container: {
+          padding: 0;
+          width: 300px;
         }
       }
 
@@ -208,7 +227,7 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       search-image-gallery {
-        margin: 10px 10px 5px 20px;
+        margin: 15px 0 0 20px;
       }
 
       image-gallery.input-gallery {
@@ -251,7 +270,7 @@ A Polymer Element showing search fields in a modal dialog.
       .search-data iron-icon,
       .search-data paper-icon-button {
         /* Vertically align the icons with their label & paper-input-containers. */
-        margin-top: 20px;
+        margin-top: 15px;
       }
 
       .network-expansion-icon.on.inactive {
@@ -359,29 +378,30 @@ A Polymer Element showing search fields in a modal dialog.
       }
     </style>
 
-    <paper-button class="layout horizontal center open-dialog-button" active="[[opened]]" on-tap="toggleSearchFieldsDialog" title="Click to Enter Search Terms">
+    <paper-button class="open-dialog-button" active="[[opened]]" on-tap="toggleSearchFieldsDialog" title="Click to Enter Search Terms">
       <iron-icon icon="fa:search"></iron-icon>
       <div>Click to Enter Search Terms</div>
     </paper-button>
 
     <styled-dialog class$="search-dialog [[_isBackdrop(_openedDialogHelp, _openedDialogImages)]]" fill modal opened="{{opened}}">
       <div slot="top" class="layout horizontal center center-justified header">
-        <button-action icon="fa:search" text="Search" on-tap="handleSearch"></button-action>
-        <button-action icon="fa:undo" text="Reset" on-tap="resetAllSearchFields"></button-action>
-        <button-action icon="fa:times" text="Cancel" on-tap="cancelSearch"></button-action>
-        <button-action icon="fa:question" text="Help" on-tap="openHelp"></button-action>
+        <button-action icon="fa:search" text="Search" title="Run Search" on-tap="handleSearch"></button-action>
+        <button-action icon="fa:question" text="Help" title="Open Help" on-tap="openHelp"></button-action>
         <template is="dom-if" if="[[!hideImages]]">
-          <button-action icon="fa:picture-o" text="Images" on-tap="openImages"></button-action>
+          <button-action icon="fa:picture-o" text="Images" title="View Images" on-tap="openImages"></button-action>
         </template>
+        <button-action icon="fa:flask" text="Advanced" title="Toggle Advanced Options" on-tap="toggleShowAdvanced"></button-action>
+        <button-action icon="fa:trash" text="Clear" title="Clear All Terms" on-tap="removeAllSearchTerms"></button-action>
+        <button-action icon="fa:times" text="Cancel" title="Cancel Search" on-tap="cancelSearch"></button-action>
       </div>
 
       <template is="dom-repeat" items="[[_searchFields]]" as="dialogConfig">
         <div class="layout horizontal" style="margin-bottom: 0;">
           <template is="dom-if" if="[[dialogConfig.isDate]]">
-            <div class="styled-dialog-name search-name">[[dialogConfig.name]]</div>
+            <div class="search-name">[[dialogConfig.name]]</div>
             <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
               <div class="layout horizontal search-data nowrap">
-                <iron-icon class$="little [[searchConfig.styleClass]]" icon="[[searchConfig.icon]]"></iron-icon>
+                <iron-icon class$="config-icon [[searchConfig.styleClass]]" icon="[[searchConfig.icon]]"></iron-icon>
 
                 <vaadin-date-picker-display
                   facet-key="value"
@@ -395,8 +415,8 @@ A Polymer Element showing search fields in a modal dialog.
 
           <template is="dom-if" if="[[!dialogConfig.isDate]]">
             <template is="dom-if" if="[[dialogConfig.isImage]]">
-              <div class="styled-dialog-name images-name">[[dialogConfig.name]]</div>
-              <div class="layout vertical flex">
+              <div class="images-name">[[dialogConfig.name]]</div>
+              <div class="layout vertical">
                 <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
                   <search-image-gallery
                     large-image-style-class="[[largeImageStyleClass]]"
@@ -412,44 +432,39 @@ A Polymer Element showing search fields in a modal dialog.
             </template>
 
             <template is="dom-if" if="[[!dialogConfig.isImage]]">
-              <div class="styled-dialog-name search-name">[[dialogConfig.name]]</div>
+              <div class="search-name">[[dialogConfig.name]]</div>
               <div class="layout horizontal wrap">
                 <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
                   <div class="layout horizontal nowrap search-data">
-                    <iron-icon class$="little [[searchConfig.styleClass]]" icon="[[searchConfig.icon]]"></iron-icon>
+                    <iron-icon class$="config-icon [[searchConfig.styleClass]]" icon="[[searchConfig.icon]]"></iron-icon>
 
                     <paper-input
-                      class$="[[_getInputWidthStyleClass(searchConfig.enableNetworkExpansion)]]"
+                      class$="[[_getInputWidthStyleClass(searchConfig.enableNetworkExpansion, _showAdvanced)]]"
                       id$="input_[[searchConfig.key]]"
                       label="[[searchConfig.title]]"
                       value="{{searchConfig.value}}"
                       on-keyup="_didUserHitEnterKey">
                     </paper-input>
 
-                    <div class="layout horizontal">
-                      <template is="dom-if" if="[[searchConfig.enableNetworkExpansion]]">
+                    <template is="dom-if" if="[[_showAdvanced]]">
+                      <div class="layout horizontal">
+                        <template is="dom-if" if="[[searchConfig.enableNetworkExpansion]]">
+                          <paper-icon-button
+                            class$="network-expansion-icon [[_getNetworkExpansionStyleClass(searchConfig.activateNetworkExpansion, _isNetworkExpansionViable)]]"
+                            icon="fa:arrows-alt"
+                            title="Toggle Network Expansion of [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.activateNetworkExpansion)]])"
+                            on-tap="_toggleNetworkExpansion">
+                          </paper-icon-button>
+                        </template>
+
                         <paper-icon-button
-                          class$="network-expansion-icon [[_getNetworkExpansionStyleClass(searchConfig.activateNetworkExpansion, _isNetworkExpansionViable)]]"
-                          icon="fa:arrows-alt"
-                          title="Toggle Network Expansion of [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.activateNetworkExpansion)]])"
-                          on-tap="_toggleNetworkExpansion">
+                          class$="require-one-icon [[_getButtonStyleClass(searchConfig.requireOne)]]"
+                          icon="fa:asterisk"
+                          title="Require at Least One Term from [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.requireOne)]])"
+                          on-tap="_toggleRequireOne">
                         </paper-icon-button>
-                      </template>
-
-                      <paper-icon-button
-                        class$="require-one-icon [[_getButtonStyleClass(searchConfig.requireOne)]]"
-                        icon="fa:asterisk"
-                        title="Require at Least One Term from [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.requireOne)]])"
-                        on-tap="_toggleRequireOne">
-                      </paper-icon-button>
-
-                      <paper-icon-button
-                        class$="reset-value-icon [[_getButtonStyleClass(searchConfig.value)]]"
-                        icon="fa:undo"
-                        title="Reset [[searchConfig.title]]"
-                        on-tap="_resetValue">
-                      </paper-icon-button>
-                    </div>
+                      </div>
+                    </template>
                   </div>
                 </template>
               </div>
@@ -517,6 +532,12 @@ A Polymer Element showing search fields in a modal dialog.
         Click the <strong>SEARCH</strong> button or press the <strong>ENTER</strong> key to run the search.
         Click the <strong>RESET</strong> button to clear all terms.
       </div>
+      <div class="help-text">
+        Click the <strong>IMAGES</strong> button to show your uploaded images and image matches.
+      </div>
+      <div class="help-text">
+        Click the <strong>ADVANCED</strong> button to show <strong>required grouping</strong> and <strong>network expansion</strong> options.
+      </div>
 
       <div class="styled-dialog-divider"></div>
 
@@ -559,6 +580,7 @@ A Polymer Element showing search fields in a modal dialog.
         class="input-gallery"
         large-image-style-class="[[largeImageStyleClass]]"
         select-word="View"
+        unselect-word="Viewing"
         show-delete
         show-labels
         show-select
@@ -587,6 +609,7 @@ A Polymer Element showing search fields in a modal dialog.
           new-tab
           page-size="100"
           select-word="Add to Search"
+          unselect-word="Added to Search"
           show-labels
           show-select
           show-select-preceding
@@ -914,6 +937,7 @@ A Polymer Element showing search fields in a modal dialog.
          */
         opened: {
           notify: true,
+          observer: '_updateFocusedInput',
           type: Boolean,
           value: false
         },
@@ -1044,6 +1068,7 @@ A Polymer Element showing search fields in a modal dialog.
          * @private
          */
         _openedDialogHelp: {
+          observer: '_updateFocusedInput',
           type: Boolean,
           value: false
         },
@@ -1056,6 +1081,7 @@ A Polymer Element showing search fields in a modal dialog.
          * @private
          */
         _openedDialogImages: {
+          observer: '_updateFocusedInput',
           type: Boolean,
           value: false
         },
@@ -1069,6 +1095,18 @@ A Polymer Element showing search fields in a modal dialog.
         _searchFields: {
           computed: '_createSearchFields(searchFieldsConfig, dataProperty, nameProperty, typeProperty, dataIconProperty, dataKeyProperty, dataStyleClassProperty, dataTitleProperty)',
           type: Array
+        },
+
+        /**
+         * Whether to show the advanced options (network expansion, required groupings).
+         *
+         * @type {Boolean}
+         * @default false
+         * @private
+         */
+        _showAdvanced: {
+          type: Boolean,
+          value: false
         },
 
         /**
@@ -1199,8 +1237,8 @@ A Polymer Element showing search fields in a modal dialog.
        * @return {String}
        * @private
        */
-      _getInputWidthStyleClass: function(enableNetworkExpansion) {
-        return enableNetworkExpansion ? '' : 'add-width';
+      _getInputWidthStyleClass: function(enableNetworkExpansion, showAdvanced) {
+        return showAdvanced ? (enableNetworkExpansion ? 'two-icon' : 'one-icon') : '';
       },
 
       /**
@@ -1391,16 +1429,6 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Resets the value property of the searchConfig in the model of the given event.
-       *
-       * @event tap
-       * @private
-       */
-      _resetValue: function(event) {
-        this.$$('#input_' + event.model.searchConfig.key).value = '';
-      },
-
-      /**
        * Toggles the activateNetworkExpansion property of the searchConfig in the model of the given event.
        *
        * @event tap
@@ -1487,6 +1515,28 @@ A Polymer Element showing search fields in a modal dialog.
         } else if(this.searchParameters[parameterKey][searchConfig.key]) {
           this.searchParameters[parameterKey][searchConfig.key] = {};
           this.notifyPath(['searchParameters', parameterKey, searchConfig.key], {});
+        }
+      },
+
+      /**
+       * Updates the focused input element.
+       *
+       * @private
+       */
+      _updateFocusedInput: function() {
+        if(this.opened && !this._openedDialogHelp && !this._openedDialogImages) {
+          var focusedInput;
+          this._searchFields.forEach(function(dialogConfig, dialogIndex) {
+            if(!focusedInput && !dialogConfig.isDate && !dialogConfig.isImage && dialogConfig.data) {
+              focusedInput = '#input_' + dialogConfig.data[0].key;
+            }
+          });
+          var self = this;
+          setTimeout(function() {
+            if(focusedInput && self.$$(focusedInput)) {
+              self.$$(focusedInput).focus();
+            }
+          }, 250);
         }
       },
 
@@ -1790,7 +1840,7 @@ A Polymer Element showing search fields in a modal dialog.
         this._updateSearchParametersFromFields();
 
         if(this.areSearchParametersDisabled(this.searchParameters)) {
-          this.resetAllSearchFields();
+          this.removeAllSearchTerms();
           return;
         }
 
@@ -1812,9 +1862,9 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Clears all of the search fields in the dialog.
+       * Removes all of the search terms from fields in the dialog.
        */
-      resetAllSearchFields: function() {
+      removeAllSearchTerms: function() {
         this._uploadedFiles = [];
         if(this._searchFields) {
           var self = this;
@@ -1864,6 +1914,13 @@ A Polymer Element showing search fields in a modal dialog.
         }
 
         this.opened = !this.opened;
+      },
+
+      /**
+       * Toggles the advanced options.
+       */
+      toggleShowAdvanced: function() {
+        this._showAdvanced = !this._showAdvanced;
       }
     });
   })();
