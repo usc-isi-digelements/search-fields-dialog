@@ -391,7 +391,7 @@ A Polymer Element showing search fields in a modal dialog.
         <template is="dom-if" if="[[!hideImages]]">
           <button-action icon="fa:picture-o" text="Images" title="View Images" on-tap="openImages"></button-action>
         </template>
-        <button-action icon="fa:flask" text="Advanced" title="Toggle Advanced Options" on-tap="toggleShowAdvanced"></button-action>
+        <button-action active="[[_showAdvanced]]" icon="fa:flask" text="Advanced" title="Toggle Advanced Options" on-tap="toggleShowAdvanced"></button-action>
         <button-action icon="fa:trash" text="Clear" title="Clear All Terms" on-tap="removeAllSearchTerms"></button-action>
         <button-action icon="fa:times" text="Cancel" title="Cancel Search" on-tap="cancelSearch"></button-action>
       </div>
