@@ -22,7 +22,6 @@ limitations under the License.
 <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../iron-icon/iron-icon.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
-<link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../paper-styles/color.html">
 <link rel="import" href="../search-image-gallery/search-image-gallery.html">
@@ -76,20 +75,17 @@ A Polymer Element showing search fields in a modal dialog.
         }
       }
 
-      .open-dialog-button {
-        margin: 0 auto;
+      .whole-width {
+        width: 100%;
+      }
+
+      .main-button {
+        margin: 0 0 0 10px;
         padding: 0;
       }
 
-      .open-dialog-button[active],
-      .open-dialog-button:hover {
+      .main-button:hover {
         color: greenyellow;
-      }
-
-      .open-dialog-button > div {
-        font-size: 24px;
-        font-weight: 500;
-        text-transform: none;
       }
 
       [slot="top"] {
@@ -181,6 +177,17 @@ A Polymer Element showing search fields in a modal dialog.
           height: 20px;
           line-height: 20px;
         };
+      }
+
+      .free-text {
+        padding-top: 5px;
+        --paper-input-container-color: white;
+        --paper-input-container-input-color: white;
+        --paper-input-container-focus-color: white;
+        --paper-input-container: {
+          padding: 0;
+          width: auto;
+        }
       }
 
       .search-data paper-input {
@@ -279,7 +286,7 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       .help-dialog {
-        --styled-dialog-min-width: 800px;
+        --styled-dialog-min-width: 0;
         --styled-dialog-max-width: 800px;
       }
 
@@ -379,10 +386,18 @@ A Polymer Element showing search fields in a modal dialog.
       }
     </style>
 
-    <paper-button class="open-dialog-button" active="[[opened]]" on-tap="toggleSearchFieldsDialog" title="Click to Enter Search Terms">
-      <iron-icon icon="fa:search"></iron-icon>
-      <div>Click to Enter Search Terms</div>
-    </paper-button>
+    <div class="layout horizontal whole-width">
+      <paper-input
+        class="free-text"
+        no-label-float
+        placeholder="Enter Search Keywords"
+        value="{{_freeText}}"
+        on-keyup="_didUserHitEnterKeyOnFreeText">
+      </paper-input>
+
+      <paper-icon-button class="main-button" icon="fa:search" on-tap="handleFreeTextSearch" title="Run Search"></paper-icon-button>
+      <paper-icon-button class="main-button" icon="fa:wrench" on-tap="toggleSearchFieldsDialog" title="Open Advanced Search"></paper-icon-button>
+    </div>
 
     <styled-dialog class$="search-dialog [[_isBackdrop(_openedDialogHelp, _openedDialogImages)]]" fill modal opened="{{opened}}">
       <div slot="top" class="layout horizontal center center-justified header">
@@ -774,6 +789,19 @@ A Polymer Element showing search fields in a modal dialog.
         /**
          * (Optional)
          *
+         * The type property in the data in the searchFieldsConfig.
+         *
+         * @type {String}
+         * @default 'type'
+         */
+        dataTypeProperty: {
+          type: String,
+          value: 'type'
+        },
+
+        /**
+         * (Optional)
+         *
          * The keys of dates in the searchFieldsConfig mapped to the keys of dates in the searchParameters.
          *
          * @type {Object}
@@ -784,6 +812,17 @@ A Polymer Element showing search fields in a modal dialog.
           value: function() {
             return {};
           }
+        },
+
+        /**
+         * (Required)
+         *
+         * List of search fields objects for the free text search each containing {String} key, {String} title, and optionally {String} type.
+         *
+         * @type {Array}
+         */
+        freeTextSearchFields: {
+          type: Array
         },
 
         /**
@@ -1007,6 +1046,18 @@ A Polymer Element showing search fields in a modal dialog.
         },
 
         /**
+         * Free text input field.
+         *
+         * @type {String}
+         * @default ''
+         * @private
+         */
+        _freeText: {
+          type: String,
+          value: ''
+        },
+
+        /**
          * An object containing the list of image results and the list of selected image IDs to be shown in the images dialog.
          *
          * @type {Object}
@@ -1094,7 +1145,7 @@ A Polymer Element showing search fields in a modal dialog.
          * @private
          */
         _searchFields: {
-          computed: '_createSearchFields(searchFieldsConfig, dataProperty, nameProperty, typeProperty, dataIconProperty, dataKeyProperty, dataStyleClassProperty, dataTitleProperty)',
+          computed: '_createSearchFields(searchFieldsConfig, dataProperty, nameProperty, typeProperty, dataIconProperty, dataKeyProperty, dataStyleClassProperty, dataTitleProperty, dataTypeProperty)',
           type: Array
         },
 
@@ -1138,10 +1189,11 @@ A Polymer Element showing search fields in a modal dialog.
        * @param {String} dataKeyProperty
        * @param {String} dataStyleClassProperty
        * @param {String} dataTitleProperty
+       * @param {String} dataTypeProperty
        * @return {Array}
        * @private
        */
-      _createSearchFields: function(config, dataProperty, nameProperty, typeProperty, dataIconProperty, dataKeyProperty, dataStyleClassProperty, dataTitleProperty) {
+      _createSearchFields: function(config, dataProperty, nameProperty, typeProperty, dataIconProperty, dataKeyProperty, dataStyleClassProperty, dataTitleProperty, dataTypeProperty) {
         var self = this;
         return (config || []).map(function(dialogConfig) {
           var isDate = dialogConfig[typeProperty] === 'date';
@@ -1152,7 +1204,8 @@ A Polymer Element showing search fields in a modal dialog.
                 icon: searchConfig[dataIconProperty],
                 key: searchConfig[dataKeyProperty],
                 styleClass: searchConfig[dataStyleClassProperty],
-                title: searchConfig[dataTitleProperty]
+                title: searchConfig[dataTitleProperty],
+                type: searchConfig[dataTypeProperty]
               };
 
               if(!isImage) {
@@ -1194,6 +1247,19 @@ A Polymer Element showing search fields in a modal dialog.
         this._updateNetworkExpansion();
         if(event.keyCode === 13) {
           this.handleSearch();
+        }
+      },
+
+      /**
+       * Updates the searchParameters using the free text if ENTER was pressed.
+       *
+       * @param {Object} event
+       * @private
+       */
+      _didUserHitEnterKeyOnFreeText: function(event) {
+        this._updateNetworkExpansion();
+        if(event.keyCode === 13) {
+          this.handleFreeTextSearch();
         }
       },
 
@@ -1736,7 +1802,7 @@ A Polymer Element showing search fields in a modal dialog.
           }
 
           // TODO Move custom formatting.
-          if(searchConfig.key === 'phone') {
+          if(searchConfig.type === 'phone') {
             key = self._unformatPhones(key);
           }
 
@@ -1827,7 +1893,28 @@ A Polymer Element showing search fields in a modal dialog.
       },
 
       /**
-       * Updates the searchParameters using the search fields and closes the dialog so that new queries can run.
+       * Updates the searchParameters using the free text and unlocks the query.
+       */
+      handleFreeTextSearch: function() {
+        if(this._freeText && this.freeTextSearchFields && this.freeTextSearchFields.length) {
+          var self = this;
+          this.processRequest = false;
+          this.freeTextSearchFields.forEach(function(searchFieldsObject) {
+            self._updateSearchParameterFromField({
+              key: searchFieldsObject.key,
+              requireOne: true,
+              title: searchFieldsObject.title,
+              type: searchFieldsObject.type,
+              value: self._freeText
+            });
+          });
+          this._freeText = '';
+          this.processRequest = true;
+        }
+      },
+
+      /**
+       * Updates the searchParameters using the search fields, closes the dialog, and unlocks the query.
        */
       handleSearch: function() {
         this._uploadedFiles = [];

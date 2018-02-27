@@ -59,6 +59,7 @@ limitations under the License.
         var phoneConfig = {
           key: 'phone',
           title: 'Telephone Number',
+          type: 'phone',
           enableNetworkExpansion: true
         };
         var titleConfig = {
@@ -78,6 +79,8 @@ limitations under the License.
           dateStart: 'postingDate',
           dateEnd: 'postingDate'
         };
+
+        demo.freeTextSearchFields = [titleConfig, descriptionConfig];
 
         demo.networkExpansionParameters = {
           city: false,
@@ -121,12 +124,14 @@ limitations under the License.
 
     <template is="dom-bind">
       <p>Date Config:  <strong>[[stringify(dateConfig)]]</strong></p>
+      <p>Free Text Search Fields:  <strong>[[stringify(freeTextSearchFields)]]</strong></p>
       <p>Search Fields Config:  <strong>[[stringify(searchFieldsConfig)]]</strong></p>
       <p>Search Parameters:  <strong>[[stringify(searchParameters, searchParameters.*)]]</strong></p>
       <p>Network Expansion Parameters:  <strong>[[stringify(networkExpansionParameters, networkExpansionParameters.*)]]</strong></p>
 
       <search-fields-dialog
         date-config="[[dateConfig]]"
+        free-text-search-fields="[[freeTextSearchFields]]"
         search-fields-config="[[searchFieldsConfig]]"
         search-parameters="{{searchParameters}}"
         network-expansion-parameters="{{networkExpansionParameters}}">

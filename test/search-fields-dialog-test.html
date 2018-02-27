@@ -89,6 +89,7 @@ limitations under the License.
         key: 'phone',
         styleClass: 'phone-style',
         title: 'Telephone Number',
+        type: 'phone',
         enableNetworkExpansion: true
       };
       var titleConfig = {
@@ -193,6 +194,7 @@ limitations under the License.
           website: {}
         });
 
+        assert.equal(element._freeText, '');
         assert.equal(element._linksInput, '');
 
         assert.isFalse(element._openedDialogHelp);
@@ -207,11 +209,21 @@ limitations under the License.
         assert.deepEqual(element._uploadedFiles, []);
       });
 
+      test('does have the input to enter free text', function() {
+        assert.isNotNull(element.$$('paper-input.free-text'));
+        assert.isTrue(element.$$('paper-input.free-text').noLabelFloat);
+        assert.equal(element.$$('paper-input.free-text').placeholder, 'Enter Search Keywords');
+        assert.equal(element.$$('paper-input.free-text').value, '');
+      });
+
+      test('does have the button to run the free text search', function() {
+        assert.isNotNull(element.$$('paper-icon-button.main-button[icon="fa:search"]'));
+        assert.equal(element.$$('paper-icon-button.main-button[icon="fa:search"]').title, 'Run Search');
+      });
+
       test('does have the button to open the search dialog', function() {
-        assert.isNotNull(element.$$('paper-button.open-dialog-button'));
-        assert.isFalse(element.$$('paper-button.open-dialog-button').active);
-        assert.isNotNull(element.$$('paper-button.open-dialog-button iron-icon[icon="fa:search"]'));
-        assert.isNotNull(element.$$('paper-button.open-dialog-button div'));
+        assert.isNotNull(element.$$('paper-icon-button.main-button[icon="fa:wrench"]'));
+        assert.equal(element.$$('paper-icon-button.main-button[icon="fa:wrench"]').title, 'Open Advanced Search');
       });
 
       test('does have the search dialog', function() {
@@ -363,6 +375,7 @@ limitations under the License.
           key: 'dateStart',
           styleClass: 'date-start-style',
           title: 'From',
+          type: undefined,
           value: {}
         });
         assert.deepEqual(datePickers[0].key, 'dateStart');
@@ -374,6 +387,7 @@ limitations under the License.
           key: 'dateEnd',
           styleClass: 'date-end-style',
           title: 'To',
+          type: undefined,
           value: {}
         });
         assert.deepEqual(datePickers[1].key, 'dateEnd');
@@ -539,12 +553,14 @@ limitations under the License.
             key: 'dateStart',
             styleClass: 'date-start-style',
             title: 'From',
+            type: undefined,
             value: {}
           }, {
             icon: 'date-end-icon',
             key: 'dateEnd',
             styleClass: 'date-end-style',
             title: 'To',
+            type: undefined,
             value: {}
           }]
         }, {
@@ -556,6 +572,7 @@ limitations under the License.
             key: 'phone',
             styleClass: 'phone-style',
             title: 'Telephone Number',
+            type: 'phone',
             value: '',
             activateNetworkExpansion: false,
             activateNetworkExpansionPrevious: false,
@@ -567,6 +584,7 @@ limitations under the License.
             key: 'email',
             styleClass: 'email-style',
             title: 'Email Address',
+            type: undefined,
             value: '',
             activateNetworkExpansion: false,
             activateNetworkExpansionPrevious: false,
@@ -583,6 +601,7 @@ limitations under the License.
             key: 'city',
             styleClass: 'city-style',
             title: 'City',
+            type: undefined,
             value: '',
             activateNetworkExpansion: false,
             activateNetworkExpansionPrevious: false,
@@ -594,6 +613,7 @@ limitations under the License.
             key: 'country',
             styleClass: 'country-style',
             title: 'Country',
+            type: undefined,
             value: '',
             activateNetworkExpansion: false,
             activateNetworkExpansionPrevious: false,
@@ -610,6 +630,7 @@ limitations under the License.
             key: 'website',
             styleClass: 'website-style',
             title: 'Website',
+            type: undefined,
             value: '',
             activateNetworkExpansion: false,
             activateNetworkExpansionPrevious: false,
@@ -621,6 +642,7 @@ limitations under the License.
             key: 'title',
             styleClass: 'title-style',
             title: 'Title',
+            type: undefined,
             value: '',
             activateNetworkExpansion: false,
             activateNetworkExpansionPrevious: false,
@@ -632,6 +654,7 @@ limitations under the License.
             key: 'description',
             styleClass: 'description-style',
             title: 'Description',
+            type: undefined,
             value: '',
             activateNetworkExpansion: false,
             activateNetworkExpansionPrevious: false,
@@ -643,6 +666,7 @@ limitations under the License.
             key: 'url',
             styleClass: 'url-style',
             title: 'URL',
+            type: undefined,
             value: '',
             activateNetworkExpansion: false,
             activateNetworkExpansionPrevious: false,
@@ -659,6 +683,7 @@ limitations under the License.
             key: 'image',
             styleClass: 'image-style',
             title: 'Image',
+            type: undefined,
             images: [],
             excluded: [],
             required: [],
@@ -704,26 +729,40 @@ limitations under the License.
         });
       });
 
-      test('_didUserHitEnterKey does not call handleSearch if search parameters are undefined', function() {
-        element.opened = true;
-        element._didUserHitEnterKey({keyCode: 13});
-
-        assert.isTrue(element.opened);
+      test('_didUserHitEnterKeyOnFreeText does call handleFreeTextSearch if the enter key is tapped', function() {
+        var calls = 0;
+        element.handleFreeTextSearch = function() {
+          ++calls;
+        };
+        element._didUserHitEnterKeyOnFreeText({keyCode: 13});
+        assert.equal(calls, 1);
       });
 
-      test('_didUserHitEnterKey does call handleSearch if search parameters are enabled and enter key is used', function() {
-        element.opened = true;
-        element._searchFields[2].data[0].value = 'nyc';
-        element._didUserHitEnterKey({keyCode: 13});
-
-        assert.isFalse(element.opened);
+      test('_didUserHitEnterKeyOnFreeText does not call handleFreeTextSearch if something besides the enter key is tapped', function() {
+        var calls = 0;
+        element.handleFreeTextSearch = function() {
+          ++calls;
+        };
+        element._didUserHitEnterKeyOnFreeText({keyCode: 10});
+        assert.equal(calls, 0);
       });
 
-      test('_didUserHitEnterKey does not call handleSearch if something besides the enter key is clicked', function() {
-        element.opened = true;
+      test('_didUserHitEnterKey does call handleSearch if the enter key is tapped', function() {
+        var calls = 0;
+        element.handleSearch = function() {
+          ++calls;
+        };
+        element._didUserHitEnterKey({keyCode: 13});
+        assert.equal(calls, 1);
+      });
+
+      test('_didUserHitEnterKey does not call handleSearch if something besides the enter key is tapped', function() {
+        var calls = 0;
+        element.handleSearch = function() {
+          ++calls;
+        };
         element._didUserHitEnterKey({keyCode: 10});
-
-        assert.isTrue(element.opened);
+        assert.equal(calls, 0);
       });
 
       test('_didUserHitEnterKeyOnLinksInput does update images', function() {
@@ -1525,6 +1564,7 @@ limitations under the License.
           key: 'city',
           styleClass: 'city-style',
           title: 'City',
+          type: undefined,
           value: 'nyc, chicago',
           activateNetworkExpansion: false,
           activateNetworkExpansionPrevious: false,
@@ -1568,6 +1608,7 @@ limitations under the License.
           key: 'city',
           styleClass: 'city-style',
           title: 'City',
+          type: undefined,
           value: '+nyc, chicago',
           activateNetworkExpansion: false,
           activateNetworkExpansionPrevious: false,
@@ -1611,6 +1652,7 @@ limitations under the License.
           key: 'city',
           styleClass: 'city-style',
           title: 'City',
+          type: undefined,
           value: '-nyc, chicago',
           activateNetworkExpansion: false,
           activateNetworkExpansionPrevious: false,
@@ -1655,6 +1697,7 @@ limitations under the License.
           key: 'description',
           styleClass: 'description-style',
           title: 'Description',
+          type: undefined,
           value: '>123, <456',
           activateNetworkExpansion: false,
           activateNetworkExpansionPrevious: false,
@@ -2051,6 +2094,94 @@ limitations under the License.
         assert.isTrue(element._searchFields[2].data[0].requireOne);
       });
 
+      test('handleFreeTextSearch does nothing if no freeTextSearchFields are specified', function() {
+        element._freeText = 'word, many words';
+        element.handleFreeTextSearch();
+        assert.deepEqual(element.searchParameters, {
+          city: {},
+          country: {},
+          description: {},
+          email: {},
+          image: {},
+          phone: {},
+          postingDate: {},
+          title: {},
+          url: {},
+          website: {}
+        });
+        assert.equal(element._freeText, 'word, many words');
+      });
+
+      test('handleFreeTextSearch does nothing if _freeText is empty', function() {
+        element.freeTextSearchFields = [titleConfig, descriptionConfig];
+        element.handleFreeTextSearch();
+        assert.deepEqual(element.searchParameters, {
+          city: {},
+          country: {},
+          description: {},
+          email: {},
+          image: {},
+          phone: {},
+          postingDate: {},
+          title: {},
+          url: {},
+          website: {}
+        });
+      });
+
+      test('handleFreeTextSearch does update searchParameters and does reset _freeText', function() {
+        element._freeText = 'word, many words';
+        element.freeTextSearchFields = [titleConfig, descriptionConfig];
+        element.handleFreeTextSearch();
+        assert.deepEqual(element.searchParameters, {
+          city: {},
+          country: {},
+          description: {
+            word: {
+              key: 'word',
+              category: 'Description',
+              date: undefined,
+              enabled: true,
+              search: 'union',
+              text: 'word'
+            },
+            'many words': {
+              key: 'many words',
+              category: 'Description',
+              date: undefined,
+              enabled: true,
+              search: 'union',
+              text: 'many words'
+            }
+          },
+          email: {},
+          image: {},
+          phone: {},
+          postingDate: {},
+          title: {
+            word: {
+              key: 'word',
+              category: 'Title',
+              date: undefined,
+              enabled: true,
+              search: 'union',
+              text: 'word'
+            },
+            'many words': {
+              key: 'many words',
+              category: 'Title',
+              date: undefined,
+              enabled: true,
+              search: 'union',
+              text: 'many words'
+            }
+          },
+          url: {},
+          website: {}
+        });
+        assert.equal(element._freeText, '');
+      });
+
       test('handleSearch does nothing if no fields are specified', function() {
         element.opened = true;
         element.removeAllSearchTerms();
@@ -2072,7 +2203,7 @@ limitations under the License.
         assert.isFalse(element._searchFields[2].data[0].requireOnePrevious);
       });
 
-      test('handleSearch updates searchParameters and closes dialog', function() {
+      test('handleSearch does update searchParameters and closes dialog', function() {
         element.opened = true;
 
         element.$$('#input_city').value = 'nyc, chicago';
