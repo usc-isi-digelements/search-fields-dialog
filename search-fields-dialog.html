@@ -79,9 +79,25 @@ A Polymer Element showing search fields in a modal dialog.
         width: 100%;
       }
 
-      .main-button {
+      paper-icon-button.main-button {
         margin: 0 0 0 10px;
         padding: 0;
+      }
+
+      button-action.main-button {
+        margin: 0 auto;
+        --button-action-mixin: {
+          box-shadow: none;
+          font-size: 20px;
+          font-weight: 500;
+        };
+        --button-action-hover-mixin: {
+          box-shadow: none;
+        };
+      }
+
+      button-action.main-button.small {
+        display: none;
       }
 
       .main-button:hover {
@@ -384,20 +400,51 @@ A Polymer Element showing search fields in a modal dialog.
       iron-icon.yellow {
         color: var(--paper-yellow-600);
       }
+
+      @media all and (min-width: 0) and (max-width: 480px) {
+        button-action.main-button.small {
+          display: initial;
+        }
+
+        button-action.main-button.large {
+          display: none;
+        }
+      }
     </style>
 
-    <div class="layout horizontal whole-width">
-      <paper-input
-        class="free-text"
-        no-label-float
-        placeholder="Enter Search Keywords"
-        value="{{_freeText}}"
-        on-keyup="_didUserHitEnterKeyOnFreeText">
-      </paper-input>
+    <template is="dom-if" if="[[!freeTextSearchFields.length]]">
+      <button-action
+        class="main-button large"
+        click-listener="[[_createToggleDialogListener()]]"
+        icon="fa:search"
+        text="Enter Search Keywords"
+        title="Open Search Window and Enter Search Keywords">
+      </button-action>
 
-      <paper-icon-button class="main-button" icon="fa:search" on-tap="handleFreeTextSearch" title="Run Search"></paper-icon-button>
-      <paper-icon-button class="main-button" icon="fa:wrench" on-tap="toggleSearchFieldsDialog" title="Open Advanced Search"></paper-icon-button>
-    </div>
+      <!-- Small button for the smaller screen resolutions. -->
+      <button-action
+        class="main-button small"
+        click-listener="[[_createToggleDialogListener()]]"
+        icon="fa:search"
+        text="Search"
+        title="Open Search Window and Enter Search Keywords">
+      </button-action>
+    </template>
+
+    <template is="dom-if" if="[[freeTextSearchFields.length]]">
+      <div class="layout horizontal whole-width">
+        <paper-input
+          class="free-text"
+          no-label-float
+          placeholder="Enter Search Keywords"
+          value="{{_freeText}}"
+          on-keyup="_didUserHitEnterKeyOnFreeText">
+        </paper-input>
+
+        <paper-icon-button class="main-button" icon="fa:search" on-tap="handleFreeTextSearch" title="Run Search"></paper-icon-button>
+        <paper-icon-button class="main-button" icon="fa:wrench" on-tap="toggleSearchFieldsDialog" title="Open Advanced Search"></paper-icon-button>
+      </div>
+    </template>
 
     <styled-dialog class$="search-dialog [[_isBackdrop(_openedDialogHelp, _openedDialogImages)]]" fill modal opened="{{opened}}">
       <div slot="top" class="layout horizontal center center-justified header">
@@ -1235,6 +1282,21 @@ A Polymer Element showing search fields in a modal dialog.
             name: dialogConfig[nameProperty]
           };
         });
+      },
+
+      /**
+       * Creates and returns the listener object for opening the search fields dialog.
+       *
+       * @return {Object}
+       * @private
+       */
+      _createToggleDialogListener: function() {
+        var self = this;
+        return {
+          onClick: function() {
+            self.toggleSearchFieldsDialog();
+          }
+        };
       },
 
       /**

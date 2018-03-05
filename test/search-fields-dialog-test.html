@@ -209,21 +209,48 @@ limitations under the License.
         assert.deepEqual(element._uploadedFiles, []);
       });
 
-      test('does have the input to enter free text', function() {
-        assert.isNotNull(element.$$('paper-input.free-text'));
-        assert.isTrue(element.$$('paper-input.free-text').noLabelFloat);
-        assert.equal(element.$$('paper-input.free-text').placeholder, 'Enter Search Keywords');
-        assert.equal(element.$$('paper-input.free-text').value, '');
+      test('does have the correct elements if freeTextSearchFields is empty', function(done) {
+        element.freeTextSearchFields = [];
+
+        flush(function() {
+          assert.isNotNull(element.$$('button-action.main-button.large'));
+          assert.isNotNull(element.$$('button-action.main-button.large').clickListener);
+          assert.equal(element.$$('button-action.main-button.large').icon, 'fa:search');
+          assert.equal(element.$$('button-action.main-button.large').text, 'Enter Search Keywords');
+
+          assert.isNotNull(element.$$('button-action.main-button.small'));
+          assert.isNotNull(element.$$('button-action.main-button.small').clickListener);
+          assert.equal(element.$$('button-action.main-button.small').icon, 'fa:search');
+          assert.equal(element.$$('button-action.main-button.small').text, 'Search');
+
+          assert.isNull(element.$$('paper-input.free-text'));
+          assert.isNull(element.$$('paper-icon-button.main-button[icon="fa:search"]'));
+          assert.isNull(element.$$('paper-icon-button.main-button[icon="fa:wrench"]'));
+
+          done();
+        });
       });
 
-      test('does have the button to run the free text search', function() {
-        assert.isNotNull(element.$$('paper-icon-button.main-button[icon="fa:search"]'));
-        assert.equal(element.$$('paper-icon-button.main-button[icon="fa:search"]').title, 'Run Search');
-      });
+      test('does have the correct elements if freeTextSearchFields is non-empty', function(done) {
+        element.freeTextSearchFields = [titleConfig, descriptionConfig];
 
-      test('does have the button to open the search dialog', function() {
-        assert.isNotNull(element.$$('paper-icon-button.main-button[icon="fa:wrench"]'));
-        assert.equal(element.$$('paper-icon-button.main-button[icon="fa:wrench"]').title, 'Open Advanced Search');
+        flush(function() {
+          assert.isNotNull(element.$$('paper-input.free-text'));
+          assert.isTrue(element.$$('paper-input.free-text').noLabelFloat);
+          assert.equal(element.$$('paper-input.free-text').placeholder, 'Enter Search Keywords');
+          assert.equal(element.$$('paper-input.free-text').value, '');
+
+          assert.isNotNull(element.$$('paper-icon-button.main-button[icon="fa:search"]'));
+          assert.equal(element.$$('paper-icon-button.main-button[icon="fa:search"]').title, 'Run Search');
+
+          assert.isNotNull(element.$$('paper-icon-button.main-button[icon="fa:wrench"]'));
+          assert.equal(element.$$('paper-icon-button.main-button[icon="fa:wrench"]').title, 'Open Advanced Search');
+
+          assert.isNull(element.$$('button-action.main-button.large'));
+          assert.isNull(element.$$('button-action.main-button.small'));
+
+          done();
+        });
       });
 
       test('does have the search dialog', function() {
@@ -727,6 +754,20 @@ limitations under the License.
           search: 'search',
           text: 'text'
         });
+      });
+
+      test('_createToggleDialogListener does return expected listener object', function() {
+        var calls = 0;
+        element.toggleSearchFieldsDialog = function() {
+          ++calls;
+        };
+
+        var listener = element._createToggleDialogListener();
+        expect(listener).to.be.an('Object');
+        expect(listener.onClick).to.be.a('Function');
+        expect(calls).to.equal(0);
+        listener.onClick();
+        expect(calls).to.equal(1);
       });
 
       test('_didUserHitEnterKeyOnFreeText does call handleFreeTextSearch if the enter key is tapped', function() {
