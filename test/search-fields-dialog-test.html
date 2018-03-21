@@ -45,6 +45,13 @@ limitations under the License.
         enableNetworkExpansion: true,
         activateNetworkExpansion: true
       };
+      var countConfig = {
+        icon: 'count-icon',
+        key: 'count',
+        styleClass: 'count-style',
+        title: 'Count',
+        type: 'number'
+      };
       var countryConfig = {
         icon: 'country-icon',
         key: 'country',
@@ -104,12 +111,6 @@ limitations under the License.
         styleClass: 'url-style',
         title: 'URL'
       };
-      var websiteConfig = {
-        icon: 'website-icon',
-        key: 'website',
-        styleClass: 'website-style',
-        title: 'Website'
-      };
 
       setup(function(done) {
         element = fixture('search-fields-dialog-fixture');
@@ -133,7 +134,7 @@ limitations under the License.
           data: [cityConfig, countryConfig]
         }, {
           name: 'Ads',
-          data: [websiteConfig, titleConfig, descriptionConfig, urlConfig]
+          data: [countConfig, titleConfig, descriptionConfig, urlConfig]
         }, {
           type: 'image',
           name: 'Images',
@@ -141,6 +142,7 @@ limitations under the License.
         }];
         element.searchParameters = {
           city: {},
+          count: {},
           country: {},
           description: {},
           email: {},
@@ -148,8 +150,7 @@ limitations under the License.
           phone: {},
           postingDate: {},
           title: {},
-          url: {},
-          website: {}
+          url: {}
         };
         flush(done);
       });
@@ -183,6 +184,7 @@ limitations under the License.
         });
         assert.deepEqual(element.searchParameters, {
           city: {},
+          count: {},
           country: {},
           description: {},
           email: {},
@@ -190,8 +192,7 @@ limitations under the License.
           phone: {},
           postingDate: {},
           title: {},
-          url: {},
-          website: {}
+          url: {}
         });
 
         assert.equal(element._freeText, '');
@@ -254,29 +255,29 @@ limitations under the License.
       });
 
       test('does have the search dialog', function() {
-        assert.isNotNull(element.$$('.search-dialog'));
-        assert.isTrue(element.$$('.search-dialog').fill);
-        assert.isTrue(element.$$('.search-dialog').modal);
-        assert.isFalse(element.$$('.search-dialog').opened);
-        assert.isFalse(element.$$('.search-dialog').classList.contains('backdrop'));
+        assert.isNotNull(element.$$('#searchDialog'));
+        assert.isTrue(element.$$('#searchDialog').fill);
+        assert.isTrue(element.$$('#searchDialog').modal);
+        assert.isFalse(element.$$('#searchDialog').opened);
+        assert.isFalse(element.$$('#searchDialog').classList.contains('backdrop'));
       });
 
       test('does have the help dialog', function() {
-        assert.isNotNull(element.$$('.help-dialog'));
-        assert.isFalse(element.$$('.help-dialog').fill);
-        assert.isFalse(element.$$('.help-dialog').modal);
-        assert.isFalse(element.$$('.help-dialog').opened);
+        assert.isNotNull(element.$$('#helpDialog'));
+        assert.isFalse(element.$$('#helpDialog').fill);
+        assert.isFalse(element.$$('#helpDialog').modal);
+        assert.isFalse(element.$$('#helpDialog').opened);
       });
 
       test('does have the images dialog and elements', function() {
-        assert.isNotNull(element.$$('.images-dialog'));
-        assert.isTrue(element.$$('.images-dialog').fill);
-        assert.isFalse(element.$$('.images-dialog').modal);
-        assert.isFalse(element.$$('.images-dialog').opened);
+        assert.isNotNull(element.$$('#imagesDialog'));
+        assert.isTrue(element.$$('#imagesDialog').fill);
+        assert.isFalse(element.$$('#imagesDialog').modal);
+        assert.isFalse(element.$$('#imagesDialog').opened);
       });
 
       test('images dialog does have an image gallery', function() {
-        var inputGallery = Polymer.dom(element.root).querySelectorAll('.images-dialog image-gallery');
+        var inputGallery = Polymer.dom(element.root).querySelectorAll('#imagesDialog image-gallery');
         assert.equal(inputGallery.length, 1);
 
         assert.equal(inputGallery[0].imageNameProperty, 'id');
@@ -293,7 +294,7 @@ limitations under the License.
         element.set('_imageResults.id', 'id1');
 
         flush(function() {
-          var inputGallery = Polymer.dom(element.root).querySelectorAll('.images-dialog image-gallery');
+          var inputGallery = Polymer.dom(element.root).querySelectorAll('#imagesDialog image-gallery');
           assert.equal(inputGallery.length, 1);
 
           assert.equal(inputGallery[0].imageNameProperty, 'id');
@@ -305,7 +306,7 @@ limitations under the License.
           assert.deepEqual(inputGallery[0].processing, []);
           assert.deepEqual(inputGallery[0].selected, []);
 
-          var resultsGallery = Polymer.dom(element.root).querySelectorAll('.images-dialog auto-paginated-image-gallery');
+          var resultsGallery = Polymer.dom(element.root).querySelectorAll('#imagesDialog auto-paginated-image-gallery');
           assert.equal(resultsGallery.length, 1);
 
           assert.isTrue(resultsGallery[0].classList.contains('results-gallery'));
@@ -345,7 +346,7 @@ limitations under the License.
         };
 
         flush(function() {
-          var inputGallery = Polymer.dom(element.root).querySelectorAll('.images-dialog image-gallery');
+          var inputGallery = Polymer.dom(element.root).querySelectorAll('#imagesDialog image-gallery');
           assert.equal(inputGallery.length, 1);
 
           assert.equal(inputGallery[0].imageNameProperty, 'id');
@@ -365,7 +366,7 @@ limitations under the License.
           assert.deepEqual(inputGallery[0].processing, ['image1']);
           assert.deepEqual(inputGallery[0].selected, ['image2']);
 
-          var resultsGallery = Polymer.dom(element.root).querySelectorAll('.images-dialog auto-paginated-image-gallery');
+          var resultsGallery = Polymer.dom(element.root).querySelectorAll('#imagesDialog auto-paginated-image-gallery');
           assert.equal(resultsGallery.length, 1);
 
           assert.isTrue(resultsGallery[0].classList.contains('results-gallery'));
@@ -387,13 +388,13 @@ limitations under the License.
       });
 
       test('images dialog does have image input elements', function() {
-        assert.isNotNull(element.$$('.images-dialog div[slot="bottom"] .link-data paper-input'));
-        assert.isNotNull(element.$$('.images-dialog div[slot="bottom"] .link-data paper-icon-button'));
-        assert.isNotNull(element.$$('.images-dialog div[slot="bottom"] vaadin-upload'));
+        assert.isNotNull(element.$$('#imagesDialog div[slot="bottom"] .link-data paper-input'));
+        assert.isNotNull(element.$$('#imagesDialog div[slot="bottom"] .link-data paper-icon-button'));
+        assert.isNotNull(element.$$('#imagesDialog div[slot="bottom"] vaadin-upload'));
       });
 
       test('search dialog does have date pickers', function() {
-        var datePickers = Polymer.dom(element.root).querySelectorAll('.search-dialog vaadin-date-picker-display');
+        var datePickers = Polymer.dom(element.root).querySelectorAll('#searchDialog vaadin-date-picker-display');
         assert.equal(datePickers.length, 2);
         assert.deepEqual(datePickers[0].facetKey, 'value');
         assert.equal(datePickers[0].facets, element._searchFields[0].data[0]);
@@ -422,7 +423,7 @@ limitations under the License.
       });
 
       test('search dialog does have paper inputs for the search fields', function() {
-        var paperInputs = Polymer.dom(element.root).querySelectorAll('.search-dialog .search-data paper-input');
+        var paperInputs = Polymer.dom(element.root).querySelectorAll('#searchDialog .search-data paper-input');
         assert.equal(paperInputs.length, 8);
         assert.equal(paperInputs[0].id, 'input_phone');
         assert.equal(paperInputs[0].label, 'Telephone Number');
@@ -436,8 +437,8 @@ limitations under the License.
         assert.equal(paperInputs[3].id, 'input_country');
         assert.equal(paperInputs[3].label, 'Country');
         assert.equal(paperInputs[3].value, '');
-        assert.equal(paperInputs[4].id, 'input_website');
-        assert.equal(paperInputs[4].label, 'Website');
+        assert.equal(paperInputs[4].id, 'input_count');
+        assert.equal(paperInputs[4].label, 'Count');
         assert.equal(paperInputs[4].value, '');
         assert.equal(paperInputs[5].id, 'input_title');
         assert.equal(paperInputs[5].label, 'Title');
@@ -455,39 +456,39 @@ limitations under the License.
         element.set(['_searchFields', 1, 'data', 1, 'value'], 'testEmail');
         element.set(['_searchFields', 2, 'data', 0, 'value'], 'testCity');
         element.set(['_searchFields', 2, 'data', 1, 'value'], 'testCountry');
-        element.set(['_searchFields', 3, 'data', 0, 'value'], 'testWebsite');
+        element.set(['_searchFields', 3, 'data', 0, 'value'], 'testCount');
         element.set(['_searchFields', 3, 'data', 1, 'value'], 'testTitle');
         element.set(['_searchFields', 3, 'data', 2, 'value'], 'testDescription');
         element.set(['_searchFields', 3, 'data', 3, 'value'], 'testURL');
 
-        var paperInputs = Polymer.dom(element.root).querySelectorAll('.search-dialog .search-data paper-input');
+        var paperInputs = Polymer.dom(element.root).querySelectorAll('#searchDialog .search-data paper-input');
         assert.equal(paperInputs.length, 8);
         assert.equal(paperInputs[0].value, 'testPhone');
         assert.equal(paperInputs[1].value, 'testEmail');
         assert.equal(paperInputs[2].value, 'testCity');
         assert.equal(paperInputs[3].value, 'testCountry');
-        assert.equal(paperInputs[4].value, 'testWebsite');
+        assert.equal(paperInputs[4].value, 'testCount');
         assert.equal(paperInputs[5].value, 'testTitle');
         assert.equal(paperInputs[6].value, 'testDescription');
         assert.equal(paperInputs[7].value, 'testURL');
       });
 
       test('search dialog does not have paper icon buttons for the search fields if _showAdvanced is false', function() {
-        var buttons = Polymer.dom(element.root).querySelectorAll('.search-dialog .search-data paper-icon-button');
+        var buttons = Polymer.dom(element.root).querySelectorAll('#searchDialog .search-data paper-icon-button');
         assert.equal(buttons.length, 0);
       });
 
       test('search dialog does have paper icon buttons for the search fields if _showAdvanced is true', function(done) {
         element._showAdvanced = true;
         flush(function() {
-          var buttons = Polymer.dom(element.root).querySelectorAll('.search-dialog .search-data paper-icon-button');
+          var buttons = Polymer.dom(element.root).querySelectorAll('#searchDialog .search-data paper-icon-button');
           assert.equal(buttons.length, 12);
           done();
         });
       });
 
       test('search dialog does have image gallery for the image field', function() {
-        var gallery = Polymer.dom(element.root).querySelectorAll('.search-dialog search-image-gallery');
+        var gallery = Polymer.dom(element.root).querySelectorAll('#searchDialog search-image-gallery');
         assert.equal(gallery.length, 1);
         assert.deepEqual(gallery[0].excluded, []);
         assert.deepEqual(gallery[0].images, []);
@@ -523,7 +524,7 @@ limitations under the License.
         element.set(['_searchFields', 4, 'data', 0, 'excluded'], ['image4']);
         element.set(['_searchFields', 4, 'data', 0, 'union'], ['image5']);
 
-        var gallery = Polymer.dom(element.root).querySelectorAll('.search-dialog search-image-gallery');
+        var gallery = Polymer.dom(element.root).querySelectorAll('#searchDialog search-image-gallery');
         assert.equal(gallery.length, 1);
         assert.deepEqual(gallery[0].excluded, ['image4']);
         assert.deepEqual(gallery[0].images, [{
@@ -553,7 +554,7 @@ limitations under the License.
       });
 
       test('search dialog does have expected header buttons', function() {
-        var buttons = Polymer.dom(element.root).querySelectorAll('.search-dialog div[slot="top"].header button-action');
+        var buttons = Polymer.dom(element.root).querySelectorAll('#searchDialog div[slot="top"].header button-action');
         assert.isNotNull(buttons);
         assert.equal(buttons.length, 6);
         assert.equal(buttons[0].text, 'Search');
@@ -565,9 +566,9 @@ limitations under the License.
       });
 
       test('search dialog does have image input elements', function() {
-        assert.isNotNull(element.$$('.search-dialog div[slot="bottom"] .link-data paper-input'));
-        assert.isNotNull(element.$$('.search-dialog div[slot="bottom"] .link-data paper-icon-button'));
-        assert.isNotNull(element.$$('.search-dialog div[slot="bottom"] vaadin-upload'));
+        assert.isNotNull(element.$$('#searchDialog div[slot="bottom"] .link-data paper-input'));
+        assert.isNotNull(element.$$('#searchDialog div[slot="bottom"] .link-data paper-icon-button'));
+        assert.isNotNull(element.$$('#searchDialog div[slot="bottom"] vaadin-upload'));
       });
 
       test('_searchFields is as expected', function() {
@@ -653,11 +654,11 @@ limitations under the License.
           isImage: false,
           isDate: false,
           data: [{
-            icon: 'website-icon',
-            key: 'website',
-            styleClass: 'website-style',
-            title: 'Website',
-            type: undefined,
+            icon: 'count-icon',
+            key: 'count',
+            styleClass: 'count-style',
+            title: 'Count',
+            type: 'number',
             value: '',
             activateNetworkExpansion: false,
             activateNetworkExpansionPrevious: false,
@@ -1518,14 +1519,6 @@ limitations under the License.
             search: 'optional',
             text: 'image1'
           },
-          image2: {
-            category: 'Image',
-            date: undefined,
-            enabled: false,
-            key: 'image2',
-            search: undefined,
-            text: 'image2'
-          },
           image3: {
             category: 'Image',
             date: undefined,
@@ -1797,6 +1790,58 @@ limitations under the License.
 
         assert.deepEqual(element.networkExpansionParameters, {
           city: false
+        });
+      });
+
+      test('_updateSearchParameterFromField does add numbers as expected', function() {
+        element.$$('#input_count').value = '1234, 5678';
+
+        element._updateSearchParameterFromField(element._searchFields[3].data[0]);
+
+        assert.deepEqual(element.searchParameters.count, {
+          1234: {
+            key: 1234,
+            date: undefined,
+            category: 'Count',
+            enabled: true,
+            search: 'union',
+            text: 1234
+          },
+          5678: {
+            key: 5678,
+            date: undefined,
+            category: 'Count',
+            enabled: true,
+            search: 'union',
+            text: 5678
+          }
+        });
+      });
+
+      test('_updateSearchParameterFromField does remove numbers as expected', function() {
+        element.searchParameters.count = {
+          1234: {
+            key: 1234,
+            date: undefined,
+            category: 'Count',
+            enabled: true,
+            search: 'union',
+            text: 1234
+          }
+        };
+        element.$$('#input_count').value = '5678';
+
+        element._updateSearchParameterFromField(element._searchFields[3].data[0]);
+
+        assert.deepEqual(element.searchParameters.count, {
+          5678: {
+            key: 5678,
+            date: undefined,
+            category: 'Count',
+            enabled: true,
+            search: 'union',
+            text: 5678
+          }
         });
       });
 
@@ -2140,6 +2185,7 @@ limitations under the License.
         element.handleFreeTextSearch();
         assert.deepEqual(element.searchParameters, {
           city: {},
+          count: {},
           country: {},
           description: {},
           email: {},
@@ -2147,8 +2193,7 @@ limitations under the License.
           phone: {},
           postingDate: {},
           title: {},
-          url: {},
-          website: {}
+          url: {}
         });
         assert.equal(element._freeText, 'word, many words');
       });
@@ -2158,6 +2203,7 @@ limitations under the License.
         element.handleFreeTextSearch();
         assert.deepEqual(element.searchParameters, {
           city: {},
+          count: {},
           country: {},
           description: {},
           email: {},
@@ -2165,8 +2211,7 @@ limitations under the License.
           phone: {},
           postingDate: {},
           title: {},
-          url: {},
-          website: {}
+          url: {}
         });
       });
 
@@ -2176,6 +2221,7 @@ limitations under the License.
         element.handleFreeTextSearch();
         assert.deepEqual(element.searchParameters, {
           city: {},
+          count: {},
           country: {},
           description: {
             word: {
@@ -2217,8 +2263,7 @@ limitations under the License.
               text: 'many words'
             }
           },
-          url: {},
-          website: {}
+          url: {}
         });
         assert.equal(element._freeText, '');
       });
@@ -2272,6 +2317,7 @@ limitations under the License.
               text: 'chicago'
             }
           },
+          count: {},
           country: {},
           description: {},
           email: {},
@@ -2288,23 +2334,22 @@ limitations under the License.
           },
           postingDate: {},
           title: {},
-          url: {},
-          website: {}
+          url: {}
         });
       });
 
       test('openHelp does open the help dialog', function() {
         element.openHelp();
         assert.isTrue(element._openedDialogHelp);
-        assert.isTrue(element.$$('.help-dialog').opened);
-        assert.isTrue(element.$$('.search-dialog').classList.contains('backdrop'));
+        assert.isTrue(element.$$('#helpDialog').opened);
+        assert.isTrue(element.$$('#searchDialog').classList.contains('backdrop'));
       });
 
       test('openImages does open the images dialog', function() {
         element.openImages();
         assert.isTrue(element._openedDialogImages);
-        assert.isTrue(element.$$('.images-dialog').opened);
-        assert.isTrue(element.$$('.search-dialog').classList.contains('backdrop'));
+        assert.isTrue(element.$$('#imagesDialog').opened);
+        assert.isTrue(element.$$('#searchDialog').classList.contains('backdrop'));
       });
 
       test('removeAllSearchTerms does have expected behavior', function() {

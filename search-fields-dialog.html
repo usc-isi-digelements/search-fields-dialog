@@ -116,7 +116,7 @@ A Polymer Element showing search fields in a modal dialog.
         margin-top: 10px;
       }
 
-      .search-dialog {
+      #searchDialog {
         --styled-dialog-min-width: 940px;
         --styled-dialog-max-width: 940px;
         --styled-dialog-style-mixin: {
@@ -129,7 +129,7 @@ A Polymer Element showing search fields in a modal dialog.
         };
       }
 
-      .search-dialog.backdrop {
+      #searchDialog.backdrop {
         --styled-dialog-style-mixin: {
           max-width: 980px;
           min-width: 980px;
@@ -173,9 +173,9 @@ A Polymer Element showing search fields in a modal dialog.
       paper-input {
         padding-bottom: 1px;
         width: 100%;
-        --paper-input-container-color: var(--secondary-text-color);
-        --paper-input-container-input-color: var(--primary-text-color);
-        --paper-input-container-focus-color: var(--primary-text-color);
+        --paper-input-container-color: var(--paper-grey-600);
+        --paper-input-container-input-color: var(--paper-grey-900);
+        --paper-input-container-focus-color: var(--paper-grey-900);
         --paper-input-container: {
           padding: 0;
         };
@@ -228,7 +228,7 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       .selected {
-        background-color: var(--primary-background-color);
+        background-color: var(--paper-grey-100);
       }
 
       .hovering {
@@ -237,7 +237,7 @@ A Polymer Element showing search fields in a modal dialog.
 
       auto-paginated-image-gallery {
         --auto-paginated-image-gallery-hovering-color: yellow;
-        --auto-paginated-image-gallery-selected-color: var(--primary-background-color);
+        --auto-paginated-image-gallery-selected-color: var(--paper-grey-100);
         --auto-paginated-image-gallery-max-height: none;
         --auto-paginated-image-gallery-show-more-button: {
           margin-top: 10px;
@@ -247,7 +247,7 @@ A Polymer Element showing search fields in a modal dialog.
       image-gallery,
       search-image-gallery {
         --image-gallery-hovering-color: yellow;
-        --image-gallery-selected-color: var(--primary-background-color);
+        --image-gallery-selected-color: var(--paper-grey-100);
       }
 
       search-image-gallery {
@@ -275,12 +275,12 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       paper-icon-button.off {
-        color: var(--disabled-text-color);
+        color: var(--paper-grey-300);
       }
 
       paper-icon-button:hover,
       paper-icon-button.on {
-        color: var(--primary-text-color);
+        color: var(--paper-grey-900);
       }
 
       vaadin-upload {
@@ -298,16 +298,16 @@ A Polymer Element showing search fields in a modal dialog.
       }
 
       .network-expansion-icon.on.inactive {
-        color: var(--secondary-text-color);
+        color: var(--paper-grey-300);
       }
 
-      .help-dialog {
+      #helpDialog {
         --styled-dialog-min-width: 0;
         --styled-dialog-max-width: 800px;
       }
 
       .help-text {
-        color: var(--primary-text-color);
+        color: var(--paper-grey-900);
         font-size: 16px;
         line-height: 18px;
         min-height: 18px;
@@ -446,7 +446,7 @@ A Polymer Element showing search fields in a modal dialog.
       </div>
     </template>
 
-    <styled-dialog class$="search-dialog [[_isBackdrop(_openedDialogHelp, _openedDialogImages)]]" fill modal opened="{{opened}}">
+    <styled-dialog id="searchDialog" class$="[[_isBackdrop(_openedDialogHelp, _openedDialogImages)]]" fill modal opened="{{opened}}">
       <div slot="top" class="layout horizontal center center-justified header">
         <button-action icon="fa:search" text="Search" title="Run Search" on-tap="handleSearch"></button-action>
         <button-action icon="fa:question" text="Help" title="Open Help" on-tap="openHelp"></button-action>
@@ -566,7 +566,7 @@ A Polymer Element showing search fields in a modal dialog.
       </template>
     </styled-dialog>
 
-    <styled-dialog class="help-dialog" header="Search Help" opened="{{_openedDialogHelp}}">
+    <styled-dialog id="helpDialog" header="Search Help" opened="{{_openedDialogHelp}}">
       <div class="help-text">
         Enter words or phrases as <strong>search terms</strong> in one or more text fields.
         Use <strong>commas</strong> to separate search terms.
@@ -635,7 +635,7 @@ A Polymer Element showing search fields in a modal dialog.
       </div>
     </styled-dialog>
 
-    <styled-dialog class="images-dialog" fill header="Your Image Links and Uploaded Image Files" opened="{{_openedDialogImages}}">
+    <styled-dialog id="imagesDialog" fill header="Your Image Links and Uploaded Image Files" opened="{{_openedDialogImages}}">
       <div slot="top" class="styled-dialog-text">Click the check icon next to an image to see the image matches from the DIG data.</div>
 
       <image-gallery
@@ -1405,7 +1405,7 @@ A Polymer Element showing search fields in a modal dialog.
             type: 'DATA'
           }));
 
-          this.set('_openedDialogImages', true);
+          this.$.imagesDialog.open();
         }
       },
 
@@ -1542,7 +1542,7 @@ A Polymer Element showing search fields in a modal dialog.
         })));
 
         this.set('_linksInput', '');
-        this.set('_openedDialogImages', true);
+        this.$.imagesDialog.open();
       },
 
       /**
@@ -1719,22 +1719,34 @@ A Polymer Element showing search fields in a modal dialog.
        */
       _updateImageParameterFromGallery: function(searchConfig) {
         var self = this;
-        var searchTermToSearchStatus = searchConfig.images.filter(function(object) {
+        var searchTermList = searchConfig.images.filter(function(object) {
           return searchConfig.selected.indexOf(object.id) >= 0;
-        }).reduce(function(searchTermToSearchStatus, selected) {
+        }).map(function(selected) {
           if(searchConfig.union.indexOf(selected.id) >= 0) {
-            searchTermToSearchStatus[selected.id] = 'union';
-          } else if(searchConfig.required.indexOf(selected.id) >= 0) {
-            searchTermToSearchStatus[selected.id] = 'required';
-          } else if(searchConfig.excluded.indexOf(selected.id) >= 0) {
-            searchTermToSearchStatus[selected.id] = 'excluded';
-          } else {
-            searchTermToSearchStatus[selected.id] = 'optional';
+            return {
+              id: selected.id,
+              search: 'union'
+            };
           }
-          return searchTermToSearchStatus;
-        }, {});
+          if(searchConfig.required.indexOf(selected.id) >= 0) {
+            return {
+              id: selected.id,
+              search: 'required'
+            };
+          }
+          if(searchConfig.excluded.indexOf(selected.id) >= 0) {
+            return {
+              id: selected.id,
+              search: 'excluded'
+            };
+          }
+          return {
+            id: selected.id,
+            search: 'optional'
+          };
+        });
 
-        this._updateSearchParameterTerms(searchConfig, searchTermToSearchStatus);
+        this._updateSearchParameterTerms(searchConfig, searchTermList);
       },
 
       /**
@@ -1836,46 +1848,46 @@ A Polymer Element showing search fields in a modal dialog.
       _updateSearchParameterFromField: function(searchConfig) {
         var self = this;
 
-        var searchTermToSearchStatus = searchConfig.value.split(',').map(function(term) {
-          return term.trim();
-        }).reduce(function(searchTermToSearchStatus, term) {
+        var searchTermList = searchConfig.value.split(',').map(function(term) {
           var search = searchConfig.requireOne ? 'union' : 'optional';
-          var key = term;
+          var key = term.trim();
 
           // A prefixed term overrides searchConfig.requireOne.
           if(key.indexOf('+') === 0) {
             search = 'required';
             key = key.substring(1);
-          }
-
-          if(key.indexOf('-') === 0) {
+          } else if(key.indexOf('-') === 0) {
             search = 'excluded';
             key = key.substring(1);
-          }
-
-          if(key.indexOf('<') === 0) {
+          } else if(key.indexOf('<') === 0) {
             search = 'lessthan';
             key = key.substring(1);
-          }
-
-          if(key.indexOf('>') === 0) {
+          } else if(key.indexOf('>') === 0) {
             search = 'morethan';
             key = key.substring(1);
           }
 
           // TODO Move custom formatting.
-          if(searchConfig.type === 'phone') {
+          if(searchConfig.type === 'number') {
+            key = parseFloat(key) || '';
+          } else if(searchConfig.type === 'phone') {
             key = self._unformatPhones(key);
           }
 
-          if(key) {
-            searchTermToSearchStatus[key] = search;
+          // Ignore empty space but not zero.
+          if(key !== '') {
+            return {
+              id: key,
+              search: search
+            };
           }
 
-          return searchTermToSearchStatus;
-        }, {});
+          return {};
+        }).filter(function(item) {
+          return !!item.id;
+        });
 
-        this._updateSearchParameterTerms(searchConfig, searchTermToSearchStatus);
+        this._updateSearchParameterTerms(searchConfig, searchTermList);
 
         var activateNetworkExpansion = !!(this._isNetworkExpansionViable && searchConfig.activateNetworkExpansion);
 
@@ -1916,23 +1928,26 @@ A Polymer Element showing search fields in a modal dialog.
        * Updates the searchParameters for the given searchConfig using the given search terms.
        *
        * @param {Object} searchConfig
-       * @param {Object} searchTermToSearchStatus
+       * @param {Array} searchTermList
        * @private
        */
-      _updateSearchParameterTerms: function(searchConfig, searchTermToSearchStatus) {
+      _updateSearchParameterTerms: function(searchConfig, searchTermList) {
         var self = this;
 
         _.keys(self.searchParameters[searchConfig.key]).forEach(function(term) {
-          // Disable deleted terms.
-          if(self.searchParameters[searchConfig.key][term].enabled && _.keys(searchTermToSearchStatus).indexOf(term) < 0) {
-            self.searchParameters[searchConfig.key][term] = self.buildSearchParameter(searchConfig.title, false, term, term);
+          var index = _.findIndex(searchTermList, function(item) {
+            return item.id === term;
+          });
+          // Remove old terms.
+          if(self.searchParameters[searchConfig.key][term].enabled && index < 0) {
+            delete self.searchParameters[searchConfig.key][term];
           }
         });
 
-        _.keys(searchTermToSearchStatus).forEach(function(term) {
+        searchTermList.forEach(function(item) {
           // Add new terms.
-          if(term) {
-            self.searchParameters[searchConfig.key][term] = self.buildSearchParameter(searchConfig.title, true, term, term, searchTermToSearchStatus[term]);
+          if(item.id) {
+            self.searchParameters[searchConfig.key][item.id] = self.buildSearchParameter(searchConfig.title, true, item.id, item.id, item.search);
           }
         });
 
@@ -2001,14 +2016,14 @@ A Polymer Element showing search fields in a modal dialog.
        * Opens the help dialog.
        */
       openHelp: function() {
-        this.set('_openedDialogHelp', true);
+        this.$.helpDialog.open();
       },
 
       /**
        * Opens the images dialog.
        */
       openImages: function() {
-        this.set('_openedDialogImages', true);
+        this.$.imagesDialog.open();
       },
 
       /**
@@ -2063,7 +2078,11 @@ A Polymer Element showing search fields in a modal dialog.
           this._updateNetworkExpansion();
         }
 
-        this.opened = !this.opened;
+        if(this.opened) {
+          this.$.searchDialog.close();
+        } else {
+          this.$.searchDialog.open();
+        }
       },
 
       /**
