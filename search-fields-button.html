@@ -1,0 +1,260 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../button-action/button-action.html">
+<link rel="import" href="../fontawesome-iconset/fa-all.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-styles/color.html">
+
+<!--
+A Polymer Element showing the button for the search fields dialog.
+
+### Example
+```html
+<search-fields-button handle-search-callback="[[handleSearchCallback]]" toggle-dialog-callback="[[toggleDialogCallback]]"></search-fields-button>
+```
+
+@demo demo/index.html
+-->
+
+<dom-module id="search-fields-button">
+  <template>
+    <style include="iron-flex iron-flex-alignment"></style>
+    <style include="styled-dialog-styles"></style>
+
+    <style>
+      :host {
+        display: block;
+        @apply --layout-horizontal;
+      }
+
+      .whole-width {
+        width: 100%;
+      }
+
+      button-action {
+        margin: 0 auto;
+        --button-action-mixin: {
+          box-shadow: none;
+          font-size: 20px;
+          font-weight: 500;
+        };
+        --button-action-hover-mixin: {
+          box-shadow: none;
+        };
+      }
+
+      button-action paper-icon-button.small {
+        display: none;
+      }
+
+      paper-icon-button {
+        border-radius: 50%;
+        cursor: pointer;
+        height: 30px;
+        width: 30px;
+        margin: 0 0 0 10px;
+        padding: 0;
+      }
+
+      button-action:hover,
+      paper-icon-button:hover {
+        color: greenyellow;
+      }
+
+      paper-input {
+        padding-top: 5px;
+        padding-bottom: 1px;
+        width: 100%;
+        --paper-input-container-color: white;
+        --paper-input-container-input-color: white;
+        --paper-input-container-focus-color: white;
+        --paper-input-container: {
+          padding: 0;
+          width: auto;
+        }
+        --paper-input-container-input: {
+          display: block;
+          font-size: 14px;
+          font-weight: 500;
+          height: 20px;
+          line-height: 20px;
+          padding: 1px 0;
+        };
+        --paper-input-container-label: {
+          font-size: 14px;
+          font-weight: 500;
+          height: 20px;
+          line-height: 20px;
+        };
+      }
+
+      @media all and (min-width: 0) and (max-width: 480px) {
+        button-action.small {
+          display: initial;
+        }
+
+        button-action.large {
+          display: none;
+        }
+      }
+    </style>
+
+    <template is="dom-if" if="[[!freeTextSearchFields.length]]">
+      <button-action
+        class="large"
+        click-listener="[[_createToggleDialogListener()]]"
+        icon="fa:search"
+        text="Enter Search Keywords"
+        title="Open Search Window and Enter Search Keywords">
+      </button-action>
+
+      <!-- Small button for the smaller screen resolutions. -->
+      <button-action
+        class="small"
+        click-listener="[[_createToggleDialogListener()]]"
+        icon="fa:search"
+        text="Search"
+        title="Open Search Window and Enter Search Keywords">
+      </button-action>
+    </template>
+
+    <template is="dom-if" if="[[freeTextSearchFields.length]]">
+      <div class="layout horizontal whole-width">
+        <paper-input
+          no-label-float
+          placeholder="Enter Search Keywords"
+          value="{{_freeText}}"
+          on-keyup="_handleKeyPress">
+        </paper-input>
+
+        <paper-icon-button icon="fa:search" on-tap="_handleSearch" title="Run Search"></paper-icon-button>
+        <paper-icon-button icon="fa:wrench" on-tap="_toggleDialog" title="Open Advanced Search"></paper-icon-button>
+      </div>
+    </template>
+  </template>
+
+  <script>
+  (function() {
+    /* globals _ */
+    'use strict';
+
+    Polymer({
+      is: 'search-fields-button',
+
+      properties: {
+        /**
+         * (Required)
+         *
+         * List of search fields objects for the free text search each containing {String} key, {String} title, and optionally {String} type.
+         *
+         * @type {Array}
+         */
+        freeTextSearchFields: {
+          type: Array
+        },
+
+        /**
+         * (Required)
+         *
+         * Callback function to handle a free text search.
+         *
+         * @type {Object}
+         */
+        handleSearchCallback: {
+          type: Object
+        },
+
+        /**
+         * (Required)
+         *
+         * Callback function to toggle the search fields dialog.
+         *
+         * @type {Object}
+         */
+        toggleDialogCallback: {
+          type: Object
+        },
+
+        /**
+         * Free text input field.
+         *
+         * @type {String}
+         * @default ''
+         * @private
+         */
+        _freeText: {
+          type: String,
+          value: ''
+        }
+      },
+
+      /**
+       * Creates and returns the listener object for toggling the dialog.
+       *
+       * @return {Object}
+       * @private
+       */
+      _createToggleDialogListener: function() {
+        var self = this;
+        return {
+          onClick: function() {
+            self._toggleDialog();
+          }
+        };
+      },
+
+      /**
+       * Runs a search if ENTER was pressed.
+       *
+       * @param {Object} event
+       * @private
+       */
+      _handleKeyPress: function(event) {
+        if(event.keyCode === 13) {
+          this._handleSearch();
+        }
+      },
+
+      /**
+       * Calls `handleSearchCallback`.
+       *
+       * @private
+       */
+      _handleSearch: function() {
+        if(this.handleSearchCallback) {
+          this.handleSearchCallback(this.freeTextSearchFields, this._freeText);
+          this._freeText = '';
+        }
+      },
+
+      /**
+       * Calls `toggleDialogCallback`.
+       *
+       * @private
+       */
+      _toggleDialog: function() {
+        if(this.toggleDialogCallback) {
+          this.toggleDialogCallback();
+        }
+      }
+    });
+  })();
+  </script>
+</dom-module>

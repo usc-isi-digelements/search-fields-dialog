@@ -34,6 +34,11 @@ limitations under the License.
           title: 'City',
           enableNetworkExpansion: true
         };
+        var countConfig = {
+          key: 'count',
+          title: 'Count',
+          type: 'number'
+        };
         var countryConfig = {
           key: 'country',
           title: 'Country',
@@ -70,10 +75,6 @@ limitations under the License.
           key: 'url',
           title: 'URL'
         };
-        var websiteConfig = {
-          key: 'website',
-          title: 'Website'
-        };
         
         demo.dateConfig = {
           dateStart: 'postingDate',
@@ -101,19 +102,19 @@ limitations under the License.
           data: [cityConfig, countryConfig]
         }, {
           name: 'Ad',
-          data: [websiteConfig, titleConfig, descriptionConfig, urlConfig]
+          data: [countConfig, titleConfig, descriptionConfig, urlConfig]
         }];
 
         demo.searchParameters = {
           city: {},
+          count: {},
           country: {},
           description: {},
           email: {},
           phone: {},
           postingDate: {},
           title: {},
-          url: {},
-          website: {}
+          url: {}
         };
 
         demo.stringify = function(object) {
@@ -129,9 +130,15 @@ limitations under the License.
       <p>Search Parameters:  <strong>[[stringify(searchParameters, searchParameters.*)]]</strong></p>
       <p>Network Expansion Parameters:  <strong>[[stringify(networkExpansionParameters, networkExpansionParameters.*)]]</strong></p>
 
+      <search-fields-button
+        toggle-dialog="[[buttonCallbacks.toggleDialog]]"
+        handle-search="[[buttonCallbacks.handleSearch]]"
+        free-text-search-fields="[[freeTextSearchFields]]">
+      </search-fields-button>
+
       <search-fields-dialog
+        button-callbacks="{{buttonCallbacks}}"
         date-config="[[dateConfig]]"
-        free-text-search-fields="[[freeTextSearchFields]]"
         search-fields-config="[[searchFieldsConfig]]"
         search-parameters="{{searchParameters}}"
         network-expansion-parameters="{{networkExpansionParameters}}">

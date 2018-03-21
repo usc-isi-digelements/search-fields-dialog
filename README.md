@@ -4,7 +4,14 @@ A Polymer Element showing search fields in a modal dialog.
 
 ### Example
 ```html
+<search-fields-button
+  toggle-dialog="[[buttonCallbacks.toggleDialog]]"
+  handle-search="[[buttonCallbacks.handleSearch]]"
+  free-text-search-fields="[[freeTextSearchFields]]">
+</search-fields-button>
+
 <search-fields-dialog
+  button-callbacks="{{buttonCallbacks}}"
   date-config='{"dateStart": "postingDate", "dateEnd": "postingDate"}'
   search-fields-config="[[searchFieldsConfig]]"
   search-parameters="{{searchParameters}}"

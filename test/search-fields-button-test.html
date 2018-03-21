@@ -1,0 +1,104 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>search-fields-button</title>
+  <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../bower_components/web-component-tester/browser.js"></script>
+  <link rel="import" href="../search-fields-button.html">
+</head>
+
+<body>
+  <test-fixture id="search-fields-button-fixture">
+    <template>
+      <search-fields-button></search-fields-button>
+    </template>
+  </test-fixture>
+
+  <script>
+    /* globals suite, setup, flush, test, fixture, assert */
+    suite('search-fields-button tests', function() {
+      var element;
+
+      var descriptionConfig = {
+        icon: 'description-icon',
+        key: 'description',
+        styleClass: 'description-style',
+        title: 'Description'
+      };
+      var titleConfig = {
+        icon: 'title-icon',
+        key: 'title',
+        styleClass: 'title-style',
+        title: 'Title'
+      };
+
+      setup(function(done) {
+        element = fixture('search-fields-button-fixture');
+        flush(done);
+      });
+
+      test('does have the correct elements if freeTextSearchFields is empty', function(done) {
+        element.freeTextSearchFields = [];
+
+        flush(function() {
+          assert.isNotNull(element.$$('button-action.large'));
+          assert.isNotNull(element.$$('button-action.large').clickListener);
+          assert.equal(element.$$('button-action.large').icon, 'fa:search');
+          assert.equal(element.$$('button-action.large').text, 'Enter Search Keywords');
+
+          assert.isNotNull(element.$$('button-action.small'));
+          assert.isNotNull(element.$$('button-action.small').clickListener);
+          assert.equal(element.$$('button-action.small').icon, 'fa:search');
+          assert.equal(element.$$('button-action.small').text, 'Search');
+
+          assert.isNull(element.$$('paper-input'));
+          assert.isNull(element.$$('paper-icon-button[icon="fa:search"]'));
+          assert.isNull(element.$$('paper-icon-button[icon="fa:wrench"]'));
+
+          done();
+        });
+      });
+
+      test('does have the correct elements if freeTextSearchFields is non-empty', function(done) {
+        element.freeTextSearchFields = [titleConfig, descriptionConfig];
+
+        flush(function() {
+          assert.isNotNull(element.$$('paper-input'));
+          assert.isTrue(element.$$('paper-input').noLabelFloat);
+          assert.equal(element.$$('paper-input').placeholder, 'Enter Search Keywords');
+          assert.equal(element.$$('paper-input').value, '');
+
+          assert.isNotNull(element.$$('paper-icon-button[icon="fa:search"]'));
+          assert.equal(element.$$('paper-icon-button[icon="fa:search"]').title, 'Run Search');
+
+          assert.isNotNull(element.$$('paper-icon-button[icon="fa:wrench"]'));
+          assert.equal(element.$$('paper-icon-button[icon="fa:wrench"]').title, 'Open Advanced Search');
+
+          assert.isNull(element.$$('button-action.large'));
+          assert.isNull(element.$$('button-action.small'));
+
+          done();
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -195,7 +195,6 @@ limitations under the License.
           url: {}
         });
 
-        assert.equal(element._freeText, '');
         assert.equal(element._linksInput, '');
 
         assert.isFalse(element._openedDialogHelp);
@@ -210,48 +209,10 @@ limitations under the License.
         assert.deepEqual(element._uploadedFiles, []);
       });
 
-      test('does have the correct elements if freeTextSearchFields is empty', function(done) {
-        element.freeTextSearchFields = [];
-
-        flush(function() {
-          assert.isNotNull(element.$$('button-action.main-button.large'));
-          assert.isNotNull(element.$$('button-action.main-button.large').clickListener);
-          assert.equal(element.$$('button-action.main-button.large').icon, 'fa:search');
-          assert.equal(element.$$('button-action.main-button.large').text, 'Enter Search Keywords');
-
-          assert.isNotNull(element.$$('button-action.main-button.small'));
-          assert.isNotNull(element.$$('button-action.main-button.small').clickListener);
-          assert.equal(element.$$('button-action.main-button.small').icon, 'fa:search');
-          assert.equal(element.$$('button-action.main-button.small').text, 'Search');
-
-          assert.isNull(element.$$('paper-input.free-text'));
-          assert.isNull(element.$$('paper-icon-button.main-button[icon="fa:search"]'));
-          assert.isNull(element.$$('paper-icon-button.main-button[icon="fa:wrench"]'));
-
-          done();
-        });
-      });
-
-      test('does have the correct elements if freeTextSearchFields is non-empty', function(done) {
-        element.freeTextSearchFields = [titleConfig, descriptionConfig];
-
-        flush(function() {
-          assert.isNotNull(element.$$('paper-input.free-text'));
-          assert.isTrue(element.$$('paper-input.free-text').noLabelFloat);
-          assert.equal(element.$$('paper-input.free-text').placeholder, 'Enter Search Keywords');
-          assert.equal(element.$$('paper-input.free-text').value, '');
-
-          assert.isNotNull(element.$$('paper-icon-button.main-button[icon="fa:search"]'));
-          assert.equal(element.$$('paper-icon-button.main-button[icon="fa:search"]').title, 'Run Search');
-
-          assert.isNotNull(element.$$('paper-icon-button.main-button[icon="fa:wrench"]'));
-          assert.equal(element.$$('paper-icon-button.main-button[icon="fa:wrench"]').title, 'Open Advanced Search');
-
-          assert.isNull(element.$$('button-action.main-button.large'));
-          assert.isNull(element.$$('button-action.main-button.small'));
-
-          done();
-        });
+      test('does have buttonCallbacks', function() {
+        assert.isNotNull(element.buttonCallbacks);
+        assert.isNotNull(element.buttonCallbacks.handleSearch);
+        assert.isNotNull(element.buttonCallbacks.toggleDialog);
       });
 
       test('does have the search dialog', function() {
@@ -553,18 +514,6 @@ limitations under the License.
         assert.deepEqual(gallery[0].union, ['image5']);
       });
 
-      test('search dialog does have expected header buttons', function() {
-        var buttons = Polymer.dom(element.root).querySelectorAll('#searchDialog div[slot="top"].header button-action');
-        assert.isNotNull(buttons);
-        assert.equal(buttons.length, 6);
-        assert.equal(buttons[0].text, 'Search');
-        assert.equal(buttons[1].text, 'Help');
-        assert.equal(buttons[2].text, 'Images');
-        assert.equal(buttons[3].text, 'Advanced');
-        assert.equal(buttons[4].text, 'Clear');
-        assert.equal(buttons[5].text, 'Cancel');
-      });
-
       test('search dialog does have image input elements', function() {
         assert.isNotNull(element.$$('#searchDialog div[slot="bottom"] .link-data paper-input'));
         assert.isNotNull(element.$$('#searchDialog div[slot="bottom"] .link-data paper-icon-button'));
@@ -769,24 +718,6 @@ limitations under the License.
         expect(calls).to.equal(0);
         listener.onClick();
         expect(calls).to.equal(1);
-      });
-
-      test('_didUserHitEnterKeyOnFreeText does call handleFreeTextSearch if the enter key is tapped', function() {
-        var calls = 0;
-        element.handleFreeTextSearch = function() {
-          ++calls;
-        };
-        element._didUserHitEnterKeyOnFreeText({keyCode: 13});
-        assert.equal(calls, 1);
-      });
-
-      test('_didUserHitEnterKeyOnFreeText does not call handleFreeTextSearch if something besides the enter key is tapped', function() {
-        var calls = 0;
-        element.handleFreeTextSearch = function() {
-          ++calls;
-        };
-        element._didUserHitEnterKeyOnFreeText({keyCode: 10});
-        assert.equal(calls, 0);
       });
 
       test('_didUserHitEnterKey does call handleSearch if the enter key is tapped', function() {
@@ -2181,26 +2112,7 @@ limitations under the License.
       });
 
       test('handleFreeTextSearch does nothing if no freeTextSearchFields are specified', function() {
-        element._freeText = 'word, many words';
-        element.handleFreeTextSearch();
-        assert.deepEqual(element.searchParameters, {
-          city: {},
-          count: {},
-          country: {},
-          description: {},
-          email: {},
-          image: {},
-          phone: {},
-          postingDate: {},
-          title: {},
-          url: {}
-        });
-        assert.equal(element._freeText, 'word, many words');
-      });
-
-      test('handleFreeTextSearch does nothing if _freeText is empty', function() {
-        element.freeTextSearchFields = [titleConfig, descriptionConfig];
-        element.handleFreeTextSearch();
+        element.handleFreeTextSearch([], 'word, test phrase');
         assert.deepEqual(element.searchParameters, {
           city: {},
           count: {},
@@ -2215,10 +2127,24 @@ limitations under the License.
         });
       });
 
-      test('handleFreeTextSearch does update searchParameters and does reset _freeText', function() {
-        element._freeText = 'word, many words';
-        element.freeTextSearchFields = [titleConfig, descriptionConfig];
-        element.handleFreeTextSearch();
+      test('handleFreeTextSearch does nothing if freeText is empty', function() {
+        element.handleFreeTextSearch([titleConfig, descriptionConfig], '');
+        assert.deepEqual(element.searchParameters, {
+          city: {},
+          count: {},
+          country: {},
+          description: {},
+          email: {},
+          image: {},
+          phone: {},
+          postingDate: {},
+          title: {},
+          url: {}
+        });
+      });
+
+      test('handleFreeTextSearch does update searchParameters', function() {
+        element.handleFreeTextSearch([titleConfig, descriptionConfig], 'word, test phrase');
         assert.deepEqual(element.searchParameters, {
           city: {},
           count: {},
@@ -2232,13 +2158,13 @@ limitations under the License.
               search: 'union',
               text: 'word'
             },
-            'many words': {
-              key: 'many words',
+            'test phrase': {
+              key: 'test phrase',
               category: 'Description',
               date: undefined,
               enabled: true,
               search: 'union',
-              text: 'many words'
+              text: 'test phrase'
             }
           },
           email: {},
@@ -2254,18 +2180,17 @@ limitations under the License.
               search: 'union',
               text: 'word'
             },
-            'many words': {
-              key: 'many words',
+            'test phrase': {
+              key: 'test phrase',
               category: 'Title',
               date: undefined,
               enabled: true,
               search: 'union',
-              text: 'many words'
+              text: 'test phrase'
             }
           },
           url: {}
         });
-        assert.equal(element._freeText, '');
       });
 
       test('handleSearch does nothing if no fields are specified', function() {
