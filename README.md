@@ -1,6 +1,6 @@
 # search-fields-dialog
 
-A Polymer Element showing search fields in a modal dialog.
+A Polymer Element showing search fields in a configurable styled dialog.
 
 ### Example
 ```html
