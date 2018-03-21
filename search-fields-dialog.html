@@ -1201,21 +1201,6 @@ A Polymer Element showing search fields in a configurable styled dialog.
       },
 
       /**
-       * Creates and returns the listener object for opening the search fields dialog.
-       *
-       * @return {Object}
-       * @private
-       */
-      _createToggleDialogListener: function() {
-        var self = this;
-        return {
-          onClick: function() {
-            self.toggleSearchFieldsDialog();
-          }
-        };
-      },
-
-      /**
        * Updates the searchParameters using the search fields and closes the dialog if ENTER was pressed.
        *
        * @param {Object} event

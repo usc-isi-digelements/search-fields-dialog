@@ -209,10 +209,32 @@ limitations under the License.
         assert.deepEqual(element._uploadedFiles, []);
       });
 
-      test('does have buttonCallbacks', function() {
-        assert.isNotNull(element.buttonCallbacks);
-        assert.isNotNull(element.buttonCallbacks.handleSearch);
-        assert.isNotNull(element.buttonCallbacks.toggleDialog);
+      test('buttonCallbacks.handleSearch does call handleFreeTextSearch', function() {
+        var calls = 0;
+        element.handleFreeTextSearch = function(freeTextSearchFields, freeText) {
+          ++calls;
+          assert.deepEqual(freeTextSearchFields, [titleConfig, descriptionConfig]);
+          assert.equal(freeText, 'word, test phrase');
+        };
+
+        assert.isObject(element.buttonCallbacks);
+        assert.isFunction(element.buttonCallbacks.handleSearch);
+        element.buttonCallbacks.handleSearch([titleConfig, descriptionConfig], 'word, test phrase');
+
+        assert.equal(calls, 1);
+      });
+
+      test('buttonCallbacks.toggleDialog does call toggleSearchFieldsDialog', function() {
+        var calls = 0;
+        element.toggleSearchFieldsDialog = function() {
+          ++calls;
+        };
+
+        assert.isObject(element.buttonCallbacks);
+        assert.isFunction(element.buttonCallbacks.toggleDialog);
+        element.buttonCallbacks.toggleDialog();
+
+        assert.equal(calls, 1);
       });
 
       test('does have the search dialog', function() {
@@ -704,20 +726,6 @@ limitations under the License.
           search: 'search',
           text: 'text'
         });
-      });
-
-      test('_createToggleDialogListener does return expected listener object', function() {
-        var calls = 0;
-        element.toggleSearchFieldsDialog = function() {
-          ++calls;
-        };
-
-        var listener = element._createToggleDialogListener();
-        expect(listener).to.be.an('Object');
-        expect(listener.onClick).to.be.a('Function');
-        expect(calls).to.equal(0);
-        listener.onClick();
-        expect(calls).to.equal(1);
       });
 
       test('_didUserHitEnterKey does call handleSearch if the enter key is tapped', function() {

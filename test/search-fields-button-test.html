@@ -55,6 +55,13 @@ limitations under the License.
         flush(done);
       });
 
+      test('properties are set as expected', function() {
+        assert.isUndefined(element.freeTextSearchFields);
+        assert.isUndefined(element.handleSearchCallback);
+        assert.isUndefined(element.toggleDialogCallback);
+        assert.equal(element._freeText, '');
+      });
+
       test('does have the correct elements if freeTextSearchFields is empty', function(done) {
         element.freeTextSearchFields = [];
 
@@ -97,6 +104,70 @@ limitations under the License.
 
           done();
         });
+      });
+
+      test('_createToggleDialogListener does return expected listener object', function() {
+        var calls = 0;
+        element._toggleDialog = function() {
+          ++calls;
+        };
+
+        var listener = element._createToggleDialogListener();
+        expect(listener).to.be.an('Object');
+        expect(listener.onClick).to.be.a('Function');
+        expect(calls).to.equal(0);
+        listener.onClick();
+        expect(calls).to.equal(1);
+      });
+
+      test('_handleKeyPress does call _handleSearch if the enter key is tapped', function() {
+        var calls = 0;
+        element._handleSearch = function() {
+          ++calls;
+        };
+        element._handleKeyPress({
+          keyCode: 13
+        });
+        assert.equal(calls, 1);
+      });
+
+      test('_handleKeyPress does not call _handleSearch if something besides the enter key is tapped', function() {
+        var calls = 0;
+        element._handleSearch = function() {
+          ++calls;
+        };
+        element._handleKeyPress({
+          keyCode: 1
+        });
+        assert.equal(calls, 0);
+      });
+
+      test('_handleSearch does call handleSearchCallback and reset _freeText', function() {
+        element.freeTextSearchFields = [titleConfig, descriptionConfig];
+        element._freeText = 'word, test phrase';
+
+        var calls = 0;
+        element.handleSearchCallback = function(freeTextSearchFields, freeText) {
+          assert.deepEqual(freeTextSearchFields, [titleConfig, descriptionConfig]);
+          assert.deepEqual(freeText, 'word, test phrase');
+          ++calls;
+        };
+
+        element._handleSearch();
+
+        assert.equal(calls, 1);
+        assert.equal(element._freeText, '');
+      });
+
+      test('_toggleDialog does call toggleDialogCallback', function() {
+        var calls = 0;
+        element.toggleDialogCallback = function() {
+          ++calls;
+        };
+
+        element._toggleDialog();
+
+        assert.equal(calls, 1);
       });
     });
   </script>
