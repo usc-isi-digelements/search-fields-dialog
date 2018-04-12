@@ -60,10 +60,6 @@ A Polymer Element showing the button for the search-fields-dialog.
         };
       }
 
-      button-action paper-icon-button.small {
-        display: none;
-      }
-
       paper-icon-button {
         border-radius: 50%;
         cursor: pointer;
@@ -104,33 +100,13 @@ A Polymer Element showing the button for the search-fields-dialog.
           line-height: 20px;
         };
       }
-
-      @media all and (min-width: 0) and (max-width: 480px) {
-        button-action.small {
-          display: initial;
-        }
-
-        button-action.large {
-          display: none;
-        }
-      }
     </style>
 
     <template is="dom-if" if="[[!freeTextSearchFields.length]]">
       <button-action
-        class="large"
         click-listener="[[_createToggleDialogListener()]]"
         icon="fa:search"
-        text="Enter Search Keywords"
-        title="Open Search Window and Enter Search Keywords">
-      </button-action>
-
-      <!-- Small button for the smaller screen resolutions. -->
-      <button-action
-        class="small"
-        click-listener="[[_createToggleDialogListener()]]"
-        icon="fa:search"
-        text="Search"
+        text="[[_getSearchButtonText(width)]]"
         title="Open Search Window and Enter Search Keywords">
       </button-action>
     </template>
@@ -157,6 +133,12 @@ A Polymer Element showing the button for the search-fields-dialog.
 
     Polymer({
       is: 'search-fields-button',
+
+      behaviors: [Polymer.IronResizableBehavior],
+
+      listeners: {
+        'iron-resize': '_onResize'
+      },
 
       properties: {
         /**
@@ -202,7 +184,21 @@ A Polymer Element showing the button for the search-fields-dialog.
         _freeText: {
           type: String,
           value: ''
+        },
+
+        /**
+         * Element width.
+         *
+         * @type {Number}
+         * @private
+         */
+        _width: {
+          type: Number
         }
+      },
+
+      attached: function() {
+        this._onResize();
       },
 
       /**
@@ -218,6 +214,10 @@ A Polymer Element showing the button for the search-fields-dialog.
             self._toggleDialog();
           }
         };
+      },
+
+      _getSearchButtonText: function(width) {
+        return width > 480 ? 'Enter Search Keywords' : 'Search';
       },
 
       /**
@@ -242,6 +242,15 @@ A Polymer Element showing the button for the search-fields-dialog.
           this.handleSearchCallback(this.freeTextSearchFields, this._freeText);
           this._freeText = '';
         }
+      },
+
+      /**
+       * Handles resize behavior.
+       *
+       * @private
+       */
+      _onResize: function() {
+        this.set('width', this.offsetWidth);
       },
 
       /**
