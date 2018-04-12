@@ -66,15 +66,10 @@ limitations under the License.
         element.freeTextSearchFields = [];
 
         flush(function() {
-          assert.isNotNull(element.$$('button-action.large'));
-          assert.isNotNull(element.$$('button-action.large').clickListener);
-          assert.equal(element.$$('button-action.large').icon, 'fa:search');
-          assert.equal(element.$$('button-action.large').text, 'Enter Search Keywords');
-
-          assert.isNotNull(element.$$('button-action.small'));
-          assert.isNotNull(element.$$('button-action.small').clickListener);
-          assert.equal(element.$$('button-action.small').icon, 'fa:search');
-          assert.equal(element.$$('button-action.small').text, 'Search');
+          assert.isNotNull(element.$$('button-action'));
+          assert.isNotNull(element.$$('button-action').clickListener);
+          assert.equal(element.$$('button-action').icon, 'fa:search');
+          assert.equal(element.$$('button-action').text, 'Enter Search Keywords');
 
           assert.isNull(element.$$('paper-input'));
           assert.isNull(element.$$('paper-icon-button[icon="fa:search"]'));
