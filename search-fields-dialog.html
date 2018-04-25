@@ -20,13 +20,12 @@ limitations under the License.
 <link rel="import" href="../fontawesome-iconset/fa-all.html">
 <link rel="import" href="../image-gallery/image-gallery.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
-<link rel="import" href="../iron-icon/iron-icon.html">
-<link rel="import" href="../iron-icons/iron-icons.html">
 <link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../paper-styles/color.html">
 <link rel="import" href="../search-image-gallery/search-image-gallery.html">
 <link rel="import" href="../styled-dialog/styled-dialog.html">
 <link rel="import" href="../styled-dialog/styled-dialog-styles.html">
+<link rel="import" href="../stylized-icon/stylized-icon.html">
 <link rel="import" href="../vaadin-date-picker-display/vaadin-date-picker-display.html">
 <link rel="import" href="../vaadin-upload/vaadin-upload.html">
 
@@ -57,21 +56,9 @@ A Polymer Element showing search fields in a configurable styled dialog.
         @apply --layout-horizontal;
       }
 
-      iron-icon {
-        --iron-icon-height: 30px;
-        --iron-icon-width: 30px;
-        --iron-icon: {
-          min-width: 30px;
+      stylized-icon {
+        --stylized-icon-mixin: {
           padding: 0 5px;
-        }
-      }
-
-      .config-icon {
-        --iron-icon-height: 20px;
-        --iron-icon-width: 20px;
-        --iron-icon: {
-          min-width: 20px;
-          padding: 5px 10px 0;
         }
       }
 
@@ -225,24 +212,6 @@ A Polymer Element showing search fields in a configurable styled dialog.
         margin: 10px;
       }
 
-      paper-icon-button {
-        border-radius: 50%;
-        cursor: pointer;
-        height: 30px;
-        width: 30px;
-        min-width: 30px;
-        padding: 5px;
-      }
-
-      paper-icon-button.off {
-        color: var(--paper-grey-300);
-      }
-
-      paper-icon-button:hover,
-      paper-icon-button.on {
-        color: var(--paper-grey-900);
-      }
-
       vaadin-upload {
         margin: 10px;
         padding: 10px;
@@ -251,14 +220,19 @@ A Polymer Element showing search fields in a configurable styled dialog.
         };
       }
 
-      .search-data iron-icon,
-      .search-data paper-icon-button {
-        /* Vertically align the icons with their label & paper-input-containers. */
-        margin-top: 15px;
+      .search-data icon-button {
+        --icon-button-mixin: {
+          /* Vertically align the icons with their label & paper-input-containers. */
+          margin-top: 15px;
+        };
       }
 
-      .network-expansion-icon.on.inactive {
-        color: var(--paper-grey-300);
+      .search-data stylized-icon {
+        --stylized-icon-mixin: {
+          /* Vertically align the icons with their label & paper-input-containers. */
+          margin-top: 15px;
+          padding: 5px 10px 0;
+        };
       }
 
       #helpDialog {
@@ -275,90 +249,6 @@ A Polymer Element showing search fields in a configurable styled dialog.
 
       .help-text > div {
         margin-left: 10px;
-      }
-
-      iron-icon.amber {
-        color: var(--paper-amber-600);
-      }
-
-      iron-icon.black {
-        color: #111;
-      }
-
-      iron-icon.blue {
-        color: var(--paper-blue-600);
-      }
-
-      iron-icon.blue-grey {
-        color: var(--paper-blue-grey-600);
-      }
-
-      iron-icon.brown {
-        color: var(--paper-brown-600);
-      }
-
-      iron-icon.cyan {
-        color: var(--paper-cyan-600);
-      }
-
-      iron-icon.deep-orange {
-        color: var(--paper-deep-orange-600);
-      }
-
-      iron-icon.deep-purple {
-        color: var(--paper-deep-purple-600);
-      }
-
-      iron-icon.green {
-        color: var(--paper-green-600);
-      }
-
-      iron-icon.grey {
-        color: var(--paper-grey-600);
-      }
-
-      iron-icon.indigo {
-        color: var(--paper-indigo-600);
-      }
-
-      iron-icon.light-blue {
-        color: var(--paper-light-blue-600);
-      }
-
-      iron-icon.light-green {
-        color: var(--paper-light-green-600);
-      }
-
-      iron-icon.lime {
-        color: var(--paper-lime-600);
-      }
-
-      iron-icon.orange {
-        color: var(--paper-orange-600);
-      }
-
-      iron-icon.pink {
-        color: var(--paper-pink-600);
-      }
-
-      iron-icon.purple {
-        color: var(--paper-purple-600);
-      }
-
-      iron-icon.red {
-        color: var(--paper-red-600);
-      }
-
-      iron-icon.teal {
-        color: var(--paper-teal-600);
-      }
-
-      iron-icon.white {
-        color: #fff;
-      }
-
-      iron-icon.yellow {
-        color: var(--paper-yellow-600);
       }
     </style>
 
@@ -380,7 +270,7 @@ A Polymer Element showing search fields in a configurable styled dialog.
             <div class="search-name">[[dialogConfig.name]]</div>
             <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
               <div class="layout horizontal search-data nowrap">
-                <iron-icon class$="config-icon [[searchConfig.styleClass]]" icon="[[searchConfig.icon]]"></iron-icon>
+                <stylized-icon icon="[[searchConfig.icon]]" style-class="[[searchConfig.styleClass]]"></stylized-icon>
 
                 <vaadin-date-picker-display
                   facet-key="value"
@@ -415,7 +305,7 @@ A Polymer Element showing search fields in a configurable styled dialog.
               <div class="layout horizontal wrap">
                 <template is="dom-repeat" items="[[dialogConfig.data]]" as="searchConfig">
                   <div class="layout horizontal nowrap search-data">
-                    <iron-icon class$="config-icon [[searchConfig.styleClass]]" icon="[[searchConfig.icon]]"></iron-icon>
+                    <stylized-icon icon="[[searchConfig.icon]]" style-class="[[searchConfig.styleClass]]"></stylized-icon>
 
                     <paper-input
                       class$="[[_getInputWidthStyleClass(searchConfig.enableNetworkExpansion, _showAdvanced)]]"
@@ -428,20 +318,26 @@ A Polymer Element showing search fields in a configurable styled dialog.
                     <template is="dom-if" if="[[_showAdvanced]]">
                       <div class="layout horizontal">
                         <template is="dom-if" if="[[searchConfig.enableNetworkExpansion]]">
-                          <paper-icon-button
-                            class$="network-expansion-icon [[_getNetworkExpansionStyleClass(searchConfig.activateNetworkExpansion, _isNetworkExpansionViable)]]"
+                          <icon-button
+                            active="[[_getNetworkExpansionButtonActiveStatus(searchConfig.activateNetworkExpansion, _isNetworkExpansionViable)]]"
+                            bigger
+                            class="network-expansion-icon"
                             icon="fa:arrows-alt"
-                            title="Toggle Network Expansion of [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.activateNetworkExpansion)]])"
+                            padded
+                            title-tooltip="Toggle Network Expansion of [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.activateNetworkExpansion)]])"
                             on-tap="_toggleNetworkExpansion">
-                          </paper-icon-button>
+                          </icon-button>
                         </template>
 
-                        <paper-icon-button
-                          class$="require-one-icon [[_getButtonStyleClass(searchConfig.requireOne)]]"
+                        <icon-button
+                          active="[[searchConfig.requireOne]]"
+                          bigger
+                          class="require-one-icon"
                           icon="fa:asterisk"
-                          title="Require at Least One Term from [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.requireOne)]])"
+                          padded
+                          title-tooltip="Require at Least One Term from [[searchConfig.title]] (Currently [[_getButtonText(searchConfig.requireOne)]])"
                           on-tap="_toggleRequireOne">
-                        </paper-icon-button>
+                        </icon-button>
                       </div>
                     </template>
                   </div>
@@ -462,13 +358,15 @@ A Polymer Element showing search fields in a configurable styled dialog.
               on-keyup="_didUserHitEnterKeyOnLinksInput">
             </paper-input>
 
-            <paper-icon-button
-              class$="[[_getButtonStyleClass(_linksInput)]]"
-              icon="fa:plus-circle"
-              title="Add Image Links"
+            <icon-button
+              active="[[_linksInput]]"
+              bigger
               disabled="[[!_linksInput]]"
+              icon="fa:plus-circle"
+              title-tooltip="Add Image Links"
+              padded
               on-tap="_handleLinksInput">
-            </paper-icon-button>
+            </icon-button>
           </div>
 
           <vaadin-upload
@@ -521,7 +419,7 @@ A Polymer Element showing search fields in a configurable styled dialog.
       <div class="styled-dialog-divider"></div>
 
       <div class="help-text layout horizontal center">
-        <iron-icon class="require-one-icon on" icon="fa:asterisk"></iron-icon>
+        <stylized-icon active bigger class="require-one-icon" icon="fa:asterisk"></stylized-icon>
         <div>
           Click the <strong>asterisk</strong> button to activate a <strong>required grouping</strong> on all the search terms of a field.
           Search results must match <strong>at least one term from all required groupings</strong>.
@@ -535,7 +433,7 @@ A Polymer Element showing search fields in a configurable styled dialog.
       <div class="styled-dialog-divider"></div>
 
       <div class="help-text layout horizontal center">
-        <iron-icon class="network-expansion-icon on" icon="fa:arrows-alt"></iron-icon>
+        <stylized-icon active bigger class="network-expansion-icon" icon="fa:arrows-alt"></stylized-icon>
         <div class="layout vertical">
           <div>
             Click the <strong>expand</strong> button to activate <strong>network expansion</strong> on a field and run a <strong>multi-stage search</strong>:
@@ -607,13 +505,15 @@ A Polymer Element showing search fields in a configurable styled dialog.
             on-keyup="_didUserHitEnterKeyOnLinksInput">
           </paper-input>
 
-          <paper-icon-button
-            class$="[[_getButtonStyleClass(_linksInput)]]"
-            icon="fa:plus-circle"
-            title="Add Image Links"
+          <icon-button
+            active="[[_linksInput]]"
+            bigger
             disabled="[[!_linksInput]]"
+            icon="fa:plus-circle"
+            title-tooltip="Add Image Links"
+            padded
             on-tap="_handleLinksInput">
-          </paper-icon-button>
+          </icon-button>
         </div>
 
         <vaadin-upload
@@ -1226,17 +1126,6 @@ A Polymer Element showing search fields in a configurable styled dialog.
       },
 
       /**
-       * Returns the style class for the button with the given toggle status.
-       *
-       * @param {Boolean} on
-       * @return {String}
-       * @private
-       */
-      _getButtonStyleClass: function(on) {
-        return on ? 'on' : 'off';
-      },
-
-      /**
        * Returns the text for the button with the given toggle status.
        *
        * @param {Boolean} on
@@ -1259,15 +1148,15 @@ A Polymer Element showing search fields in a configurable styled dialog.
       },
 
       /**
-       * Returns the network expansion style class for the button with the given toggle status.
+       * Returns whether network expansion for the button with the given toggle status is active.
        *
        * @param {Boolean} on
-       * @param {Boolean} active
-       * @return {String}
+       * @param {Boolean} viable
+       * @return {Boolean}
        * @private
        */
-      _getNetworkExpansionStyleClass: function(on, active) {
-        return this._getButtonStyleClass(on) + (active ? '' : ' inactive');
+      _getNetworkExpansionButtonActiveStatus: function(on, viable) {
+        return on && viable;
       },
 
       /**

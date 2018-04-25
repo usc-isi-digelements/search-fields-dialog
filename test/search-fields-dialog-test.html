@@ -263,7 +263,6 @@ limitations under the License.
         var inputGallery = element.$$('#imagesDialog image-gallery');
         assert.isNotNull(inputGallery);
         assert.isTrue(inputGallery.classList.contains('input-gallery'));
-        /* FIXME
         assert.equal(inputGallery.imageNameProperty, 'id');
         assert.isTrue(inputGallery.showDelete);
         assert.isTrue(inputGallery.showLabels);
@@ -271,7 +270,6 @@ limitations under the License.
         assert.deepEqual(inputGallery.images, []);
         assert.deepEqual(inputGallery.processing, []);
         assert.deepEqual(inputGallery.selected, []);
-        */
       });
 
       test('images dialog does have two image galleries if _imageResults.id is defined', function(done) {
@@ -281,7 +279,6 @@ limitations under the License.
           var inputGallery = element.$$('#imagesDialog image-gallery');
           assert.isNotNull(inputGallery);
           assert.isTrue(inputGallery.classList.contains('input-gallery'));
-          /* FIXME
           assert.equal(inputGallery.imageNameProperty, 'id');
           assert.isTrue(inputGallery.showDelete);
           assert.isTrue(inputGallery.showLabels);
@@ -289,7 +286,6 @@ limitations under the License.
           assert.deepEqual(inputGallery.images, []);
           assert.deepEqual(inputGallery.processing, []);
           assert.deepEqual(inputGallery.selected, []);
-          */
 
           var resultsGallery = element.$$('#imagesDialog auto-paginated-image-gallery');
           assert.isTrue(resultsGallery.classList.contains('results-gallery'));
@@ -332,7 +328,6 @@ limitations under the License.
           var inputGallery = element.$$('#imagesDialog image-gallery');
           assert.isNotNull(inputGallery);
           assert.isTrue(inputGallery.classList.contains('input-gallery'));
-          /* FIXME
           assert.equal(inputGallery.imageNameProperty, 'id');
           assert.isTrue(inputGallery.showDelete);
           assert.isTrue(inputGallery.showLabels);
@@ -348,7 +343,6 @@ limitations under the License.
           }]);
           assert.deepEqual(inputGallery.processing, ['image1']);
           assert.deepEqual(inputGallery.selected, ['image2']);
-          */
 
           var resultsGallery = element.$$('#imagesDialog auto-paginated-image-gallery');
           assert.isTrue(resultsGallery.classList.contains('results-gallery'));
@@ -371,7 +365,7 @@ limitations under the License.
 
       test('images dialog does have image input elements', function() {
         assert.isNotNull(element.$$('#imagesDialog div[slot="bottom"] .link-data paper-input'));
-        assert.isNotNull(element.$$('#imagesDialog div[slot="bottom"] .link-data paper-icon-button'));
+        assert.isNotNull(element.$$('#imagesDialog div[slot="bottom"] .link-data icon-button'));
         assert.isNotNull(element.$$('#imagesDialog div[slot="bottom"] vaadin-upload'));
       });
 
@@ -456,14 +450,14 @@ limitations under the License.
       });
 
       test('search dialog does not have paper icon buttons for the search fields if _showAdvanced is false', function() {
-        var buttons = Polymer.dom(element.root).querySelectorAll('#searchDialog .search-data paper-icon-button');
+        var buttons = Polymer.dom(element.root).querySelectorAll('#searchDialog .search-data icon-button');
         assert.equal(buttons.length, 0);
       });
 
       test('search dialog does have paper icon buttons for the search fields if _showAdvanced is true', function(done) {
         element._showAdvanced = true;
         flush(function() {
-          var buttons = Polymer.dom(element.root).querySelectorAll('#searchDialog .search-data paper-icon-button');
+          var buttons = Polymer.dom(element.root).querySelectorAll('#searchDialog .search-data icon-button');
           assert.equal(buttons.length, 12);
           done();
         });
@@ -472,13 +466,11 @@ limitations under the License.
       test('search dialog does have image gallery for the image field', function() {
         var imageGallery = element.$$('#searchDialog search-image-gallery');
         assert.isNotNull(imageGallery);
-        /* FIXME
         assert.deepEqual(imageGallery.excluded, []);
         assert.deepEqual(imageGallery.images, []);
         assert.deepEqual(imageGallery.required, []);
         assert.deepEqual(imageGallery.selected, []);
         assert.deepEqual(imageGallery.union, []);
-        */
       });
 
       test('search image gallery does have expected images', function() {
@@ -510,7 +502,6 @@ limitations under the License.
 
         var imageGallery = element.$$('#searchDialog search-image-gallery');
         assert.isNotNull(imageGallery);
-        /* FIXME
         assert.deepEqual(imageGallery.excluded, ['image4']);
         assert.deepEqual(imageGallery.images, [{
           hits: [],
@@ -536,12 +527,11 @@ limitations under the License.
         assert.deepEqual(imageGallery.required, ['image3']);
         assert.deepEqual(imageGallery.selected, ['image2', 'image3', 'image4', 'image5']);
         assert.deepEqual(imageGallery.union, ['image5']);
-        */
       });
 
       test('search dialog does have image input elements', function() {
         assert.isNotNull(element.$$('#searchDialog div[slot="bottom"] .link-data paper-input'));
-        assert.isNotNull(element.$$('#searchDialog div[slot="bottom"] .link-data paper-icon-button'));
+        assert.isNotNull(element.$$('#searchDialog div[slot="bottom"] .link-data icon-button'));
         assert.isNotNull(element.$$('#searchDialog div[slot="bottom"] vaadin-upload'));
       });
 
@@ -784,11 +774,6 @@ limitations under the License.
         assert.isFalse(element._openedDialogImages);
       });
 
-      test('_getButtonStyleClass does return as expected', function() {
-        assert.equal(element._getButtonStyleClass(true), 'on');
-        assert.equal(element._getButtonStyleClass(false), 'off');
-      });
-
       test('_getButtonText does return as expected', function() {
         assert.equal(element._getButtonText(true), 'On');
         assert.equal(element._getButtonText(false), 'Off');
@@ -801,11 +786,11 @@ limitations under the License.
         assert.equal(element._getInputWidthStyleClass(true, true), 'two-icon');
       });
 
-      test('_getNetworkExpansionStyleClass does return as expected', function() {
-        assert.equal(element._getNetworkExpansionStyleClass(false, false), 'off inactive');
-        assert.equal(element._getNetworkExpansionStyleClass(false, true), 'off');
-        assert.equal(element._getNetworkExpansionStyleClass(true, false), 'on inactive');
-        assert.equal(element._getNetworkExpansionStyleClass(true, true), 'on');
+      test('_getNetworkExpansionButtonActiveStatus does return as expected', function() {
+        assert.isFalse(element._getNetworkExpansionButtonActiveStatus(false, false));
+        assert.isFalse(element._getNetworkExpansionButtonActiveStatus(false, true));
+        assert.isFalse(element._getNetworkExpansionButtonActiveStatus(true, false));
+        assert.isTrue(element._getNetworkExpansionButtonActiveStatus(true, true));
       });
 
       test('_handleImageFileUploadSuccess does not update images or _openedDialogImages if mimeType is not image', function() {

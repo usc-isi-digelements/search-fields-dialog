@@ -72,8 +72,8 @@ limitations under the License.
           assert.equal(element.$$('button-action').text, 'Enter Search Keywords');
 
           assert.isNull(element.$$('paper-input'));
-          assert.isNull(element.$$('paper-icon-button[icon="fa:search"]'));
-          assert.isNull(element.$$('paper-icon-button[icon="fa:wrench"]'));
+          assert.isNull(element.$$('icon-button[icon="fa:search"]'));
+          assert.isNull(element.$$('icon-button[icon="fa:wrench"]'));
 
           done();
         });
@@ -88,11 +88,11 @@ limitations under the License.
           assert.equal(element.$$('paper-input').placeholder, 'Enter Search Keywords');
           assert.equal(element.$$('paper-input').value, '');
 
-          assert.isNotNull(element.$$('paper-icon-button[icon="fa:search"]'));
-          assert.equal(element.$$('paper-icon-button[icon="fa:search"]').title, 'Run Search');
+          assert.isNotNull(element.$$('icon-button[icon="fa:search"]'));
+          assert.equal(element.$$('icon-button[icon="fa:search"]').titleTooltip, 'Run Search');
 
-          assert.isNotNull(element.$$('paper-icon-button[icon="fa:wrench"]'));
-          assert.equal(element.$$('paper-icon-button[icon="fa:wrench"]').title, 'Open Advanced Search');
+          assert.isNotNull(element.$$('icon-button[icon="fa:wrench"]'));
+          assert.equal(element.$$('icon-button[icon="fa:wrench"]').titleTooltip, 'Open Advanced Search');
 
           assert.isNull(element.$$('button-action.large'));
           assert.isNull(element.$$('button-action.small'));
