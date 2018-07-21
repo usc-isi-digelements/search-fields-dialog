@@ -11,26 +11,26 @@
     "polymer"
   ],
   "main": "search-fields-dialog.html",
-  "homepage": "https://github.com/DigElements/search-fields-dialog/",
+  "homepage": "https://github.com/usc-isi-digelements/search-fields-dialog/",
   "ignore": [
     "/.*",
     "/test/"
   ],
   "dependencies": {
     "polymer": "Polymer/polymer#2.5.0",
-    "auto-paginated-image-gallery": "DigElements/auto-paginated-image-gallery#2.3.4",
-    "button-action": "DigElements/button-action#2.0.4",
-    "fontawesome-iconset": "https://github.com/vangware/fontawesome-iconset.git#09ac70f619bb44d73fefc5f9524ae29ab217ed15",
-    "image-gallery": "DigElements/image-gallery#2.2.0",
-    "icon-button": "DigElements/icon-button#2.0.1",
+    "auto-paginated-image-gallery": "usc-isi-digelements/auto-paginated-image-gallery#2.3.4",
+    "button-action": "usc-isi-digelements/button-action#2.0.4",
+    "fontawesome-iconset": "../fontawesome",
+    "image-gallery": "usc-isi-digelements/image-gallery#2.2.0",
+    "icon-button": "usc-isi-digelements/icon-button#2.0.1",
     "iron-flex-layout": "PolymerElements/iron-flex-layout#^2.0.0",
     "iron-resizable-behavior": "PolymerElements/iron-resizable-behavior#^2.0.0",
     "paper-input": "PolymerElements/paper-input#^2.0.0",
     "paper-styles": "PolymerElements/paper-styles#^2.0.0",
-    "search-image-gallery": "DigElements/search-image-gallery#2.1.0",
-    "styled-dialog": "DigElements/styled-dialog#2.2.0",
-    "stylized-icon": "DigElements/stylized-icon#2.0.0",
-    "vaadin-date-picker-display": "DigElements/vaadin-date-picker-display#2.0.4",
+    "search-image-gallery": "usc-isi-digelements/search-image-gallery#2.1.0",
+    "styled-dialog": "usc-isi-digelements/styled-dialog#2.2.0",
+    "stylized-icon": "usc-isi-digelements/stylized-icon#2.0.0",
+    "vaadin-date-picker-display": "usc-isi-digelements/vaadin-date-picker-display#2.0.4",
     "vaadin-upload": "vaadin/vaadin-upload#2.1.0"
   },
   "devDependencies": {
