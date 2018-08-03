@@ -1,7 +1,7 @@
 {
   "name": "search-fields-dialog",
   "description": "A Polymer Element showing search fields in a modal dialog.",
-  "version": "2.7.1",
+  "version": "2.7.2",
   "authors": ["Next Century Corporation"],
   "license": "Apache-2.0",
   "keywords": ["web-component", "polymer"],
@@ -13,7 +13,8 @@
     "auto-paginated-image-gallery":
       "usc-isi-digelements/auto-paginated-image-gallery#^2.3.4",
     "button-action": "usc-isi-digelements/button-action#^2.0.4",
-    "fontawesome-iconset": "../fontawesome",
+    "fontawesome-iconset":
+      "NextCenturyCorporation/polymer-fontawesome-iconset#d2afc78a06295aacfd8a434e0dfa54164715529e",
     "image-gallery": "usc-isi-digelements/image-gallery#^2.2.0",
     "icon-button": "usc-isi-digelements/icon-button#^2.0.2",
     "iron-flex-layout": "PolymerElements/iron-flex-layout#^2.0.0",
